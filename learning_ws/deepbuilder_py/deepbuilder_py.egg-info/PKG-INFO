@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: deepbuilder-py
+Version: 0.0.1
+Summary: pip-installable package for communication with Deep Learner
+Home-page: https://github.com/HeinzBenjamin/DeepBuilder
+Author: Benjamin Felbrich
+Author-email: benjamin@felbrich.com
+License: MIT
+Description: UNKNOWN
+Keywords: protobuf, deepbuilder_py
+Platform: UNKNOWN

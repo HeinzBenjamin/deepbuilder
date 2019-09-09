@@ -1,0 +1,4 @@
+float32[] path
+float32 speed
+---
+string message

@@ -1,0 +1,4 @@
+float32[] goal
+float32 speed
+---
+string message

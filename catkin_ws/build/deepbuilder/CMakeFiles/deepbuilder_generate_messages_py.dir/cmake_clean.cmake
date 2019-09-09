@@ -1,0 +1,40 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/deepbuilder_generate_messages_py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/msg/_rt_status.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_gripper_open.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_gripper_moveto.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_move_home.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_rt_set_state.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_se_get_values.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_get_robot_state.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_get_block.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_se_adjust_field_start_x.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_rt_set_agent_presence.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_se_adjust_fieldsize_x.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_se_adjust_resolution.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_rt_get_status.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_get_state.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_gripper_setforce.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_check_path.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_move_cam.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_move_point.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_se_adjust_fieldsize_y.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_move_source.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_rt_set_action.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_gripper_close.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_gripper_setspeed.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_move_path.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_se_adjust_field_start_y.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_se_adjust_field_offset_y.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_rt_wait_for_ready.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_rt_is_ready.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_se_adjust_field_offset_x.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_se_adjust_correction.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/msg/__init__.py"
+  "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/__init__.py"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang )
+  include(CMakeFiles/deepbuilder_generate_messages_py.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

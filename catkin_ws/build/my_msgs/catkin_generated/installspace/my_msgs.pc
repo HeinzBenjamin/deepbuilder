@@ -1,0 +1,8 @@
+prefix=/home/ros/deepbuilder/catkin_ws/install
+
+Name: my_msgs
+Description: Description of my_msgs
+Version: 0.0.0
+Cflags: -I/home/ros/deepbuilder/catkin_ws/install/include
+Libs: -L/home/ros/deepbuilder/catkin_ws/install/lib 
+Requires: message_runtime

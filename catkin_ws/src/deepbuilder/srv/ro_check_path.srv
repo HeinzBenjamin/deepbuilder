@@ -1,0 +1,4 @@
+float32[] goal
+---
+trajectory_msgs/JointTrajectory path
+string message

@@ -1,0 +1,8 @@
+prefix=/home/ros/deepbuilder/catkin_ws/devel
+
+Name: deepbuilder
+Description: Description of deepbuilder
+Version: 0.0.0
+Cflags: -I/home/ros/deepbuilder/catkin_ws/devel/include -I/home/ros/deepbuilder/catkin_ws/src/deepbuilder/include -I/usr/include
+Libs: -L/home/ros/deepbuilder/catkin_ws/devel/lib -lur_hardware_interface /usr/lib/x86_64-linux-gnu/libboost_system.so
+Requires: roscpp rospy std_msgs my_msgs geometry_msgs rosbridge_msgs actionlib control_msgs controller_manager hardware_interface industrial_msgs sensor_msgs trajectory_msgs ur_msgs moveit_commander moveit_msgs pcl_ros

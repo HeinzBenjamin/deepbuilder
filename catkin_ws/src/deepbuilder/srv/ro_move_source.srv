@@ -1,0 +1,5 @@
+float32 speed
+bool tcp_mode
+#if false angular distacnes are used to calculate time steps of path points, xyz distances of tcps are used (only available if tcp distances are given)
+---
+string message
