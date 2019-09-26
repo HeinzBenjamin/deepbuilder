@@ -3,7 +3,7 @@ from . import settings
 #HOME_POSE = [1.1334346532821655,-1.7553976217852991,0.8690872192382812,-0.6843889395343226,-1.5728209654437464,-0.424158]
 
 class Connection():
-    def __init__(self):
+    def __init__(self, sess_name):
         self.client = roslibpy.Ros(host='localhost', port=9090)
         self.client.run()
         self.srv_status = roslibpy.Service(self.client, '/rosout/get_loggers', 'roscpp/GetLoggers')
@@ -13,6 +13,7 @@ class Connection():
         self.srv_get_block = roslibpy.Service(self.client, '/deepbuilder/robot/get_block', '/deepbuilder/ro_get_block')
         self.srv_get_joint_states = roslibpy.Service(self.client, '/deepbuilder/robot/get_robot_state', '/deepbuilder/ro_get_robot_state')
         self.srv_move_path = roslibpy.Service(self.client, '/deepbuilder/robot/move_path', '/deepbuilder/ro_move_path')
+        self.talker_state = roslibpy.Topic(self.client, '/deepbuilder/sensing/values_gh/'+str(sess_name), 'my_msgs/float_array')
 
     def ROS_status(self):
         request = roslibpy.ServiceRequest()
@@ -24,7 +25,7 @@ class Connection():
         if double_check:
             _in = input("Goal pose is valid, continue at speed "+str(speed)+"? [y, n or enter number to overwrite speed]")
             if _in != 'y':
-                if math.isnan(float(_in)):
+                if _in == 'n':
                     return False
                 else:
                     speed = speed if float(_in) == 'Nan' else min([0.6, float(_in)])
@@ -51,19 +52,27 @@ class Connection():
 
 
     #return is_valid [bool], path [][]
-    def test_pose(self, pose):
+    def test_pose(self, pose, state=[]):
         value = {}
         value['goal'] = pose
         request = roslibpy.ServiceRequest(value)
         path = []
         result = None
+        if state != []:
+            self.talker_state.publish(roslibpy.Message({'values':state}))
         while result == None:
             try:
                 result = self.srv_path.call(request)
             except:
-                print('ROS Service could not be reached. Make sure it is running. Retrying...')
+                print('ROS Service could not be reached. Make sure it is running. Retrying in 5 sec...')
+                time.sleep(5)
+                #print('Reconnecting rosbridge client...')
+                #self.client.close()
+                #time.sleep(5)
+                #self.client.connect()
+                #print('Reconnected rosbridge client...')
+                #self.srv_path.call = roslibpy.Service(self.client, '/deepbuilder/robot/check_path', '/deepbuilder/ro_check_path')
                 result = None
-                time.sleep(1)
         if result['message'] == 'HOME_ERR':
             input("Moveit threw home error. Is robot state being published and is robot in home position? Press Enter to retry.")
             result = self.srv_path.call(request)
@@ -85,7 +94,7 @@ class Connection():
 
     def get_sensor_values(self):
         res = self.srv_get_sensor_vals.call(roslibpy.ServiceRequest())
-        return [i * 1000.0 for i in res["values"]]
+        return [i * 1000.0 for i in res.data['values']['values']]
 
     def get_block(self):
         is_home, _, sq_dist = self.is_robot_in_position(settings.HOME_POSE)

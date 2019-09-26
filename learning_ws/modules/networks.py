@@ -3,6 +3,37 @@ import torch
 import torch.nn as nn
 import torch.functional as F
 
+
+class SimplestPolicyNetwork(nn.Module):
+    def __init__(self, obs_dim, act_dim, hid_dim, num_hidden):
+        super(PolicyNetwork, self).__init__()
+
+        self.linear_i = nn.Linear(obs_dim, hid_dim)
+        self.linear_h = []
+        for _ in range(num_hidden):
+            self.linear_h.append(nn.Linear(hid_dim, hid_dim))
+        self.linear_o = nn.Linear(hid_dim, act_dim)
+        self.num_hidden = num_hidden
+
+    '''
+    accepts a state of rank two where rows are boxes described in their columns
+    state=
+    [
+        [box0_posX, box0_posY, box0_posZ, box0_ornX, box0_ornY, box0_ornZ, box0_ornW],
+        [box1_posX, box1_posY, box1_posZ, box1_ornX, box1_ornY, box1_ornZ, box1_ornW],
+        [box2_posX, box2_posY, box2_posZ, box2_ornX, box2_ornY, box2_ornZ, box2_ornW],
+        .
+        .
+    ]
+    '''
+    def forward(self, state):
+        x = F.F.relu(self.linear_i(state.reshape(1,state.numel()).squeeze()))
+        for i in range(self.num_hidden):
+            x=F.F.relu(self.linear_h[i](x))
+        x=F.F.relu(self.linear_o(x))
+        return x
+
+
 #soft actor critic
 #estimates the state value
 class ValueNetwork(nn.Module):
@@ -37,7 +68,7 @@ class SoftQNetwork(nn.Module):
         self.linear3.bias.data.uniform_(-init_w, init_w)
         
     def forward(self, state, action):
-        x = torch.cat([state, action], 0)
+        x = torch.cat([state, action], 1)
         x = F.F.relu(self.linear1(x))
         x = F.F.relu(self.linear2(x))
         x = self.linear3(x)
@@ -78,7 +109,7 @@ class PolicyNetwork(nn.Module):
         
         normal = torch.distributions.Normal(0, 1)
         z      = normal.sample()
-        action = torch.tanh(mean + std * z.to(self.device))
+        action = torch.tanh(mean+ std*z.to(self.device))
         log_prob = torch.distributions.Normal(mean, std).log_prob(mean+ std*z.to(self.device)) - torch.log(1 - action.pow(2) + epsilon)
         log_prob = log_prob.sum(1, keepdim=True)
         return action, log_prob, z, mean, log_std

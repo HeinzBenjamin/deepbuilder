@@ -3,6 +3,34 @@ from termcolor import colored
 import torch, os, requests, zipfile, io, json, pickle
 from .settings import *
 
+def load_rklit_file(session_name):
+    sub_folders = []
+    for name in os.listdir('/home/ros/deepbuilder/learning_ws/rlkit/data/'+session_name):
+        if os.path.isdir('/home/ros/deepbuilder/learning_ws/rlkit/data/'+session_name+"/"+name):
+            sub_folders.append('/home/ros/deepbuilder/learning_ws/rlkit/data/'+session_name+"/"+name)
+
+    if len(sub_folders) == 0:
+        print("No snapshot found to resum")
+        return None, None
+
+    i = 0
+    for s in sub_folders:
+        print("["+str(i)+"]: " + s)
+        i += 1
+
+    i = input("Chose version from folder names above [int]: ")
+    directory = sub_folders[int(i)]
+    file_path_p = directory + "/params.pkl" 
+    file_path_v = directory + "/variant.json"
+    print("Loading from path " + directory)
+    
+    with open(file_path_v, 'r') as f:
+        variant_file = json.load(f)
+
+    torch_file = torch.load(file_path_p)
+    return variant_file, torch_file
+
+
 def SaveAgent(agent, path):
     if not os.path.exists(path):
         os.makedirs(path)

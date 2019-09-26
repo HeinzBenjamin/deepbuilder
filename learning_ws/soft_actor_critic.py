@@ -6,7 +6,7 @@ import torch.optim as optim
 from datetime import datetime
 from termcolor import colored
 
-from modules import environment_sim as sim
+from modules import environment as sim
 from modules import networks as n
 from modules import stuff
 from modules import documentation as doc
@@ -72,11 +72,11 @@ class SAC_Agent():
         #get random sample from replay_buffer and bring into the proper format on the device
         state, action, reward, next_state, done = self.replay_buffer.sample(batch_size)
 
-        state       = torch.FloatTensor(state).squeeze().to(self.device)
-        next_state  = torch.FloatTensor(next_state).squeeze().to(self.device)
-        action      = torch.FloatTensor(action).squeeze().to(self.device)
-        reward      = torch.FloatTensor(reward).to(self.device)
-        done        = torch.FloatTensor(np.float32(done)).to(self.device)
+        state       = torch.FloatTensor(state).to(self.device)
+        next_state  = torch.FloatTensor(next_state).to(self.device)
+        action      = torch.FloatTensor(action).to(self.device)
+        reward      = torch.FloatTensor(reward).unsqueeze(1).to(self.device)
+        done        = torch.FloatTensor(np.float32(done)).unsqueeze(1).to(self.device)
 
         #get all predictions from the current state of the model
         predicted_q_value1 = self.soft_q_net1(state, action)
@@ -248,7 +248,7 @@ if __name__ == '__main__':
 
     #training-specific args
     parser.add_argument('--num_plays',type=int,default=100000)
-    parser.add_argument('--batch_size',type=int,default=256)
+    parser.add_argument('--batch_size',type=int,default=128)
 
     parser.add_argument('--simulation', type=int, default=1)
 

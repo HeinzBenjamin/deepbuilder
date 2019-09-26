@@ -1,5 +1,6 @@
 import numpy as np
 from . import path_planning as pp
+from . import settings
 
 tower_growth_rew = 70.0
 tower_collapse_rew = -5.0
@@ -21,7 +22,7 @@ no_rew_threshold_angle = 0.8    # no control reward is granted for angle above t
 
 full_ctrl_act_rew_dist = 15.0 #indiscounted full reward. This is interpolated linearly btw full_rew_threshold and no_rew_throshold based on measrued angle
 full_rew_threshold_dist = 120  # full control reward is granted when box angle is below this values
-no_rew_threshold_dist = 800    # no control reward is granted for angle above this value, between this and the full_rew threshold values are interpolated
+no_rew_threshold_dist = 400    # no control reward is granted for angle above this value, between this and the full_rew threshold values are interpolated
     
 #PRESENT BOXES related
 rew_per_present_box = 0.1
@@ -116,8 +117,12 @@ def ForTcpCloseToTower(rew, info, res, all_boxes):
 
     return rew, info
     
-def TowerChange(rew, info, current_height_env, res, box_width, box_height):
+def TowerChange(rew, info, current_height_env, res, box_width, box_height):    
+    if res['current_height'] < settings.BOX_HEIGHT * 0.4:
+        return rew, info
+        
     height_difference = res["current_height"]-current_height_env
+    
     if height_difference > box_height * 0.48:
         #tower got taller, but we don't know yet why and if it's valid
         if len(res["box_poses"]) == 1:

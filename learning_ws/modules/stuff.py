@@ -49,7 +49,10 @@ class NormalizedActions(gym.ActionWrapper):
         #second axis only operates in [-180, 0] to avoid obvious floor and boudning box collisions
         action[1] *= 0.5
         action[1] -= rng/4
-        
+
+        action[2] *= 0.5
+        action[2] += rng/4
+         
         return action
 
     def reverse_action(self, action):
@@ -63,5 +66,8 @@ class NormalizedActions(gym.ActionWrapper):
 
         action[1] += rng/4
         action[1] *= 2.0
+
+        action[2] -= rng/4
+        action[2] *= 2.0
         
         return action

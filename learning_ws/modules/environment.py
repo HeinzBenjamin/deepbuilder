@@ -35,11 +35,15 @@ class DeepBuilderEnv(gym.Env):
 
         self.height_field_res = height_field_res
         self.height_field_noise_scale = 10
+        self.state_low = -200.0
+        self.state_high = 1600.0
+        self.reward_scale = 0.01
 
         #setting up torch and openAI objects
         self.action_space = spaces.Box(-np.pi,  np.pi, shape=(act_dim,), dtype=np.float32)
-        #self.observation_space = spaces.Box(-1200.0, 1200.0, shape=(max_num_boxes * box_dim,), dtype=np.float32)
-        self.observation_space = spaces.Box(0.0, 1600.0, shape=(height_field_res * height_field_res,), dtype=np.float32)
+        self.observation_space = spaces.Box(self.state_low, self.state_high, shape=(height_field_res * height_field_res,), dtype=np.float32) #no idea if we actually need this
+
+        #this is actually kept up to date
         self.state = torch.randn(height_field_res * height_field_res) * self.height_field_noise_scale #init state as tiny
 
         #simulation state and parameters for actual learning
@@ -54,7 +58,7 @@ class DeepBuilderEnv(gym.Env):
 
         self.is_simulation = True
         self.use_moveit = True
-        self.ros_comm = rc.Connection()
+        self.hidden_ros_comm = rc.Connection(self.session_name)
 
         #path planning params
         self.path_steps = 20      #number of intermediate steps between home and pose
@@ -154,7 +158,7 @@ class DeepBuilderEnv(gym.Env):
 
 
         else:
-            pose_reachable, self.path, _ = self.ros_comm.test_pose(action_array)
+            pose_reachable, self.path, _ = self.ros_comm().test_pose(action_array, (0.001*self.state).tolist())
             rew, info, done, _ = reward.ForCollisionInGoalPose(not pose_reachable, not pose_reachable)
 
 
@@ -181,7 +185,7 @@ class DeepBuilderEnv(gym.Env):
             else:
                 #robo drop
                 print(colored("Running action on robot... ", 'blue'), end='')
-                dropped_successfully, res = self.ros_comm.drop_block(action_array, double_check=True)
+                dropped_successfully, res = self.ros_comm().drop_block(action_array, double_check=True)
 
                 
             #if the pose can't be reached for some reason, it'll be treated as if collisions occured
@@ -206,26 +210,33 @@ class DeepBuilderEnv(gym.Env):
 
         #obs = self.BoxesToObservation(self.last_boxes_seen, randomize_order=True)
         obs = self.HeightFieldObservation(self.last_height_field_seen)
+
         self.has_boxes = len(self.last_boxes_seen) > 0
 
         if rew > -5.0:
             print("Reward: " + str(rew) + ", Done: " + str(done) + ", Info: " + info)
-
-        return obs, rew, done, info
+        
+        return obs, rew * self.reward_scale, done, info
 
     def reset(self):
         # Reset the state of the environment to an initial state
         # Reset FlexHopper by deleting all boxes (if there are any)
         if self.is_simulation and (self.fh_needs_reset or self.path == [] or self.has_boxes):
-            self.FH_Reset()
+            try:
+                self.FH_Reset()
+            except ValueError as err:
+                if not err.args[0] == "GH_OUT":
+                    raise
+
             self.state = torch.randn(self.height_field_res * self.height_field_res) * self.height_field_noise_scale
 
+        #Resetting robot stuff with user input
         if not self.is_simulation:
             input("Resetting, make sure that a) the robot is in home position, b) the gripper is open, c) there's NO block in the gripper, d) (optional) blocks are removed from arena. Hit enter to continue!")
-            self.ros_comm.move_home()
-            sense_vals = self.ros_comm.get_sensor_values()
+            self.ros_comm().move_home()
+            sense_vals = self.ros_comm().get_sensor_values()
             self.state = torch.FloatTensor(sense_vals)
-            self.ros_comm.get_block()
+            self.ros_comm().get_block()
 
         # Reset rest
         self.current_height = -9999.9
@@ -235,6 +246,7 @@ class DeepBuilderEnv(gym.Env):
 
         #setting box_std back to zero
         self.box_std = 0.0
+        return self.state
 
     #if optional_path is not supplied, last self.path is used
     def screenshot(self, _play, _round, optional_path = []):
@@ -322,11 +334,20 @@ class DeepBuilderEnv(gym.Env):
                 print("Retrying... Wish me luck")
                 self.SafeRequest(controller, _params, _timeout)
 
-
     def HeightFieldObservation(self, height_field):
         for i in range(len(height_field)):
             self.state[i] = height_field[i] + np.random.normal(0, self.height_field_noise_scale)
         return self.state
+
+    def ros_comm(self):
+        if self.hidden_ros_comm == None:
+            self.hidden_ros_comm = rc.Connection(self.session_name)
+        return self.hidden_ros_comm
+
+    def serializable(self):
+        del self.hidden_ros_comm
+        self.hidden_ros_comm = None
+        return self
 
     '''
     def BoxesToObservation(self, box_poses, randomize_order=True):

@@ -472,7 +472,7 @@ def get_robot_state(req):
 
 def get_sensor_values(req):
     v = rospy.wait_for_message("deepbuilder/sensing/values", float_array)
-    return se_get_valuesResponse(values=v.values)
+    return se_get_valuesResponse(values=v)
 
 
 def main():
