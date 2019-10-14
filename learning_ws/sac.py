@@ -73,15 +73,16 @@ def experiment(args, variant):
 
     expl_path_collector = MdpPathCollector(
         expl_env,
-        policy if not resumed else params['exploration/policy'],
+        policy,
     )
+
     replay_buffer_expl = EnvReplayBuffer(
         variant['replay_buffer_size'],
         expl_env,
     )
 
     replay_buffer_eval = EnvReplayBuffer(
-        variant['replay_buffer_size'],
+        int(variant['replay_buffer_size'] * (float(args.num_plays_eval) / float(args.num_plays_expl))),
         eval_env,
     )
 
@@ -95,22 +96,40 @@ def experiment(args, variant):
         replay_buffer_expl._terminals = params['replay_buffer_expl/terminals']
         replay_buffer_expl._top = params['replay_buffer_expl/top']
 
+        replay_buffer_eval._actions = params['replay_buffer_eval/actions']
+        replay_buffer_eval._env_infos = params['replay_buffer_eval/env_infos']
+        replay_buffer_eval._next_obs = params['replay_buffer_eval/next_obs']
+        replay_buffer_eval._observations = params['replay_buffer_eval/observations']
+        replay_buffer_eval._rewards = params['replay_buffer_eval/rewards']
+        replay_buffer_eval._size = params['replay_buffer_eval/size']
+        replay_buffer_eval._terminals = params['replay_buffer_eval/terminals']
+        replay_buffer_eval._top = params['replay_buffer_eval/top']
+
     elif args.replay_add_sess_name != '':
         _, other_params = doc.load_rklit_file(args.replay_add_sess_name)
         num_samples = int(args.replay_add_num_samples)
-        for buf in [replay_buffer_eval, replay_buffer_expl]:
-            buf._size = 0
-            buf._top = 0
-            print("Loading "+str(num_samples)+" batch samples from session " + args.replay_add_sess_name)
-            for i in range(num_samples):
-                buf._actions[i] = copy.deepcopy(other_params['replay_buffer'+buf+'/actions'][i].tolist())
-                buf._next_obs[i] = copy.deepcopy(other_params['replay_buffer'+buf+'/next_obs'][i].tolist())
-                buf._observations[i] = copy.deepcopy(other_params['replay_buffer'+buf+'/observations'][i].tolist())
-                buf._rewards[i] = copy.deepcopy(other_params['replay_buffer'+buf+'/rewards'][i].tolist())
-                buf._terminals[i] = copy.deepcopy(other_params['replay_buffer'+buf+'/terminals'][i].tolist())
-                buf._size += 1
-                buf._top += 1
+        replay_buffer_expl._size = 0
+        replay_buffer_expl._top = 0
+        print("Loading "+str(num_samples)+" batch samples from session " + args.replay_add_sess_name)
+        zeroes = []
+        offset = 0
+        for i in range(num_samples):
+            act = other_params['replay_buffer_expl/actions'][i]
+            obs = other_params['replay_buffer_expl/observations'][i]
+            if act.min() == 0.0 and act.max() == 0.0 and obs.min() == 0.0 and obs.max() == 0.0:
+                zeroes.append(i)
+                continue
 
+            replay_buffer_expl._actions[offset] = copy.deepcopy(act.tolist())
+            replay_buffer_expl._next_obs[offset] = copy.deepcopy(other_params['replay_buffer_expl/next_obs'][i].tolist())
+            replay_buffer_expl._observations[offset] = copy.deepcopy(obs.tolist())
+            replay_buffer_expl._rewards[offset] = copy.deepcopy(other_params['replay_buffer_expl/rewards'][i].tolist())
+            replay_buffer_expl._terminals[offset] = copy.deepcopy(other_params['replay_buffer_expl/terminals'][i].tolist())
+            replay_buffer_expl._size += 1
+            replay_buffer_expl._top += 1
+            offset += 1
+
+        print("Detected and ignored "+str(len(zeroes))+" zero samples in replay buffer. Total num samples loaded into replay buffer: " + str(replay_buffer_expl._size))
         other_params = {}
 
     trainer = SACTrainer(
@@ -120,7 +139,8 @@ def experiment(args, variant):
         qf2=qf2,
         target_qf1=target_qf1,
         target_qf2=target_qf2,
-        **variant['trainer_kwargs']
+        **variant['trainer_kwargs'],
+        starting_train_steps = 0 if not resumed else (params['replay_buffer_expl/top']*variant['algorithm_kwargs']['num_trains_per_train_loop']),
     )
 
     algorithm = TorchBatchRLAlgorithm(
@@ -150,7 +170,7 @@ if __name__ == "__main__":
     parser.add_argument('--docu_nets', type=bool, default=False)
     parser.add_argument('--docu_data', type=bool, default=True)
     parser.add_argument('--docu_pics', type=bool, default=False)
-    parser.add_argument('--save_agent_every', type=int, default=1)
+    parser.add_argument('--save_agent_every', type=int, default=50) #intermediate save copies are made every (num_plays_expl + num_plays_eval) * save_agent_every
     parser.add_argument('--resume', type=int, default=0)
     parser.add_argument('--rnd_plays', type=int, default=0)
     parser.add_argument('--height_field_dim', type=int, default=12)
@@ -161,20 +181,20 @@ if __name__ == "__main__":
     parser.add_argument('--max_num_boxes',type=int,default=20)   
 
     #args relevant for agent setup and learning hyper params
-    parser.add_argument('--replay_buffer_size',type=int,default=210000)
+    parser.add_argument('--replay_buffer_size',type=int,default=500000) #applies to replay_buffer_expl; replay_buffer_eval is scaled according to their relation of num_plays
     parser.add_argument('--value_lr',type=float,default=3e-4)
     parser.add_argument('--soft_q_lr',type=float,default=3e-4)
     parser.add_argument('--policy_lr',type=float,default=3e-4)
 
     #training-specific args
     parser.add_argument('--num_epochs',type=int,default=50000)
-    parser.add_argument('--num_plays_eval',type=int,default=40)
-    parser.add_argument('--num_plays_expl',type=int,default=10)
+    parser.add_argument('--num_plays_eval',type=int,default=1)
+    parser.add_argument('--num_plays_expl',type=int,default=10) #params.pkl is saved every (num_plays_expl + num_plays_eval) plays
     parser.add_argument('--num_trains_per_train_loop',type=int,default=200)
     parser.add_argument('--batch_size',type=int,default=256)
 
-    parser.add_argument('--replay_add_sess_name', type=str, default='replay-buffer-tower-21000')
-    parser.add_argument('--replay_add_num_samples', type=str, default=21000)
+    parser.add_argument('--replay_add_sess_name', type=str, default='replay-buffer-222k')
+    parser.add_argument('--replay_add_num_samples', type=str, default=222747)
 
     args=parser.parse_args()
 

@@ -3,7 +3,10 @@ import sys, copy, rospy, moveit_commander
 import moveit_msgs.msg
 import robot_control as rc
 from geometry_msgs.msg import *
+from std_msgs.msg import *
 from deepbuilder.srv import *
+from visualization_msgs.msg import Marker
+from visualization_msgs.msg import MarkerArray
 import settings
 
 robot = {}
@@ -96,6 +99,8 @@ def plan_path(req):
     # which is why we will specify 0.01 as the eef_step in Cartesian
     # translation.  We will disable the jump threshold by setting it to 0.0 disabling:
     plan = move_group.plan(req.goal)
+    if len(req.state) > 0 and req.session_name!='':
+        draw_learner_state(req.state, req.session_name)
 
     # Note: We are just planning, not asking move_group to actually move the robot yet:
     res.path = plan.joint_trajectory
@@ -103,6 +108,46 @@ def plan_path(req):
     return res
 
     ## END_SUB_TUTORIAL
+marker_pub_state=rospy.Publisher('/deepbuilder/robot/learner_state_array', MarkerArray, queue_size=1)
+
+def draw_learner_state(state, session_name):
+    marker_array = MarkerArray()
+    resolution=12
+    minX = 0.373
+    maxX = -0.378
+    minY = -1.0215
+    maxY = -0.2755
+    m = Marker()
+    m.type = Marker.POINTS
+    m.action = Marker.ADD
+    m.header.frame_id = "/base"
+    m.header.stamp = rospy.Time.now()
+    m.ns = session_name
+    m.id=0
+    m.pose.orientation.w=1.0
+    m.scale.x=0.01
+    m.scale.y=0.01
+    m.scale.z=0.01
+    m.lifetime=rospy.Duration()
+
+    i = 0
+    for iterY in range(resolution):
+        for iterX in range(resolution):
+            p = Point()
+            p.x = minX + ((maxX - minX) * (float(iterX) / float(resolution - 1)))
+            p.y = minY + ((maxY - minY) * (float(iterY) / float(resolution - 1)))
+            p.z = state[i]
+            c = ColorRGBA()
+            c.r = 0.4 * float(iterX) / float(resolution)
+            c.g = 0.8 * float(iterY) / float(resolution)
+            c.b = 0.4
+            c.a = 1.0
+            m.points.append(p)
+            m.colors.append(c)
+            i+=1
+
+    marker_array.markers.append(m)
+    marker_pub_state.publish(marker_array)
 
 def display_trajectory(plan, speed_factor):
     # Copy class variables to local variables to make the web tutorials more clear.

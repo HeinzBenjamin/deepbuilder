@@ -40,7 +40,7 @@ template<>
 struct MD5Sum< ::deepbuilder::ro_check_path > {
   static const char* value()
   {
-    return "6ebb58b1e14d32cb6ceb8398120942bd";
+    return "1eb7e8316dc45f59de08c07322cfdf4c";
   }
 
   static const char* value(const ::deepbuilder::ro_check_path&) { return value(); }

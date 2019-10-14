@@ -158,7 +158,7 @@ class DeepBuilderEnv(gym.Env):
 
 
         else:
-            pose_reachable, self.path, _ = self.ros_comm().test_pose(action_array, (0.001*self.state).tolist())
+            pose_reachable, self.path, _ = self.ros_comm().test_pose(action_array, session_name = self.session_name, state = (0.001*self.state).tolist())
             rew, info, done, _ = reward.ForCollisionInGoalPose(not pose_reachable, not pose_reachable)
 
 
@@ -323,7 +323,7 @@ class DeepBuilderEnv(gym.Env):
         except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
             print(colored("RhinoManager didn't respond.", color='red'))
             try:
-                timeout = 60
+                timeout = 300
                 while timeout >= 0:
                     timeout -= 1
                     print("Automatic retry in {}. Hit keyboard interrupt to resume immediately.".format(str(datetime.timedelta(seconds=timeout))), end='\r')

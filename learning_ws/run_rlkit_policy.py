@@ -54,7 +54,7 @@ if __name__ == "__main__":
     parser.add_argument('--gpu', action='store_true')
     parser.add_argument('--session_name', type=str)
     parser.add_argument('--simulation', type=int,default=1)
-    parser.add_argument('--mode', type=str, default='eval')
+    parser.add_argument('--mode', type=str, default='expl')
     args = parser.parse_args()
 
     simulate_policy(args)

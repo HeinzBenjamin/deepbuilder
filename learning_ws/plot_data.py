@@ -118,7 +118,7 @@ def main(args):
         with open(filepath, 'r') as f:
             data = json.load(f)
 
-    elif args.mode == 'rlkit':
+    elif args.mode.startswith('rlkit'):
         directory = ('./rlkit/data/'+args.session_name) if args.session_name != '' else './'
         data['rewards'] = {}
         data['tower_heights'] = {}
@@ -130,10 +130,11 @@ def main(args):
         tow=[]
         col=[]
         collisions = []
-        for i in range(random_play_offset, int(params['replay_buffer/size']-end_offset)):
-            step_rew=params['replay_buffer/rewards'][i].tolist()[0]
+        which_buf = "_eval" if args.mode == 'rlkit_eval' else ('_expl' if not args.mode == 'rlkit' else '')
+        for i in range(random_play_offset, int(params['replay_buffer'+which_buf+'/size']-end_offset)):
+            step_rew=params['replay_buffer'+which_buf+'/rewards'][i].tolist()[0]
             rew.append(step_rew)
-            tow.append(max(params['replay_buffer/observations'][i].tolist()))
+            tow.append(max(params['replay_buffer'+which_buf+'/observations'][i].tolist()))
             col.append(0 if step_rew > 0 else 1)
         r = partition_list(rew, 21)
         t = partition_list(tow, 21)
@@ -167,7 +168,7 @@ def main(args):
 
         sac_plot(args, data, directory, num_plays)
 
-    elif args.mode == 'rlkit':
+    elif args.mode.startswith('rlkit'):
         '''
         plt.plot(range(num_plays), returns, linewidth=0.3, color='#C9DBFF')
         plt.plot(range(num_plays), smooth(returns, args.smoothing), linewidth=0.6)
@@ -233,7 +234,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     #args relevant for env setup
     parser.add_argument('--session_name',type=str, default='')
-    parser.add_argument('--mode', type=str,default='rlkit')
+    parser.add_argument('--mode', type=str,default='rlkit_expl')
     parser.add_argument('--show',type=str,default='True')
     parser.add_argument('--smooth_window',type=int,default=201)
     parser.add_argument('--smooth_deg',type=int,default=1)

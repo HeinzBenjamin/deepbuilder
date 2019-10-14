@@ -51,10 +51,13 @@ class Connection():
             return self.move_path(path, settings.ROBOT_SPEED_AUTO)
 
 
-    #return is_valid [bool], path [][]
-    def test_pose(self, pose, state=[]):
+    #return is_valid (bool), path [][]
+    def test_pose(self, pose, session_name = '', state=[]):
         value = {}
+        
         value['goal'] = pose
+        value['session_name'] = session_name if session_name != '' else 'none'
+        value['state'] = state
         request = roslibpy.ServiceRequest(value)
         path = []
         result = None
@@ -66,12 +69,6 @@ class Connection():
             except:
                 print('ROS Service could not be reached. Make sure it is running. Retrying in 5 sec...')
                 time.sleep(5)
-                #print('Reconnecting rosbridge client...')
-                #self.client.close()
-                #time.sleep(5)
-                #self.client.connect()
-                #print('Reconnected rosbridge client...')
-                #self.srv_path.call = roslibpy.Service(self.client, '/deepbuilder/robot/check_path', '/deepbuilder/ro_check_path')
                 result = None
         if result['message'] == 'HOME_ERR':
             input("Moveit threw home error. Is robot state being published and is robot in home position? Press Enter to retry.")
@@ -127,7 +124,8 @@ class Connection():
             return False, {}
             
         #move to goal position
-        self.move_path(path, settings.ROBOT_SPEED_AUTO, double_check = double_check)
+        if not self.move_path(path, settings.ROBOT_SPEED_AUTO, double_check = double_check):
+            return False, {}
         time.sleep(0.2)
 
         #release block

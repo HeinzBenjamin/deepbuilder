@@ -24,10 +24,14 @@ struct ro_check_pathRequest_
   typedef ro_check_pathRequest_<ContainerAllocator> Type;
 
   ro_check_pathRequest_()
-    : goal()  {
+    : goal()
+    , state()
+    , session_name()  {
     }
   ro_check_pathRequest_(const ContainerAllocator& _alloc)
-    : goal(_alloc)  {
+    : goal(_alloc)
+    , state(_alloc)
+    , session_name(_alloc)  {
   (void)_alloc;
     }
 
@@ -35,6 +39,12 @@ struct ro_check_pathRequest_
 
    typedef std::vector<float, typename ContainerAllocator::template rebind<float>::other >  _goal_type;
   _goal_type goal;
+
+   typedef std::vector<float, typename ContainerAllocator::template rebind<float>::other >  _state_type;
+  _state_type state;
+
+   typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _session_name_type;
+  _session_name_type session_name;
 
 
 
@@ -114,12 +124,12 @@ struct MD5Sum< ::deepbuilder::ro_check_pathRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "299570accc62e60347f54aac33d9eae5";
+    return "6358275a6dc1eedbf60d72e24506cc16";
   }
 
   static const char* value(const ::deepbuilder::ro_check_pathRequest_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x299570accc62e603ULL;
-  static const uint64_t static_value2 = 0x47f54aac33d9eae5ULL;
+  static const uint64_t static_value1 = 0x6358275a6dc1eedbULL;
+  static const uint64_t static_value2 = 0xf60d72e24506cc16ULL;
 };
 
 template<class ContainerAllocator>
@@ -139,6 +149,8 @@ struct Definition< ::deepbuilder::ro_check_pathRequest_<ContainerAllocator> >
   static const char* value()
   {
     return "float32[] goal\n\
+float32[] state\n\
+string session_name\n\
 ";
   }
 
@@ -158,6 +170,8 @@ namespace serialization
     template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
     {
       stream.next(m.goal);
+      stream.next(m.state);
+      stream.next(m.session_name);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -182,6 +196,14 @@ struct Printer< ::deepbuilder::ro_check_pathRequest_<ContainerAllocator> >
       s << indent << "  goal[" << i << "]: ";
       Printer<float>::stream(s, indent + "  ", v.goal[i]);
     }
+    s << indent << "state[]" << std::endl;
+    for (size_t i = 0; i < v.state.size(); ++i)
+    {
+      s << indent << "  state[" << i << "]: ";
+      Printer<float>::stream(s, indent + "  ", v.state[i]);
+    }
+    s << indent << "session_name: ";
+    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.session_name);
   }
 };
 

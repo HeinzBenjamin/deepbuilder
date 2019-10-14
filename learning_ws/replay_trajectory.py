@@ -22,7 +22,10 @@ def simulate_policy(args):
     environment.env.is_simulation = args.simulation == 1
     environment.reset()
 
-    for action in good_path.good_paths5:
+    trajectory = good_path.td3
+
+    for i in range(int(args.start_at), len(trajectory)):
+        action = trajectory[i]
         actiont = torch.FloatTensor(action)
         try:        
             environment.step(actiont)
@@ -36,6 +39,7 @@ def simulate_policy(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--simulation', type=int,default=1)
+    parser.add_argument('--start_at', type=int,default=0)
     args = parser.parse_args()
 
     simulate_policy(args)

@@ -7,13 +7,15 @@ import struct
 
 
 class ro_check_pathRequest(genpy.Message):
-  _md5sum = "299570accc62e60347f54aac33d9eae5"
+  _md5sum = "6358275a6dc1eedbf60d72e24506cc16"
   _type = "deepbuilder/ro_check_pathRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """float32[] goal
+float32[] state
+string session_name
 """
-  __slots__ = ['goal']
-  _slot_types = ['float32[]']
+  __slots__ = ['goal','state','session_name']
+  _slot_types = ['float32[]','float32[]','string']
 
   def __init__(self, *args, **kwds):
     """
@@ -23,7 +25,7 @@ class ro_check_pathRequest(genpy.Message):
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       goal
+       goal,state,session_name
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -34,8 +36,14 @@ class ro_check_pathRequest(genpy.Message):
       #message fields cannot be None, assign default values for those that are
       if self.goal is None:
         self.goal = []
+      if self.state is None:
+        self.state = []
+      if self.session_name is None:
+        self.session_name = ''
     else:
       self.goal = []
+      self.state = []
+      self.session_name = ''
 
   def _get_types(self):
     """
@@ -53,6 +61,16 @@ class ro_check_pathRequest(genpy.Message):
       buff.write(_struct_I.pack(length))
       pattern = '<%sf'%length
       buff.write(struct.pack(pattern, *self.goal))
+      length = len(self.state)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%sf'%length
+      buff.write(struct.pack(pattern, *self.state))
+      _x = self.session_name
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -70,6 +88,22 @@ class ro_check_pathRequest(genpy.Message):
       start = end
       end += struct.calcsize(pattern)
       self.goal = struct.unpack(pattern, str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%sf'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.state = struct.unpack(pattern, str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.session_name = str[start:end].decode('utf-8')
+      else:
+        self.session_name = str[start:end]
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -86,6 +120,16 @@ class ro_check_pathRequest(genpy.Message):
       buff.write(_struct_I.pack(length))
       pattern = '<%sf'%length
       buff.write(self.goal.tostring())
+      length = len(self.state)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%sf'%length
+      buff.write(self.state.tostring())
+      _x = self.session_name
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -104,6 +148,22 @@ class ro_check_pathRequest(genpy.Message):
       start = end
       end += struct.calcsize(pattern)
       self.goal = numpy.frombuffer(str[start:end], dtype=numpy.float32, count=length)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%sf'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.state = numpy.frombuffer(str[start:end], dtype=numpy.float32, count=length)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.session_name = str[start:end].decode('utf-8')
+      else:
+        self.session_name = str[start:end]
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -506,6 +566,6 @@ def _get_struct_2i():
     return _struct_2i
 class ro_check_path(object):
   _type          = 'deepbuilder/ro_check_path'
-  _md5sum = '6ebb58b1e14d32cb6ceb8398120942bd'
+  _md5sum = '1eb7e8316dc45f59de08c07322cfdf4c'
   _request_class  = ro_check_pathRequest
   _response_class = ro_check_pathResponse

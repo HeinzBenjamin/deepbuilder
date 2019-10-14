@@ -37,9 +37,11 @@ class NormalizedActions(gym.ActionWrapper):
     #as suggested in one of the answers, we'll use the quaternion form with renormalization for every action (for now)
     #only necessary for cartesian actions
     def action(self, action):
+        
         low  = self.action_space.low
         high = self.action_space.high 
 
+        
         rng = high.max()-low.min()
 
         #first axis is halfed so we only operate in on one half of the action space
@@ -52,10 +54,12 @@ class NormalizedActions(gym.ActionWrapper):
 
         action[2] *= 0.5
         action[2] += rng/4
+        
          
         return action
 
     def reverse_action(self, action):
+        
         low  = self.action_space.low
         high = self.action_space.high 
 
@@ -69,5 +73,6 @@ class NormalizedActions(gym.ActionWrapper):
 
         action[2] -= rng/4
         action[2] *= 2.0
+        
         
         return action

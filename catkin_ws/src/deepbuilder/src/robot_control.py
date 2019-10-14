@@ -194,7 +194,7 @@ def get_block(req):
     #Also possible:
     open_gripper()
     move_source_h2s(req)
-    moveto_gripper(goal=80)
+    moveto_gripper(goal=60)
     move_home_s2h(req)
     #open_gripper()
 
@@ -269,6 +269,7 @@ def draw_things(whatever):
         ms.lifetime=rospy.Duration()
         mA_state.markers.append(ms)
 
+
     mA_state = draw_lines(mA_state, -0.378, 0.373, -1.0215, -0.2755, 11.0)
     marker_pub_state.publish(mA_state)
 
@@ -325,6 +326,7 @@ def draw_lines(marker_array, minX, maxX, minY, maxY, resolution):
     return marker_array
     
 mA_temp = None
+
 
 def tags_callback(tags):
     global tf_listener

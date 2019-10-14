@@ -23,6 +23,8 @@ class ro_check_pathRequest {
     if (initObj === null) {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.goal = null;
+      this.state = null;
+      this.session_name = null;
     }
     else {
       if (initObj.hasOwnProperty('goal')) {
@@ -31,6 +33,18 @@ class ro_check_pathRequest {
       else {
         this.goal = [];
       }
+      if (initObj.hasOwnProperty('state')) {
+        this.state = initObj.state
+      }
+      else {
+        this.state = [];
+      }
+      if (initObj.hasOwnProperty('session_name')) {
+        this.session_name = initObj.session_name
+      }
+      else {
+        this.session_name = '';
+      }
     }
   }
 
@@ -38,6 +52,10 @@ class ro_check_pathRequest {
     // Serializes a message object of type ro_check_pathRequest
     // Serialize message field [goal]
     bufferOffset = _arraySerializer.float32(obj.goal, buffer, bufferOffset, null);
+    // Serialize message field [state]
+    bufferOffset = _arraySerializer.float32(obj.state, buffer, bufferOffset, null);
+    // Serialize message field [session_name]
+    bufferOffset = _serializer.string(obj.session_name, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -47,13 +65,19 @@ class ro_check_pathRequest {
     let data = new ro_check_pathRequest(null);
     // Deserialize message field [goal]
     data.goal = _arrayDeserializer.float32(buffer, bufferOffset, null)
+    // Deserialize message field [state]
+    data.state = _arrayDeserializer.float32(buffer, bufferOffset, null)
+    // Deserialize message field [session_name]
+    data.session_name = _deserializer.string(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
     let length = 0;
     length += 4 * object.goal.length;
-    return length + 4;
+    length += 4 * object.state.length;
+    length += object.session_name.length;
+    return length + 12;
   }
 
   static datatype() {
@@ -63,13 +87,15 @@ class ro_check_pathRequest {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '299570accc62e60347f54aac33d9eae5';
+    return '6358275a6dc1eedbf60d72e24506cc16';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
     float32[] goal
+    float32[] state
+    string session_name
     
     `;
   }
@@ -85,6 +111,20 @@ class ro_check_pathRequest {
     }
     else {
       resolved.goal = []
+    }
+
+    if (msg.state !== undefined) {
+      resolved.state = msg.state;
+    }
+    else {
+      resolved.state = []
+    }
+
+    if (msg.session_name !== undefined) {
+      resolved.session_name = msg.session_name;
+    }
+    else {
+      resolved.session_name = ''
     }
 
     return resolved;
@@ -222,6 +262,6 @@ class ro_check_pathResponse {
 module.exports = {
   Request: ro_check_pathRequest,
   Response: ro_check_pathResponse,
-  md5sum() { return '6ebb58b1e14d32cb6ceb8398120942bd'; },
+  md5sum() { return '1eb7e8316dc45f59de08c07322cfdf4c'; },
   datatype() { return 'deepbuilder/ro_check_path'; }
 };

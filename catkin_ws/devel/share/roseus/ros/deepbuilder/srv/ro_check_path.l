@@ -22,24 +22,38 @@
 
 (defclass deepbuilder::ro_check_pathRequest
   :super ros::object
-  :slots (_goal ))
+  :slots (_goal _state _session_name ))
 
 (defmethod deepbuilder::ro_check_pathRequest
   (:init
    (&key
     ((:goal __goal) (make-array 0 :initial-element 0.0 :element-type :float))
+    ((:state __state) (make-array 0 :initial-element 0.0 :element-type :float))
+    ((:session_name __session_name) "")
     )
    (send-super :init)
    (setq _goal __goal)
+   (setq _state __state)
+   (setq _session_name (string __session_name))
    self)
   (:goal
    (&optional __goal)
    (if __goal (setq _goal __goal)) _goal)
+  (:state
+   (&optional __state)
+   (if __state (setq _state __state)) _state)
+  (:session_name
+   (&optional __session_name)
+   (if __session_name (setq _session_name __session_name)) _session_name)
   (:serialization-length
    ()
    (+
     ;; float32[] _goal
     (* 4    (length _goal)) 4
+    ;; float32[] _state
+    (* 4    (length _state)) 4
+    ;; string _session_name
+    4 (length _session_name)
     ))
   (:serialize
    (&optional strm)
@@ -50,6 +64,13 @@
      (dotimes (i (length _goal))
        (sys::poke (elt _goal i) (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
        )
+     ;; float32[] _state
+     (write-long (length _state) s)
+     (dotimes (i (length _state))
+       (sys::poke (elt _state i) (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
+       )
+     ;; string _session_name
+       (write-long (length _session_name) s) (princ _session_name s)
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
@@ -61,6 +82,15 @@
      (dotimes (i n)
      (setf (elt _goal i) (sys::peek buf ptr- :float)) (incf ptr- 4)
      ))
+   ;; float32[] _state
+   (let (n)
+     (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4)
+     (setq _state (instantiate float-vector n))
+     (dotimes (i n)
+     (setf (elt _state i) (sys::peek buf ptr- :float)) (incf ptr- 4)
+     ))
+   ;; string _session_name
+     (let (n) (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4) (setq _session_name (subseq buf ptr- (+ ptr- n))) (incf ptr- n))
    ;;
    self)
   )
@@ -121,7 +151,7 @@
   :super ros::object
   :slots ())
 
-(setf (get deepbuilder::ro_check_path :md5sum-) "6ebb58b1e14d32cb6ceb8398120942bd")
+(setf (get deepbuilder::ro_check_path :md5sum-) "1eb7e8316dc45f59de08c07322cfdf4c")
 (setf (get deepbuilder::ro_check_path :datatype-) "deepbuilder/ro_check_path")
 (setf (get deepbuilder::ro_check_path :request) deepbuilder::ro_check_pathRequest)
 (setf (get deepbuilder::ro_check_path :response) deepbuilder::ro_check_pathResponse)
@@ -129,10 +159,12 @@
 (defmethod deepbuilder::ro_check_pathRequest
   (:response () (instance deepbuilder::ro_check_pathResponse :init)))
 
-(setf (get deepbuilder::ro_check_pathRequest :md5sum-) "6ebb58b1e14d32cb6ceb8398120942bd")
+(setf (get deepbuilder::ro_check_pathRequest :md5sum-) "1eb7e8316dc45f59de08c07322cfdf4c")
 (setf (get deepbuilder::ro_check_pathRequest :datatype-) "deepbuilder/ro_check_pathRequest")
 (setf (get deepbuilder::ro_check_pathRequest :definition-)
       "float32[] goal
+float32[] state
+string session_name
 ---
 trajectory_msgs/JointTrajectory path
 string message
@@ -173,10 +205,12 @@ float64[] effort
 duration time_from_start
 ")
 
-(setf (get deepbuilder::ro_check_pathResponse :md5sum-) "6ebb58b1e14d32cb6ceb8398120942bd")
+(setf (get deepbuilder::ro_check_pathResponse :md5sum-) "1eb7e8316dc45f59de08c07322cfdf4c")
 (setf (get deepbuilder::ro_check_pathResponse :datatype-) "deepbuilder/ro_check_pathResponse")
 (setf (get deepbuilder::ro_check_pathResponse :definition-)
       "float32[] goal
+float32[] state
+string session_name
 ---
 trajectory_msgs/JointTrajectory path
 string message
@@ -219,6 +253,6 @@ duration time_from_start
 
 
 
-(provide :deepbuilder/ro_check_path "6ebb58b1e14d32cb6ceb8398120942bd")
+(provide :deepbuilder/ro_check_path "1eb7e8316dc45f59de08c07322cfdf4c")
 
 

@@ -17,20 +17,11 @@ import json, os, torch
 
 
 def experiment(args, variant):
-    #eval_env = gym.make('FetchReach-v1')
-    #expl_env = gym.make('FetchReach-v1')    
-
     core_env = env.DeepBuilderEnv(args.session_name, args.act_dim, args.box_dim, args.max_num_boxes, args.height_field_dim)
     eval_env = stuff.NormalizedActions(core_env)
     expl_env = stuff.NormalizedActions(core_env)
     obs_dim = expl_env.observation_space.low.size
     action_dim = eval_env.action_space.low.size
-
-    resumed = args.resume == 1
-
-    if resumed:
-        variant, params = doc.load_rklit_file(args.session_name)
-        variant['algorithm_kwargs']['min_num_steps_before_training']=0
 
     M = variant['layer_size']
 
@@ -38,33 +29,33 @@ def experiment(args, variant):
         input_size=obs_dim + action_dim,
         output_size=1,
         hidden_sizes=[M, M],
-    ) if not resumed else params['trainer/qf1']
+    )
 
     qf2 = FlattenMlp(
         input_size=obs_dim + action_dim,
         output_size=1,
         hidden_sizes=[M, M],
-    ) if not resumed else params['trainer/qf2']
+    )
 
     target_qf1 = FlattenMlp(
         input_size=obs_dim + action_dim,
         output_size=1,
         hidden_sizes=[M, M],
-    ) if not resumed else params['trainer/target_qf1']
+    )
 
     target_qf2 = FlattenMlp(
         input_size=obs_dim + action_dim,
         output_size=1,
         hidden_sizes=[M, M],
-    ) if not resumed else params['trainer/target_qf2']
+    )
 
     policy = TanhGaussianPolicy(
         obs_dim=obs_dim,
         action_dim=action_dim,
         hidden_sizes=[M, M],
-    ) if not resumed else params['trainer/policy']
+    )
 
-    eval_policy = MakeDeterministic(policy) if not resumed else params['evaluation/policy']
+    eval_policy = MakeDeterministic(policy)
     
     eval_path_collector = MdpPathCollector(
         eval_env,
@@ -73,69 +64,74 @@ def experiment(args, variant):
 
     expl_path_collector = MdpPathCollector(
         expl_env,
-        policy if not resumed else params['exploration/policy'],
+        policy,
     )
     replay_buffer = EnvReplayBuffer(
-        variant['replay_buffer_size'],
+        222726+21,
         expl_env,
     )
 
-    if resumed:
-        replay_buffer._actions = params['replay_buffer/actions']
-        replay_buffer._env_infos = params['replay_buffer/env_infos']
-        replay_buffer._next_obs = params['replay_buffer/next_obs']
-        replay_buffer._observations = params['replay_buffer/observations']
-        replay_buffer._rewards = params['replay_buffer/rewards']
-        replay_buffer._size = params['replay_buffer/size']
-        replay_buffer._terminals = params['replay_buffer/terminals']
-        replay_buffer._top = params['replay_buffer/top']
+    replay_buffer_eval = EnvReplayBuffer(21, eval_env)
 
-    elif args.replay_add_sess_name_1 != '':
+    if args.replay_add_sess_name_1 != '':
         _, other_params = doc.load_rklit_file(args.replay_add_sess_name_1)
         num_samples = int(args.replay_add_num_samples_1)
         replay_buffer._size = 0
         replay_buffer._top = 0
         offset = 0
         print("Loading "+str(num_samples)+" batch samples from session " + args.replay_add_sess_name_1)
-        for i in range(num_samples):            
-            replay_buffer._actions[i] = other_params['replay_buffer/actions'][i]
-            replay_buffer._next_obs[i] = other_params['replay_buffer/next_obs'][i]
-            replay_buffer._observations[i] = other_params['replay_buffer/observations'][i]
-            replay_buffer._rewards[i] = other_params['replay_buffer/rewards'][i]
-            replay_buffer._terminals[i] = other_params['replay_buffer/terminals'][i]
-            replay_buffer._size += 1
-            replay_buffer._top += 1
-            offset+=1
+        for i in range(num_samples):
+            act = other_params['replay_buffer_expl/actions'][i]
+            obs = other_params['replay_buffer_expl/observations'][i]
+            if not (act.min()== 0.0 and act.max() == 0.0 and obs.min() == 0.0 and obs.max() == 0.0):            
+                replay_buffer._actions[i] = act
+                replay_buffer._next_obs[i] = other_params['replay_buffer_expl/next_obs'][i]
+                replay_buffer._observations[i] = obs
+                replay_buffer._rewards[i] = other_params['replay_buffer_expl/rewards'][i]
+                replay_buffer._terminals[i] = other_params['replay_buffer_expl/terminals'][i]
+                replay_buffer._size += 1
+                replay_buffer._top += 1
+                offset+=1
 
         if args.replay_add_sess_name_2 != '':
             _, other_params = doc.load_rklit_file(args.replay_add_sess_name_2)
             num_samples = int(args.replay_add_num_samples_2)
             print("Loading "+str(num_samples)+" batch samples from session " + args.replay_add_sess_name_2)
-            for i in range(num_samples):            
-                replay_buffer._actions[offset+i] = other_params['replay_buffer/actions'][i]
-                replay_buffer._next_obs[offset+i] = other_params['replay_buffer/next_obs'][i]
-                replay_buffer._observations[offset+i] = other_params['replay_buffer/observations'][i]
-                replay_buffer._rewards[offset+i] = other_params['replay_buffer/rewards'][i]
-                replay_buffer._terminals[offset+i] = other_params['replay_buffer/terminals'][i]
-                replay_buffer._size += 1
-                replay_buffer._top += 1
-                offset+=1
+            for i in range(21021, num_samples):      
+                act = other_params['replay_buffer_expl/actions'][i]
+                obs = other_params['replay_buffer_expl/observations'][i]   
+                if not (act.min()== 0.0 and act.max() == 0.0 and obs.min() == 0.0 and obs.max() == 0.0):    
+                    replay_buffer._actions[offset] = act
+                    replay_buffer._next_obs[offset] = other_params['replay_buffer_expl/next_obs'][i]
+                    replay_buffer._observations[offset] = obs
+                    replay_buffer._rewards[offset] = other_params['replay_buffer_expl/rewards'][i]
+                    replay_buffer._terminals[offset] = other_params['replay_buffer_expl/terminals'][i]
+                    replay_buffer._size += 1
+                    replay_buffer._top += 1
+                    offset+=1
 
-        if args.replay_add_sess_name_3 != '':
-            _, other_params = doc.load_rklit_file(args.replay_add_sess_name_3)
+        '''
+        if args.replay_add_sess_name_3 != args.replay_add_sess_name_2:
+            #_, other_params = doc.load_rklit_file(args.replay_add_sess_name_3)
             num_samples = int(args.replay_add_num_samples_3)
             print("Loading "+str(num_samples)+" batch samples from session " + args.replay_add_sess_name_3)
-            for i in range(num_samples):            
-                replay_buffer._actions[offset+i] = other_params['replay_buffer/actions'][i]
-                replay_buffer._next_obs[offset+i] = other_params['replay_buffer/next_obs'][i]
-                replay_buffer._observations[offset+i] = other_params['replay_buffer/observations'][i]
-                replay_buffer._rewards[offset+i] = other_params['replay_buffer/rewards'][i]
-                replay_buffer._terminals[offset+i] = other_params['replay_buffer/terminals'][i]
-                replay_buffer._size += 1
-                replay_buffer._top += 1
-                offset+=1
-            
-            del other_params
+            for i in range(num_samples):     
+                act = other_params['replay_buffer_eval/actions'][i]
+                obs = other_params['replay_buffer_eval/observations'][i]   
+                if not (act.min()== 0.0 and act.max() == 0.0 and obs.min() == 0.0 and obs.max() == 0.0):          
+                    replay_buffer._actions[offset] = act
+                    replay_buffer._next_obs[offset] = other_params['replay_buffer_eval/next_obs'][i]
+                    replay_buffer._observations[offset] = obs
+                    replay_buffer._rewards[offset] = other_params['replay_buffer_eval/rewards'][i]
+                    replay_buffer._terminals[offset] = other_params['replay_buffer_eval/terminals'][i]
+                    replay_buffer._size += 1
+                    replay_buffer._top += 1
+                    offset+=1
+        '''
+        del other_params
+
+        print("Detected and removed "+str(replay_buffer._max_replay_buffer_size - replay_buffer._size)+" zero samples. Final size of replay buffer: " + str(replay_buffer._size))
+
 
     trainer = SACTrainer(
         env=eval_env,
@@ -153,7 +149,8 @@ def experiment(args, variant):
         evaluation_env=eval_env,
         exploration_data_collector=expl_path_collector,
         evaluation_data_collector=eval_path_collector,
-        replay_buffer=replay_buffer,
+        replay_buffer_expl=replay_buffer,
+        replay_buffer_eval=replay_buffer_eval,
         **variant['algorithm_kwargs']
     )
 
@@ -174,7 +171,6 @@ if __name__ == "__main__":
     parser.add_argument('--docu_data', type=bool, default=True)
     parser.add_argument('--docu_pics', type=bool, default=False)
     parser.add_argument('--save_agent_every', type=int, default=50)
-    parser.add_argument('--resume', type=int, default=0)
     parser.add_argument('--rnd_plays', type=int, default=0)
     parser.add_argument('--height_field_dim', type=int, default=12)
 
@@ -235,8 +231,7 @@ if __name__ == "__main__":
     )
     
     setup_logger(args.session_name, variant=variant)
-    args.replay_buffer_size = args.replay_add_num_samples_1 + args.replay_add_num_samples_2 + args.replay_add_num_samples_3
-
+    variant['replay_buffer_size'] = int(args.replay_add_num_samples_1) + int(args.replay_add_num_samples_2) + int(args.replay_add_num_samples_3)
     
     ptu.set_gpu_mode(True)  # optionally set the GPU (default=False)
     experiment(args, variant)
