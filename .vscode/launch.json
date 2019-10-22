@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
     
         {
             "name": "Python: Current File",
@@ -12,7 +13,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             //"args": ["--session_name", "191003-sac-train300", "--simulation", "0"]
-            "args": ["--simulation", "0"]
+            //"args": ["--simulation", "0"]
         }
     ]
 }
