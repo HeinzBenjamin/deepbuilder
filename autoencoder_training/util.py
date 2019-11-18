@@ -1,24 +1,14 @@
-import os, json, datetime
+import os, json, datetime, torch, random
 
-def store_config(args):
-    config = {}
-    config['data_directory'] = args.data_directory
-    config['num_train_samples'] = args.num_train_samples
-    config['num_test_samples'] = args.num_test_samples
-    #config['data_level'] = args.data_level not used atm
-    config['learning_rate'] = args.learning_rate
-    config['weight_decay'] = args.weight_decay
-    config['momentum'] = args.momentum
-    config['num_epochs'] = args.num_epochs
-    config['random_order'] = args.random_order
-    config['noise_std'] = args.noise_std
+
+def store_config(dir, args, suffix):
     dt = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M')
 
-    directory = args.model_directory+dt+'/'
+    directory = dir+dt+suffix+'/'
     if not os.path.exists(directory): 
         os.makedirs(directory)
     with open(directory+'config.json', 'w') as f:
-        json.dump(config, f)
+        json.dump(args, f)
     return directory
 
 def store_loss(directory, epoch, loss):

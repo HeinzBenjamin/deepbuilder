@@ -14,6 +14,7 @@
             "console": "integratedTerminal",
             //"args": ["--session_name", "191003-sac-train300", "--simulation", "0"]
             //"args": ["--simulation", "0"]
+            "args": ["--files","/home/ros/deepbuilder/autoencoder_training/trained_models/conv3d/2019-10-25-19-52--0/loss.json,/home/ros/deepbuilder/autoencoder_training/trained_models/conv3d/2019-10-25-19-52--1/loss.json,/home/ros/deepbuilder/autoencoder_training/trained_models/conv3d/2019-10-25-19-52--2/loss.json,/home/ros/deepbuilder/autoencoder_training/trained_models/conv3d/2019-10-25-19-52--3/loss.json,/home/ros/deepbuilder/autoencoder_training/trained_models/conv3d/2019-10-25-19-52--4/loss.json,/home/ros/deepbuilder/autoencoder_training/trained_models/conv3d/2019-10-25-19-56--0/loss.json,/home/ros/deepbuilder/autoencoder_training/trained_models/conv3d/2019-10-25-19-56--1/loss.json,/home/ros/deepbuilder/autoencoder_training/trained_models/conv3d/2019-10-25-19-56--2/loss.json,/home/ros/deepbuilder/autoencoder_training/trained_models/conv3d/2019-10-25-19-56--3/loss.json,/home/ros/deepbuilder/autoencoder_training/trained_models/conv3d/2019-10-25-19-56--4/loss.json"]
         }
     ]
 }
