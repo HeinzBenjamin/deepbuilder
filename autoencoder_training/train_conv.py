@@ -13,37 +13,11 @@ import meshdata as dat
 import numpy as np
 import ae_networks
 
-sessions={
-    '0':{
-        'learning_rate': 0.00005,
-        'momentum': 0.7,
-        'weight_decay' : 0.0,
-        'bottleneck': 256
-    },
-    '1':{
-        'learning_rate': 0.00005,
-        'momentum': 0.7,
-        'weight_decay' : 0.0,
-        'bottleneck': 144
-    },
-    '2':{
-        'learning_rate': 0.02,
-        'momentum': 0.7,
-        'weight_decay' : 0.0,
-        'bottleneck': 256
-    },
-    '3':{
-        'learning_rate': 0.00005,
-        'momentum': 0.7,
-        'weight_decay' : 0.001,
-        'bottleneck': 256
-    },
-    '4':{
-        'learning_rate': 0.00005,
-        'momentum': 0.4,
-        'weight_decay' : 0.0,
-        'bottleneck': 256
-    }
+configuration={
+    'learning_rate': 0.02,
+    'momentum': 0.7,
+    'weight_decay' : 0.0,
+    'bottleneck': 256
 }
 
 if __name__ == "__main__":
@@ -57,82 +31,90 @@ if __name__ == "__main__":
     parser.add_argument('--num_epochs',type=int,default=9999999999)
     parser.add_argument('--random_order',type=int,default=1)
     parser.add_argument('--noise_std',type=float,default=1.5/750.0)
+    parser.add_argument('--test_every',type=int,default=5)
+    parser.add_argument('--save_every',type=int,default=10)
 
     args=parser.parse_args()
 
+    #get lists of all available train and test files from directories
     test_files = [f for f in listdir(args.test_samples_directory) if isfile(join(args.test_samples_directory, f))]
     train_files = [f for f in listdir(args.train_samples_directory) if isfile(join(args.train_samples_directory, f))]
 
     num_test_samples = len(test_files)
+    num_train_files = len(train_files)
 
     offset = 0
-    train_data = torch.zeros(args.samples_per_epoch, 64,64,64).cuda()   
-    test_data = torch.zeros(num_test_samples, 64,64,64).cuda() 
+    #set buffer tensors for test and training data
+    train_data = torch.zeros(args.samples_per_epoch, 64,64,64, dtype=torch.float16).cuda()   
+    test_data = torch.zeros(num_test_samples, 64,64,64, dtype=torch.float16).cuda() 
 
+    #fill test data tensors
     for i in range(num_test_samples):
         t = torch.load(args.test_samples_directory+test_files[i]).cuda()
         test_data[i] = t
 
-    models = []
-    model_folders = []
-    optimizers = []
 
-    for i in sessions:
-        model = ae_networks.autoencoder64(sessions[i]['bottleneck']).cuda()
-        models.append(model)        
-        optimizer = torch.optim.SGD(model.parameters(), lr=sessions[i]['learning_rate'], weight_decay=sessions[i]['weight_decay'], momentum=sessions[i]['momentum'])
-        optimizers.append(optimizer)
-        model_folders.append(util.store_config(args.model_directory,sessions['0'], "--"+i))
+    model = ae_networks.autoencoder64(configuration['bottleneck']).cuda()     
+    optimizer = torch.optim.SGD(model.parameters(), lr=configuration['learning_rate'], weight_decay=configuration['weight_decay'], momentum=configuration['momentum'])
+    model_folder = util.store_config(args.model_directory,configuration,"")
 
     criterion = nn.MSELoss()
-    print("First model folder: " + model_folders[0])
+    print("Model folder: " + model_folder)
     for epoch in range(args.num_epochs):
-        sample_files = random.sample(train_files, k=args.samples_per_epoch)
-        i = 0
-        for s in sample_files:
-            t = torch.load(args.train_samples_directory+s).cuda()
-            train_data[i] = t
-            i+=1
+        try:
+            sample_files = random.sample(train_files, k=args.samples_per_epoch)
+            i = 0
+            for s in sample_files:
+                t = torch.load(args.train_samples_directory+s).cuda()
+                train_data[i] = t
+                i+=1
 
-        for i in range(args.samples_per_epoch):            
-            t_sample = Variable(train_data[i]).unsqueeze(0).unsqueeze(0)
+            for ii in range(args.samples_per_epoch):            
+                t_sample = Variable(train_data[ii].to(torch.float32)).unsqueeze(0).unsqueeze(0)
 
-            noise = torch.tensor(data=np.random.normal(loc=0.0, scale=args.noise_std, size=np.shape(t_sample)), dtype=torch.float32).cuda()
-            t_sample += noise
+                noise = torch.tensor(data=np.random.normal(loc=0.0, scale=args.noise_std, size=np.shape(t_sample)), dtype=torch.float32).cuda()
+                t_sample += noise
 
-            losses = []
-            for s in sessions:
-                output = models[int(s)](t_sample)
+                output = model(t_sample)
                 loss = criterion(output, t_sample)
-                optimizers[int(s)].zero_grad()
+                optimizer.zero_grad()
                 loss.backward()
-                optimizers[int(s)].step()
-                losses.append(loss.tolist())
-            if (i+1) % 10 == 0:
-                print(('[TRAIN] Epoch '+str(epoch)+' - Step [{:5d}/{}] - Sample [{}] - Loss: [{:.6f}, {:.6f}, {:.6f}, {:.6f}, {:.6f}]\r'.format(i+1,args.samples_per_epoch,sample_files[i], losses[0],losses[1],losses[2],losses[3],losses[4])), end="" if i < (args.samples_per_epoch-1) else "\n")
+                optimizer.step()
+
+                print(('[TRAIN] Epoch '+str(epoch)+' - Step [{:5d}/{}] - Sample [{}] - Loss: [{:.6f}]\r'.format(ii+1,args.samples_per_epoch,sample_files[ii], loss)), end="" if ii < (args.samples_per_epoch-1) else "\n")
 
 
-        avg_losses = [0.0,0.0,0.0,0.0,0.0]
-        for i in range(num_test_samples):
-            t_sample = test_data[i]
-            t_sample=Variable(t_sample).cuda().unsqueeze(0).unsqueeze(0)
-            
-            for s in sessions:
-                loss = criterion(models[int(s)](t_sample), t_sample)
-                avg_losses[int(s)] += loss.data / num_test_samples
+            if epoch % args.test_every == 0:
+                avg_loss = 0.0
+                for ii in range(num_test_samples):
+                    t_sample = test_data[ii].to(torch.float32)
+                    t_sample=Variable(t_sample).cuda().unsqueeze(0).unsqueeze(0)
 
-            if (i+1) % 10 == 0:
-                print('[ TEST] Epoch {} - Step [{:5d}/{}]\r'.format(epoch, i+1, num_test_samples), end="" if i < num_test_samples-1 else "\n")
+                    test_loss = criterion(model(t_sample), t_sample)
+                    avg_loss += test_loss.data / num_test_samples
 
-        # ===================log========================
-        print('[ TEST] Epoch {} - Average Test Losses: [{:.6f}, {:.6f}, {:.6f}, {:.6f}, {:.6f}]'.format(epoch + 1, avg_losses[0],avg_losses[1],avg_losses[2],avg_losses[3],avg_losses[4]))
-        for s in sessions:
-            util.store_loss(model_folders[int(s)], epoch, avg_losses[int(s)].tolist())
+                    print('[ TEST] Epoch {} - Step [{:5d}/{}]\r'.format(epoch, ii+1, num_test_samples), end="" if ii < num_test_samples-1 else "\n")
+
+                # ===================log========================
+                print('[ TEST] Epoch {} - Average Test Losses: [{:.6f}]'.format(epoch, avg_loss))
+                util.store_loss(model_folder, epoch, avg_loss.tolist())
 
 
-        if epoch % 10 == 0:
-            print("Saving models")
-            for s in sessions:
-                torch.save(model.state_dict(), model_folders[int(s)]+'model.db')
+            if epoch % args.save_every == 0:
+                print("Saving model")
+                torch.save(model.state_dict(), model_folder+'model.db')
+                torch.save(optimizer.state_dict(),model_folder+'optimizer.db')
+                    
+        
+        except (KeyboardInterrupt):
+            cont = ''
+            while cont != 'n' and cont != 'y':
+                print("\n")
+                cont = input("Pause! Continue training with next epoch? [y/n]")
+                if cont == 'n':
+                    raise
+                elif cont == 'y':
+                    print("Continuing training...")
+                    break
 
    

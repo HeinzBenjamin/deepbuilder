@@ -14,8 +14,9 @@ def main(args):
             data = json.load(f)
             for key in data:
                 vals[i].append(data[key])
-        plt.plot(range(580), vals[i][0:580], linewidth=1.5, label='Configuration '+str(i))
+        plt.plot(range(len(vals[i])), vals[i], linewidth=1.5, label='Configuration '+str(i))
         i += 1
+    plt.ylim(0.0,0.006)
     plt.legend()
     plt.show()
 
