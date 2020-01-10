@@ -1,10 +1,7 @@
-import torch, torchvision, os, util, random
+import torch, os, util, random
 from torch import nn
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
-from torchvision import transforms
-from torchvision.datasets import MNIST
-from torchvision.utils import save_image
 
 
 class Print(nn.Module):
@@ -21,6 +18,58 @@ class Stack64(nn.Module):
         x = x.view(x.size()[1], -1)
         x=x.view(1,int(x.size()[0]/(4*4*4)),4,4,4)
         return x
+
+class autoencoderCP(nn.Module):
+    def __init__(self, rank_cp, bottle_neck_size):
+        super(autoencoderCP,self).__init__()
+
+        self.encoder = nn.Sequential(
+            nn.Linear(rank_cp * 3 * 64, rank_cp * 64),
+            nn.ReLU(True),
+            nn.Linear(rank_cp * 64, rank_cp * 16),
+            nn.ReLU(True),
+            nn.Linear(rank_cp * 16, bottle_neck_size))
+            
+        
+        self.decoder = nn.Sequential(
+            nn.Linear(bottle_neck_size, rank_cp * 16),
+            nn.ReLU(True),
+            nn.Linear(rank_cp * 16, rank_cp * 64),
+            nn.ReLU(True),
+            nn.Linear(rank_cp * 64, rank_cp * 3 * 64),
+            nn.Tanh())
+
+    def load(self, other):
+        for key in other:
+            keys = key.split('.')
+            part = self.__getattr__(keys[0])
+            mod = part._modules[keys[1]]
+            member = mod.__getattr__(keys[2])
+            member.data = other[key].data
+        '''
+        self.encoder._modules[key].bias.data = other['encoder.'+key+'.bias'].data
+        self.encoder._modules[key].weight.data = other['encoder.'+key+'.weight'].data
+        self.decoder._modules[key].bias.data = other['decoder.'+key+'.bias'].data
+        self.decoder._modules[key].weight.data = other['decoder.'+key+'.weight'].data
+        '''
+
+    def forward(self, x):
+        x = self.encoder(x)
+        x = self.decoder(x)
+        return x
+
+    def encode(self, x):
+        if len(x.shape) == 1:
+            x = x.view(64,64,64)
+        while len(x.shape) < 5:
+            x = Variable(x).unsqueeze(0)
+
+        return self.encoder(x)
+
+    def decode(self, x):
+        return self.decoder(x)
+
+
 
 class autoencoder64(nn.Module):
     def __init__(self, bottle_neck_size):
@@ -84,7 +133,7 @@ class autoencoder64(nn.Module):
     
     def encode(self, x):
         if len(x.shape) == 1:
-            x = x.view(32,32,32)
+            x = x.view(64,64,64)
         while len(x.shape) < 5:
             x = Variable(x).unsqueeze(0)
 
