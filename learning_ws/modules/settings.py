@@ -10,10 +10,8 @@ ROBOT_GET_BLOCK_SPEED = 0.8
 
 ######################## ROS / ROBOTICS SETTINGS ########################
 #########################################################################
-ROS_HOST = 'localhost'  # The server's hostname or IP address
-ROS_PORT = 65432        # The port used by the server
-BUF_SIZE_OBS = 8192     # buffer size. This could become large. 8192 should be fine for up to around 30 boxes
-
+ROS_HOST = 'http://192.168.0.101'#'localhost'  # The server's hostname or IP address
+ROS_PORT = 9090        # The port used by the server
 
 
 ######################## SIMULATION SETTINGS ########################

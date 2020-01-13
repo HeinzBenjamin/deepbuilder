@@ -46,12 +46,6 @@ class autoencoderCP(nn.Module):
             mod = part._modules[keys[1]]
             member = mod.__getattr__(keys[2])
             member.data = other[key].data
-        '''
-        self.encoder._modules[key].bias.data = other['encoder.'+key+'.bias'].data
-        self.encoder._modules[key].weight.data = other['encoder.'+key+'.weight'].data
-        self.decoder._modules[key].bias.data = other['decoder.'+key+'.bias'].data
-        self.decoder._modules[key].weight.data = other['decoder.'+key+'.weight'].data
-        '''
 
     def forward(self, x):
         x = self.encoder(x)
@@ -59,11 +53,6 @@ class autoencoderCP(nn.Module):
         return x
 
     def encode(self, x):
-        if len(x.shape) == 1:
-            x = x.view(64,64,64)
-        while len(x.shape) < 5:
-            x = Variable(x).unsqueeze(0)
-
         return self.encoder(x)
 
     def decode(self, x):

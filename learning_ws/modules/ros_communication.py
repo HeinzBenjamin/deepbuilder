@@ -1,10 +1,10 @@
 import roslibpy, time, math
-from . import settings
+import settings
 #HOME_POSE = [1.1334346532821655,-1.7553976217852991,0.8690872192382812,-0.6843889395343226,-1.5728209654437464,-0.424158]
 
 class Connection():
     def __init__(self, sess_name):
-        self.client = roslibpy.Ros(host='localhost', port=9090)
+        self.client = roslibpy.Ros(host=settings.ROS_HOST, port=settings.ROS_PORT)
         self.client.run()
         self.srv_status = roslibpy.Service(self.client, '/rosout/get_loggers', 'roscpp/GetLoggers')
         self.srv_path = roslibpy.Service(self.client, '/deepbuilder/robot/check_path', '/deepbuilder/ro_check_path')

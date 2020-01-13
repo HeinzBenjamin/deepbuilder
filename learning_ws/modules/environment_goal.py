@@ -1,5 +1,7 @@
-import gym, torch, numpy
+import gym, torch, numpy, uuid
+from gym import spaces
 import ros_communication as rc
+import settings
 
 class NormalizedActions(gym.ActionWrapper):
     def action(self, action):
@@ -37,23 +39,28 @@ class NormalizedActions(gym.ActionWrapper):
 
 class DeepBuilderGoalEnv(gym.GoalEnv):
     def __init__(self, session_name):
-        super(DeepBuilderEnv, self).__init__()
+        super(DeepBuilderGoalEnv, self).__init__()
 
         if session_name == None or session_name == '':
             raise Exception("Session name missing")
         
+        self.session_name = session_name
         self.action_dim = 7         #six axes plus one box rotation in tcp frame (for now)
         self.observation_dim = 144  #bc #yolo
 
-        self.action_space = spaces.Box(-np.pi,  np.pi, shape=(action_dim,), dtype=np.float32)
-        self.observation_space = spaces.Box(-2.5,  2.5, shape=(observation_dim,), dtype=np.float32) #bounds solely based on observations! no garantuee
+        self.action_space = spaces.Box(-numpy.pi,  numpy.pi, shape=(self.action_dim,), dtype=numpy.float32)
+        self.observation_space = spaces.Box(-2.5,  2.5, shape=(self.observation_dim,), dtype=numpy.float32) #bounds solely based on observations! no garantuee
+
+
+        '''HIDDEN MEMBERS'''
+        self.__ros_comm = None
 
     def step(self, action):
         #guid generation
         self.action_id = str(uuid.uuid4().hex)[:8]
 
         action_array = action.numpy().tolist()
-        jo = ros_comm().test_pose(action_array)
+        jo = self.ros_comm().test_pose(action_array)
 
     def compute_reward(self, achieved_goal, desired_goal, info):
         pass
@@ -62,9 +69,9 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         pass
 
     def ros_comm(self):
-        if self.hidden_ros_comm == None:
-            self.hidden_ros_comm = rc.Connection(self.session_name)
-        return self.hidden_ros_comm
+        if self.__ros_comm == None:
+            self.__ros_comm = rc.Connection(self.session_name)
+        return self.__ros_comm
 
 if __name__ == "__main__":
     env = DeepBuilderGoalEnv("sess")
