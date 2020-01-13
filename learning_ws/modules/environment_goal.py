@@ -1,26 +1,78 @@
-import gym
+import gym, torch, numpy, uuid
 from gym import spaces
-import numpy as np
-from . import environment as env
+import ros_communication as rc
+import settings
 
-#this is the environment used by every learning algorithm
-#it communicates with ROS learner and runtime to exchange info
-#sad that this shit requires so much boiler plate code
+class NormalizedActions(gym.ActionWrapper):
+    def action(self, action):
+        low  = self.action_space.low
+        high = self.action_space.high 
+        rng = high.max()-low.min()
 
-class DeepBuilderGoalEnv(env.DeepBuilderEnv):
-    def __init__(self, sess_name, act_dim, box_dim, max_num_boxes, height_field_res, goal_dim):
-        super(DeepBuilderGoalEnv, self).__init__(sess_name, act_dim, box_dim, max_num_boxes, height_field_res)
+        #first axis is halfed so we only operate in on one half of the action space
+        action[0] *= 0.5
+        action[0] += rng/4
 
-        self.desired_goal = spaces.Box(0.0, 1600.0, shape=(goal_dim,), dtype=np.float64)
-        self.achieved_goal = spaces.Box(0.0, 1600.0, shape=(goal_dim,), dtype=np.float64)
-        self.observation = spaces.Box(self.state_low, self.state_high, shape=(height_field_res*height_field_res,),dtype=np.float32)
+        #second axis only operates in [-180, 0] to avoid obvious floor collisions
+        action[1] *= 0.5
+        action[1] -= rng/4
 
-        self.observation_space = spaces.Dict({"observation": self.observation, "desired_goal": self.desired_goal, "achieved_goal": self.achieved_goal})
-        print(self.observation_space)
+        action[2] *= 0.5
+        action[2] += rng/4
+        return action
 
-    def goal_mapping(self, prev_state, obs):
-        #each state fulfills exactly one goal
-        # goals:
-        # [0, 0, 1] : robot outside boundary, collision, bad
-        # [1, 0, 0] :   
-        return achieved_goal, rew
+    def reverse_action(self, action):        
+        low  = self.action_space.low
+        high = self.action_space.high 
+
+        rng = high.max-low.min
+        
+        action[0] -= rng/4
+        action[0] *= 2.0
+
+        action[1] += rng/4
+        action[1] *= 2.0
+
+        action[2] -= rng/4
+        action[2] *= 2.0
+        return action
+
+class DeepBuilderGoalEnv(gym.GoalEnv):
+    def __init__(self, session_name):
+        super(DeepBuilderGoalEnv, self).__init__()
+
+        if session_name == None or session_name == '':
+            raise Exception("Session name missing")
+        
+        self.session_name = session_name
+        self.action_dim = 7         #six axes plus one box rotation in tcp frame (for now)
+        self.observation_dim = 144  #bc #yolo
+
+        self.action_space = spaces.Box(-numpy.pi,  numpy.pi, shape=(self.action_dim,), dtype=numpy.float32)
+        self.observation_space = spaces.Box(-2.5,  2.5, shape=(self.observation_dim,), dtype=numpy.float32) #bounds solely based on observations! no garantuee
+
+
+        '''HIDDEN MEMBERS'''
+        self.__ros_comm = None
+
+    def step(self, action):
+        #guid generation
+        self.action_id = str(uuid.uuid4().hex)[:8]
+
+        action_array = action.numpy().tolist()
+        jo = self.ros_comm().test_pose(action_array)
+
+    def compute_reward(self, achieved_goal, desired_goal, info):
+        pass
+
+    def reset(self):
+        pass
+
+    def ros_comm(self):
+        if self.__ros_comm == None:
+            self.__ros_comm = rc.Connection(self.session_name)
+        return self.__ros_comm
+
+if __name__ == "__main__":
+    env = DeepBuilderGoalEnv("sess")
+    bla = env.step(torch.rand(7))

@@ -43,7 +43,6 @@ if __name__ == "__main__":
     num_test_samples = len(test_files)
     num_train_files = len(train_files)
 
-    offset = 0
     #set buffer tensors for test and training data
     train_data = torch.zeros(args.samples_per_epoch, 64,64,64, dtype=torch.float16).cuda()   
     test_data = torch.zeros(num_test_samples, 64,64,64, dtype=torch.float16).cuda() 
