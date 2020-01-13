@@ -14,62 +14,49 @@
 
 (in-package "ROS")
 
+(if (not (find-package "TRAJECTORY_MSGS"))
+  (ros::roseus-add-msgs "trajectory_msgs"))
 
 
 
 
 (defclass deepbuilder::ro_move_pathRequest
   :super ros::object
-  :slots (_path _speed ))
+  :slots (_path ))
 
 (defmethod deepbuilder::ro_move_pathRequest
   (:init
    (&key
-    ((:path __path) (make-array 0 :initial-element 0.0 :element-type :float))
-    ((:speed __speed) 0.0)
+    ((:path __path) (instance trajectory_msgs::JointTrajectory :init))
     )
    (send-super :init)
    (setq _path __path)
-   (setq _speed (float __speed))
    self)
   (:path
-   (&optional __path)
-   (if __path (setq _path __path)) _path)
-  (:speed
-   (&optional __speed)
-   (if __speed (setq _speed __speed)) _speed)
+   (&rest __path)
+   (if (keywordp (car __path))
+       (send* _path __path)
+     (progn
+       (if __path (setq _path (car __path)))
+       _path)))
   (:serialization-length
    ()
    (+
-    ;; float32[] _path
-    (* 4    (length _path)) 4
-    ;; float32 _speed
-    4
+    ;; trajectory_msgs/JointTrajectory _path
+    (send _path :serialization-length)
     ))
   (:serialize
    (&optional strm)
    (let ((s (if strm strm
               (make-string-output-stream (send self :serialization-length)))))
-     ;; float32[] _path
-     (write-long (length _path) s)
-     (dotimes (i (length _path))
-       (sys::poke (elt _path i) (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
-       )
-     ;; float32 _speed
-       (sys::poke _speed (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
+     ;; trajectory_msgs/JointTrajectory _path
+       (send _path :serialize s)
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
    (buf &optional (ptr- 0))
-   ;; float32[] _path
-   (let (n)
-     (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4)
-     (setq _path (instantiate float-vector n))
-     (dotimes (i n)
-     (setf (elt _path i) (sys::peek buf ptr- :float)) (incf ptr- 4)
-     ))
-   ;; float32 _speed
-     (setq _speed (sys::peek buf ptr- :float)) (incf ptr- 4)
+   ;; trajectory_msgs/JointTrajectory _path
+     (send _path :deserialize buf ptr-) (incf ptr- (send _path :serialization-length))
    ;;
    self)
   )
@@ -115,7 +102,7 @@
   :super ros::object
   :slots ())
 
-(setf (get deepbuilder::ro_move_path :md5sum-) "b4a3d2594e319909ad839e09a056ad1d")
+(setf (get deepbuilder::ro_move_path :md5sum-) "8c34125c1c77b9e671e5d9698ccd6432")
 (setf (get deepbuilder::ro_move_path :datatype-) "deepbuilder/ro_move_path")
 (setf (get deepbuilder::ro_move_path :request) deepbuilder::ro_move_pathRequest)
 (setf (get deepbuilder::ro_move_path :response) deepbuilder::ro_move_pathResponse)
@@ -123,26 +110,94 @@
 (defmethod deepbuilder::ro_move_pathRequest
   (:response () (instance deepbuilder::ro_move_pathResponse :init)))
 
-(setf (get deepbuilder::ro_move_pathRequest :md5sum-) "b4a3d2594e319909ad839e09a056ad1d")
+(setf (get deepbuilder::ro_move_pathRequest :md5sum-) "8c34125c1c77b9e671e5d9698ccd6432")
 (setf (get deepbuilder::ro_move_pathRequest :datatype-) "deepbuilder/ro_move_pathRequest")
 (setf (get deepbuilder::ro_move_pathRequest :definition-)
-      "float32[] path
-float32 speed
+      "trajectory_msgs/JointTrajectory path
+
+================================================================================
+MSG: trajectory_msgs/JointTrajectory
+Header header
+string[] joint_names
+JointTrajectoryPoint[] points
+================================================================================
+MSG: std_msgs/Header
+# Standard metadata for higher-level stamped data types.
+# This is generally used to communicate timestamped data 
+# in a particular coordinate frame.
+# 
+# sequence ID: consecutively increasing ID 
+uint32 seq
+#Two-integer timestamp that is expressed as:
+# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
+# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
+# time-handling sugar is provided by the client library
+time stamp
+#Frame this data is associated with
+# 0: no frame
+# 1: global frame
+string frame_id
+
+================================================================================
+MSG: trajectory_msgs/JointTrajectoryPoint
+# Each trajectory point specifies either positions[, velocities[, accelerations]]
+# or positions[, effort] for the trajectory to be executed.
+# All specified values are in the same order as the joint names in JointTrajectory.msg
+
+float64[] positions
+float64[] velocities
+float64[] accelerations
+float64[] effort
+duration time_from_start
 ---
 string message
 ")
 
-(setf (get deepbuilder::ro_move_pathResponse :md5sum-) "b4a3d2594e319909ad839e09a056ad1d")
+(setf (get deepbuilder::ro_move_pathResponse :md5sum-) "8c34125c1c77b9e671e5d9698ccd6432")
 (setf (get deepbuilder::ro_move_pathResponse :datatype-) "deepbuilder/ro_move_pathResponse")
 (setf (get deepbuilder::ro_move_pathResponse :definition-)
-      "float32[] path
-float32 speed
+      "trajectory_msgs/JointTrajectory path
+
+================================================================================
+MSG: trajectory_msgs/JointTrajectory
+Header header
+string[] joint_names
+JointTrajectoryPoint[] points
+================================================================================
+MSG: std_msgs/Header
+# Standard metadata for higher-level stamped data types.
+# This is generally used to communicate timestamped data 
+# in a particular coordinate frame.
+# 
+# sequence ID: consecutively increasing ID 
+uint32 seq
+#Two-integer timestamp that is expressed as:
+# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
+# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
+# time-handling sugar is provided by the client library
+time stamp
+#Frame this data is associated with
+# 0: no frame
+# 1: global frame
+string frame_id
+
+================================================================================
+MSG: trajectory_msgs/JointTrajectoryPoint
+# Each trajectory point specifies either positions[, velocities[, accelerations]]
+# or positions[, effort] for the trajectory to be executed.
+# All specified values are in the same order as the joint names in JointTrajectory.msg
+
+float64[] positions
+float64[] velocities
+float64[] accelerations
+float64[] effort
+duration time_from_start
 ---
 string message
 ")
 
 
 
-(provide :deepbuilder/ro_move_path "b4a3d2594e319909ad839e09a056ad1d")
+(provide :deepbuilder/ro_move_path "8c34125c1c77b9e671e5d9698ccd6432")
 
 

@@ -30,7 +30,8 @@ struct action_
     , A2(0.0)
     , A3(0.0)
     , A4(0.0)
-    , A5(0.0)  {
+    , A5(0.0)
+    , A6(0.0)  {
     }
   action_(const ContainerAllocator& _alloc)
     : id(_alloc)
@@ -39,7 +40,8 @@ struct action_
     , A2(0.0)
     , A3(0.0)
     , A4(0.0)
-    , A5(0.0)  {
+    , A5(0.0)
+    , A6(0.0)  {
   (void)_alloc;
     }
 
@@ -65,6 +67,9 @@ struct action_
 
    typedef float _A5_type;
   _A5_type A5;
+
+   typedef float _A6_type;
+  _A6_type A6;
 
 
 
@@ -144,12 +149,12 @@ struct MD5Sum< ::my_msgs::action_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "f0ebae17eff0b0f79021baa2b4833127";
+    return "c40b50724540a881a54a2f96dfd06062";
   }
 
   static const char* value(const ::my_msgs::action_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xf0ebae17eff0b0f7ULL;
-  static const uint64_t static_value2 = 0x9021baa2b4833127ULL;
+  static const uint64_t static_value1 = 0xc40b50724540a881ULL;
+  static const uint64_t static_value2 = 0xa54a2f96dfd06062ULL;
 };
 
 template<class ContainerAllocator>
@@ -175,6 +180,7 @@ float32 A2\n\
 float32 A3\n\
 float32 A4\n\
 float32 A5\n\
+float32 A6\n\
 ";
   }
 
@@ -200,6 +206,7 @@ namespace serialization
       stream.next(m.A3);
       stream.next(m.A4);
       stream.next(m.A5);
+      stream.next(m.A6);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -232,6 +239,8 @@ struct Printer< ::my_msgs::action_<ContainerAllocator> >
     Printer<float>::stream(s, indent + "  ", v.A4);
     s << indent << "A5: ";
     Printer<float>::stream(s, indent + "  ", v.A5);
+    s << indent << "A6: ";
+    Printer<float>::stream(s, indent + "  ", v.A6);
   }
 };
 

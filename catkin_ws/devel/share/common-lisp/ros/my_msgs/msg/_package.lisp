@@ -3,8 +3,6 @@
   (:export
    "<ACTION>"
    "ACTION"
-   "<FLOAT_ARRAY>"
-   "FLOAT_ARRAY"
    "<STATE>"
    "STATE"
   ))

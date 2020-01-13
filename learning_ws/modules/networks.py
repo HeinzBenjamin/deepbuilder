@@ -3,37 +3,6 @@ import torch
 import torch.nn as nn
 import torch.functional as F
 
-
-class SimplestPolicyNetwork(nn.Module):
-    def __init__(self, obs_dim, act_dim, hid_dim, num_hidden):
-        super(PolicyNetwork, self).__init__()
-
-        self.linear_i = nn.Linear(obs_dim, hid_dim)
-        self.linear_h = []
-        for _ in range(num_hidden):
-            self.linear_h.append(nn.Linear(hid_dim, hid_dim))
-        self.linear_o = nn.Linear(hid_dim, act_dim)
-        self.num_hidden = num_hidden
-
-    '''
-    accepts a state of rank two where rows are boxes described in their columns
-    state=
-    [
-        [box0_posX, box0_posY, box0_posZ, box0_ornX, box0_ornY, box0_ornZ, box0_ornW],
-        [box1_posX, box1_posY, box1_posZ, box1_ornX, box1_ornY, box1_ornZ, box1_ornW],
-        [box2_posX, box2_posY, box2_posZ, box2_ornX, box2_ornY, box2_ornZ, box2_ornW],
-        .
-        .
-    ]
-    '''
-    def forward(self, state):
-        x = F.F.relu(self.linear_i(state.reshape(1,state.numel()).squeeze()))
-        for i in range(self.num_hidden):
-            x=F.F.relu(self.linear_h[i](x))
-        x=F.F.relu(self.linear_o(x))
-        return x
-
-
 #soft actor critic
 #estimates the state value
 class ValueNetwork(nn.Module):

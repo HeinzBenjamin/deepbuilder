@@ -20,13 +20,17 @@ class state {
     if (initObj === null) {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.action_id = null;
-      this.out_of_reach = null;
-      this.self_collision = null;
-      this.last_tcp = null;
-      this.fastest_box = null;
-      this.highest_box = null;
+      this.is_printable = null;
+      this.action_tcp = null;
+      this.displaced_tcps = null;
+      this.state_compressed = null;
+      this.compression_loss = null;
+      this.state_mesh_vertices = null;
+      this.state_mesh_indices = null;
       this.current_height = null;
-      this.box_poses = null;
+      this.current_tcp_displacements = null;
+      this.current_smoothness = null;
+      this.current_area = null;
     }
     else {
       if (initObj.hasOwnProperty('action_id')) {
@@ -35,35 +39,47 @@ class state {
       else {
         this.action_id = '';
       }
-      if (initObj.hasOwnProperty('out_of_reach')) {
-        this.out_of_reach = initObj.out_of_reach
+      if (initObj.hasOwnProperty('is_printable')) {
+        this.is_printable = initObj.is_printable
       }
       else {
-        this.out_of_reach = false;
+        this.is_printable = false;
       }
-      if (initObj.hasOwnProperty('self_collision')) {
-        this.self_collision = initObj.self_collision
-      }
-      else {
-        this.self_collision = false;
-      }
-      if (initObj.hasOwnProperty('last_tcp')) {
-        this.last_tcp = initObj.last_tcp
+      if (initObj.hasOwnProperty('action_tcp')) {
+        this.action_tcp = initObj.action_tcp
       }
       else {
-        this.last_tcp = new geometry_msgs.msg.Pose();
+        this.action_tcp = new geometry_msgs.msg.Pose();
       }
-      if (initObj.hasOwnProperty('fastest_box')) {
-        this.fastest_box = initObj.fastest_box
-      }
-      else {
-        this.fastest_box = 0;
-      }
-      if (initObj.hasOwnProperty('highest_box')) {
-        this.highest_box = initObj.highest_box
+      if (initObj.hasOwnProperty('displaced_tcps')) {
+        this.displaced_tcps = initObj.displaced_tcps
       }
       else {
-        this.highest_box = 0;
+        this.displaced_tcps = [];
+      }
+      if (initObj.hasOwnProperty('state_compressed')) {
+        this.state_compressed = initObj.state_compressed
+      }
+      else {
+        this.state_compressed = [];
+      }
+      if (initObj.hasOwnProperty('compression_loss')) {
+        this.compression_loss = initObj.compression_loss
+      }
+      else {
+        this.compression_loss = 0.0;
+      }
+      if (initObj.hasOwnProperty('state_mesh_vertices')) {
+        this.state_mesh_vertices = initObj.state_mesh_vertices
+      }
+      else {
+        this.state_mesh_vertices = [];
+      }
+      if (initObj.hasOwnProperty('state_mesh_indices')) {
+        this.state_mesh_indices = initObj.state_mesh_indices
+      }
+      else {
+        this.state_mesh_indices = [];
       }
       if (initObj.hasOwnProperty('current_height')) {
         this.current_height = initObj.current_height
@@ -71,11 +87,23 @@ class state {
       else {
         this.current_height = 0.0;
       }
-      if (initObj.hasOwnProperty('box_poses')) {
-        this.box_poses = initObj.box_poses
+      if (initObj.hasOwnProperty('current_tcp_displacements')) {
+        this.current_tcp_displacements = initObj.current_tcp_displacements
       }
       else {
-        this.box_poses = [];
+        this.current_tcp_displacements = [];
+      }
+      if (initObj.hasOwnProperty('current_smoothness')) {
+        this.current_smoothness = initObj.current_smoothness
+      }
+      else {
+        this.current_smoothness = 0.0;
+      }
+      if (initObj.hasOwnProperty('current_area')) {
+        this.current_area = initObj.current_area
+      }
+      else {
+        this.current_area = 0.0;
       }
     }
   }
@@ -84,24 +112,32 @@ class state {
     // Serializes a message object of type state
     // Serialize message field [action_id]
     bufferOffset = _serializer.string(obj.action_id, buffer, bufferOffset);
-    // Serialize message field [out_of_reach]
-    bufferOffset = _serializer.bool(obj.out_of_reach, buffer, bufferOffset);
-    // Serialize message field [self_collision]
-    bufferOffset = _serializer.bool(obj.self_collision, buffer, bufferOffset);
-    // Serialize message field [last_tcp]
-    bufferOffset = geometry_msgs.msg.Pose.serialize(obj.last_tcp, buffer, bufferOffset);
-    // Serialize message field [fastest_box]
-    bufferOffset = _serializer.int32(obj.fastest_box, buffer, bufferOffset);
-    // Serialize message field [highest_box]
-    bufferOffset = _serializer.int32(obj.highest_box, buffer, bufferOffset);
-    // Serialize message field [current_height]
-    bufferOffset = _serializer.float32(obj.current_height, buffer, bufferOffset);
-    // Serialize message field [box_poses]
-    // Serialize the length for message field [box_poses]
-    bufferOffset = _serializer.uint32(obj.box_poses.length, buffer, bufferOffset);
-    obj.box_poses.forEach((val) => {
+    // Serialize message field [is_printable]
+    bufferOffset = _serializer.bool(obj.is_printable, buffer, bufferOffset);
+    // Serialize message field [action_tcp]
+    bufferOffset = geometry_msgs.msg.Pose.serialize(obj.action_tcp, buffer, bufferOffset);
+    // Serialize message field [displaced_tcps]
+    // Serialize the length for message field [displaced_tcps]
+    bufferOffset = _serializer.uint32(obj.displaced_tcps.length, buffer, bufferOffset);
+    obj.displaced_tcps.forEach((val) => {
       bufferOffset = geometry_msgs.msg.Pose.serialize(val, buffer, bufferOffset);
     });
+    // Serialize message field [state_compressed]
+    bufferOffset = _arraySerializer.float32(obj.state_compressed, buffer, bufferOffset, null);
+    // Serialize message field [compression_loss]
+    bufferOffset = _serializer.float32(obj.compression_loss, buffer, bufferOffset);
+    // Serialize message field [state_mesh_vertices]
+    bufferOffset = _arraySerializer.float32(obj.state_mesh_vertices, buffer, bufferOffset, null);
+    // Serialize message field [state_mesh_indices]
+    bufferOffset = _arraySerializer.int32(obj.state_mesh_indices, buffer, bufferOffset, null);
+    // Serialize message field [current_height]
+    bufferOffset = _serializer.float32(obj.current_height, buffer, bufferOffset);
+    // Serialize message field [current_tcp_displacements]
+    bufferOffset = _arraySerializer.float32(obj.current_tcp_displacements, buffer, bufferOffset, null);
+    // Serialize message field [current_smoothness]
+    bufferOffset = _serializer.float32(obj.current_smoothness, buffer, bufferOffset);
+    // Serialize message field [current_area]
+    bufferOffset = _serializer.float32(obj.current_area, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -111,33 +147,45 @@ class state {
     let data = new state(null);
     // Deserialize message field [action_id]
     data.action_id = _deserializer.string(buffer, bufferOffset);
-    // Deserialize message field [out_of_reach]
-    data.out_of_reach = _deserializer.bool(buffer, bufferOffset);
-    // Deserialize message field [self_collision]
-    data.self_collision = _deserializer.bool(buffer, bufferOffset);
-    // Deserialize message field [last_tcp]
-    data.last_tcp = geometry_msgs.msg.Pose.deserialize(buffer, bufferOffset);
-    // Deserialize message field [fastest_box]
-    data.fastest_box = _deserializer.int32(buffer, bufferOffset);
-    // Deserialize message field [highest_box]
-    data.highest_box = _deserializer.int32(buffer, bufferOffset);
+    // Deserialize message field [is_printable]
+    data.is_printable = _deserializer.bool(buffer, bufferOffset);
+    // Deserialize message field [action_tcp]
+    data.action_tcp = geometry_msgs.msg.Pose.deserialize(buffer, bufferOffset);
+    // Deserialize message field [displaced_tcps]
+    // Deserialize array length for message field [displaced_tcps]
+    len = _deserializer.uint32(buffer, bufferOffset);
+    data.displaced_tcps = new Array(len);
+    for (let i = 0; i < len; ++i) {
+      data.displaced_tcps[i] = geometry_msgs.msg.Pose.deserialize(buffer, bufferOffset)
+    }
+    // Deserialize message field [state_compressed]
+    data.state_compressed = _arrayDeserializer.float32(buffer, bufferOffset, null)
+    // Deserialize message field [compression_loss]
+    data.compression_loss = _deserializer.float32(buffer, bufferOffset);
+    // Deserialize message field [state_mesh_vertices]
+    data.state_mesh_vertices = _arrayDeserializer.float32(buffer, bufferOffset, null)
+    // Deserialize message field [state_mesh_indices]
+    data.state_mesh_indices = _arrayDeserializer.int32(buffer, bufferOffset, null)
     // Deserialize message field [current_height]
     data.current_height = _deserializer.float32(buffer, bufferOffset);
-    // Deserialize message field [box_poses]
-    // Deserialize array length for message field [box_poses]
-    len = _deserializer.uint32(buffer, bufferOffset);
-    data.box_poses = new Array(len);
-    for (let i = 0; i < len; ++i) {
-      data.box_poses[i] = geometry_msgs.msg.Pose.deserialize(buffer, bufferOffset)
-    }
+    // Deserialize message field [current_tcp_displacements]
+    data.current_tcp_displacements = _arrayDeserializer.float32(buffer, bufferOffset, null)
+    // Deserialize message field [current_smoothness]
+    data.current_smoothness = _deserializer.float32(buffer, bufferOffset);
+    // Deserialize message field [current_area]
+    data.current_area = _deserializer.float32(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
     let length = 0;
     length += object.action_id.length;
-    length += 56 * object.box_poses.length;
-    return length + 78;
+    length += 56 * object.displaced_tcps.length;
+    length += 4 * object.state_compressed.length;
+    length += 4 * object.state_mesh_vertices.length;
+    length += 4 * object.state_mesh_indices.length;
+    length += 4 * object.current_tcp_displacements.length;
+    return length + 97;
   }
 
   static datatype() {
@@ -147,20 +195,24 @@ class state {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '72cea1bd08eaaeaa5fb310c31bb88005';
+    return 'b716ae9e4e97f8d790d147cc9fc70235';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
     string action_id
-    bool out_of_reach
-    bool self_collision
-    geometry_msgs/Pose last_tcp
-    int32 fastest_box
-    int32 highest_box
+    bool is_printable
+    geometry_msgs/Pose action_tcp
+    geometry_msgs/Pose[] displaced_tcps
+    float32[] state_compressed
+    float32 compression_loss
+    float32[] state_mesh_vertices
+    int32[] state_mesh_indices
     float32 current_height
-    geometry_msgs/Pose[] box_poses
+    float32[] current_tcp_displacements
+    float32 current_smoothness
+    float32 current_area
     ================================================================================
     MSG: geometry_msgs/Pose
     # A representation of pose in free space, composed of position and orientation. 
@@ -199,39 +251,56 @@ class state {
       resolved.action_id = ''
     }
 
-    if (msg.out_of_reach !== undefined) {
-      resolved.out_of_reach = msg.out_of_reach;
+    if (msg.is_printable !== undefined) {
+      resolved.is_printable = msg.is_printable;
     }
     else {
-      resolved.out_of_reach = false
+      resolved.is_printable = false
     }
 
-    if (msg.self_collision !== undefined) {
-      resolved.self_collision = msg.self_collision;
+    if (msg.action_tcp !== undefined) {
+      resolved.action_tcp = geometry_msgs.msg.Pose.Resolve(msg.action_tcp)
     }
     else {
-      resolved.self_collision = false
+      resolved.action_tcp = new geometry_msgs.msg.Pose()
     }
 
-    if (msg.last_tcp !== undefined) {
-      resolved.last_tcp = geometry_msgs.msg.Pose.Resolve(msg.last_tcp)
+    if (msg.displaced_tcps !== undefined) {
+      resolved.displaced_tcps = new Array(msg.displaced_tcps.length);
+      for (let i = 0; i < resolved.displaced_tcps.length; ++i) {
+        resolved.displaced_tcps[i] = geometry_msgs.msg.Pose.Resolve(msg.displaced_tcps[i]);
+      }
     }
     else {
-      resolved.last_tcp = new geometry_msgs.msg.Pose()
+      resolved.displaced_tcps = []
     }
 
-    if (msg.fastest_box !== undefined) {
-      resolved.fastest_box = msg.fastest_box;
+    if (msg.state_compressed !== undefined) {
+      resolved.state_compressed = msg.state_compressed;
     }
     else {
-      resolved.fastest_box = 0
+      resolved.state_compressed = []
     }
 
-    if (msg.highest_box !== undefined) {
-      resolved.highest_box = msg.highest_box;
+    if (msg.compression_loss !== undefined) {
+      resolved.compression_loss = msg.compression_loss;
     }
     else {
-      resolved.highest_box = 0
+      resolved.compression_loss = 0.0
+    }
+
+    if (msg.state_mesh_vertices !== undefined) {
+      resolved.state_mesh_vertices = msg.state_mesh_vertices;
+    }
+    else {
+      resolved.state_mesh_vertices = []
+    }
+
+    if (msg.state_mesh_indices !== undefined) {
+      resolved.state_mesh_indices = msg.state_mesh_indices;
+    }
+    else {
+      resolved.state_mesh_indices = []
     }
 
     if (msg.current_height !== undefined) {
@@ -241,14 +310,25 @@ class state {
       resolved.current_height = 0.0
     }
 
-    if (msg.box_poses !== undefined) {
-      resolved.box_poses = new Array(msg.box_poses.length);
-      for (let i = 0; i < resolved.box_poses.length; ++i) {
-        resolved.box_poses[i] = geometry_msgs.msg.Pose.Resolve(msg.box_poses[i]);
-      }
+    if (msg.current_tcp_displacements !== undefined) {
+      resolved.current_tcp_displacements = msg.current_tcp_displacements;
     }
     else {
-      resolved.box_poses = []
+      resolved.current_tcp_displacements = []
+    }
+
+    if (msg.current_smoothness !== undefined) {
+      resolved.current_smoothness = msg.current_smoothness;
+    }
+    else {
+      resolved.current_smoothness = 0.0
+    }
+
+    if (msg.current_area !== undefined) {
+      resolved.current_area = msg.current_area;
+    }
+    else {
+      resolved.current_area = 0.0
     }
 
     return resolved;

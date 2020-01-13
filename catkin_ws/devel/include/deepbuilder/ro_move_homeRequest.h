@@ -24,12 +24,10 @@ struct ro_move_homeRequest_
   typedef ro_move_homeRequest_<ContainerAllocator> Type;
 
   ro_move_homeRequest_()
-    : speed(0.0)
-    , tcp_mode(false)  {
+    : speed(0.0)  {
     }
   ro_move_homeRequest_(const ContainerAllocator& _alloc)
-    : speed(0.0)
-    , tcp_mode(false)  {
+    : speed(0.0)  {
   (void)_alloc;
     }
 
@@ -37,9 +35,6 @@ struct ro_move_homeRequest_
 
    typedef float _speed_type;
   _speed_type speed;
-
-   typedef uint8_t _tcp_mode_type;
-  _tcp_mode_type tcp_mode;
 
 
 
@@ -76,7 +71,7 @@ namespace message_traits
 
 
 // BOOLTRAITS {'IsFixedSize': True, 'IsMessage': True, 'HasHeader': False}
-// {'deepbuilder': ['/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg'], 'sensor_msgs': ['/opt/ros/kinetic/share/sensor_msgs/cmake/../msg'], 'trajectory_msgs': ['/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg'], 'std_msgs': ['/opt/ros/kinetic/share/std_msgs/cmake/../msg'], 'geometry_msgs': ['/opt/ros/kinetic/share/geometry_msgs/cmake/../msg'], 'my_msgs': ['/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg'], 'rosbridge_msgs': ['/opt/ros/kinetic/share/rosbridge_msgs/cmake/../msg']}
+// {'shape_msgs': ['/opt/ros/kinetic/share/shape_msgs/cmake/../msg'], 'std_msgs': ['/opt/ros/kinetic/share/std_msgs/cmake/../msg'], 'trajectory_msgs': ['/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg'], 'sensor_msgs': ['/opt/ros/kinetic/share/sensor_msgs/cmake/../msg'], 'geometry_msgs': ['/opt/ros/kinetic/share/geometry_msgs/cmake/../msg'], 'my_msgs': ['/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg'], 'rosbridge_msgs': ['/opt/ros/kinetic/share/rosbridge_msgs/cmake/../msg']}
 
 // !!!!!!!!!!! ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_parsed_fields', 'constants', 'fields', 'full_name', 'has_header', 'header_present', 'names', 'package', 'parsed_fields', 'short_name', 'text', 'types']
 
@@ -119,12 +114,12 @@ struct MD5Sum< ::deepbuilder::ro_move_homeRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "6ce4a00139165109ed979ea81926125d";
+    return "ca65bba734a79b4a6707341d829f4d5c";
   }
 
   static const char* value(const ::deepbuilder::ro_move_homeRequest_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x6ce4a00139165109ULL;
-  static const uint64_t static_value2 = 0xed979ea81926125dULL;
+  static const uint64_t static_value1 = 0xca65bba734a79b4aULL;
+  static const uint64_t static_value2 = 0x6707341d829f4d5cULL;
 };
 
 template<class ContainerAllocator>
@@ -144,8 +139,6 @@ struct Definition< ::deepbuilder::ro_move_homeRequest_<ContainerAllocator> >
   static const char* value()
   {
     return "float32 speed\n\
-bool tcp_mode\n\
-\n\
 ";
   }
 
@@ -165,7 +158,6 @@ namespace serialization
     template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
     {
       stream.next(m.speed);
-      stream.next(m.tcp_mode);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -186,8 +178,6 @@ struct Printer< ::deepbuilder::ro_move_homeRequest_<ContainerAllocator> >
   {
     s << indent << "speed: ";
     Printer<float>::stream(s, indent + "  ", v.speed);
-    s << indent << "tcp_mode: ";
-    Printer<uint8_t>::stream(s, indent + "  ", v.tcp_mode);
   }
 };
 

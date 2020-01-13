@@ -95,7 +95,7 @@ class DeepBuilderEnv(gym.Env):
 
         #self.rhino_pid, res = rr.TestPathInGH(self.rhino_pid, GH_CTRL_ACTION_REACH, self.session_name, self.act_id, self.path)
         if not self.use_moveit:
-            #simple p2p movement, can be imporved later
+            #simple p2p movement, can be improved later
             self.path=pp.P2P(HOME_POSE, action, self.path_steps)
             res = self.RhinoTestCollision(self.path)
             rew, info, done, pose_reachable = reward.ForCollisionInGoalPose(res["self_collisions"][-1], res["env_collisions"][-1])
@@ -348,75 +348,3 @@ class DeepBuilderEnv(gym.Env):
         del self.hidden_ros_comm
         self.hidden_ros_comm = None
         return self
-
-    '''
-    def BoxesToObservation(self, box_poses, randomize_order=True):
-        
-        observations are stored as follows
-        obs = torch.tensor
-        [
-            |-----------------------------------box_dim----------------------------------| 
-
-            [0.003,         0.011,     0.006,     0.001,      0.02,     0.003,     0.071],      T
-            [box5_posX, box5_posY, box5_posZ, box5_ornX, box5_ornY, box5_ornZ, box5_ornW],      |         
-            [box2_posX, box2_posY, box2_posZ, box2_ornX, box2_ornY, box2_ornZ, box2_ornW],      |
-            [0.001,         0.002,     0.017,     0.000,      0.02,     0.003,     0.001],      |
-            [box1_posX, box1_posY, box1_posZ, box1_ornX, box1_ornY, box1_ornZ, box1_ornW],      |
-            [0.001,         0.002,     0.017,     0.000,      0.02,     0.003,     0.001],      |
-            .                                                                                   |
-            .                                                                              max_num_boxes
-            .                                                                                   |
-            [box2_posX, box2_posY, box2_posZ, box2_ornX, box2_ornY, box2_ornZ, box2_ornW]       |
-        ]
-
-        whenever computation is performed this 2d tensor is flattened into 1d
-        it is initialised with very small values and filled when new boxes appear at random places.
-        also the order is shuffled after each step
-        
-
-        tmp_state = torch.randn(self.max_num_boxes, self.box_dim) * 0.001
-
-        xsum=0.0
-        ysum=0.0
-        order = range(self.max_num_boxes)
-        if randomize_order:
-            order = np.random.permutation(order)
-
-        for i in range(len(box_poses)):
-            b=box_poses[i]
-            xsum+=b["position"]["x"]
-            ysum+=b["position"]["y"]
-            tmp_state[order[i]]=torch.tensor([
-                b["position"]["x"] + np.random.normal(0, self.box_noise_scale_pos),
-                b["position"]["y"] + np.random.normal(0, self.box_noise_scale_pos),
-                b["position"]["z"] + np.random.normal(0, self.box_noise_scale_pos),
-                b["orientation"]["w"] + np.random.normal(0, self.box_noise_scale_ori),
-                b["orientation"]["x"] + np.random.normal(0, self.box_noise_scale_ori),
-                b["orientation"]["y"] + np.random.normal(0, self.box_noise_scale_ori),
-                b["orientation"]["z"] + np.random.normal(0, self.box_noise_scale_ori)])        
-        
-        #calc std variations in all dimensions as vector
-        
-        if len(box_poses) > 1:
-            xmean = xsum/len(box_poses)
-            ymean = ysum/len(box_poses)
-            xvar = 0.0
-            yvar = 0.0
-
-            for i in range(len(box_poses)):
-                b=box_poses[i]
-                xvar+=(xmean-b["position"]["x"])*(xmean-b["position"]["x"])
-                yvar+=(ymean-b["position"]["y"])*(ymean-b["position"]["y"])
-            
-            xvar/=len(box_poses)
-            yvar/=len(box_poses)
-
-            xstd = math.sqrt(xvar)
-            ystd = math.sqrt(yvar)
-
-            self.box_std = math.sqrt((xstd*xstd)+(ystd*ystd))
-            #print(colored("New box x,y standard deviation = " + str(self.box_std), 'blue'))
-        
-        self.state = tmp_state.reshape(self.max_num_boxes * self.box_dim,).squeeze(0)
-        return self.state
-    '''

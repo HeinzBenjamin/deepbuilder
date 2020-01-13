@@ -41,6 +41,11 @@
     :reader A5
     :initarg :A5
     :type cl:float
+    :initform 0.0)
+   (A6
+    :reader A6
+    :initarg :A6
+    :type cl:float
     :initform 0.0))
 )
 
@@ -86,6 +91,11 @@
 (cl:defmethod A5-val ((m <action>))
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader my_msgs-msg:A5-val is deprecated.  Use my_msgs-msg:A5 instead.")
   (A5 m))
+
+(cl:ensure-generic-function 'A6-val :lambda-list '(m))
+(cl:defmethod A6-val ((m <action>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader my_msgs-msg:A6-val is deprecated.  Use my_msgs-msg:A6 instead.")
+  (A6 m))
 (cl:defmethod roslisp-msg-protocol:serialize ((msg <action>) ostream)
   "Serializes a message object of type '<action>"
   (cl:let ((__ros_str_len (cl:length (cl:slot-value msg 'id))))
@@ -120,6 +130,11 @@
     (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
   (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'A5))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
+  (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'A6))))
     (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
@@ -171,6 +186,12 @@
       (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
     (cl:setf (cl:slot-value msg 'A5) (roslisp-utils:decode-single-float-bits bits)))
+    (cl:let ((bits 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
+    (cl:setf (cl:slot-value msg 'A6) (roslisp-utils:decode-single-float-bits bits)))
   msg
 )
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<action>)))
@@ -181,19 +202,20 @@
   "my_msgs/action")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<action>)))
   "Returns md5sum for a message object of type '<action>"
-  "f0ebae17eff0b0f79021baa2b4833127")
+  "c40b50724540a881a54a2f96dfd06062")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'action)))
   "Returns md5sum for a message object of type 'action"
-  "f0ebae17eff0b0f79021baa2b4833127")
+  "c40b50724540a881a54a2f96dfd06062")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<action>)))
   "Returns full string definition for message of type '<action>"
-  (cl:format cl:nil "string id~%float32 A0~%float32 A1~%float32 A2~%float32 A3~%float32 A4~%float32 A5~%~%"))
+  (cl:format cl:nil "string id~%float32 A0~%float32 A1~%float32 A2~%float32 A3~%float32 A4~%float32 A5~%float32 A6~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'action)))
   "Returns full string definition for message of type 'action"
-  (cl:format cl:nil "string id~%float32 A0~%float32 A1~%float32 A2~%float32 A3~%float32 A4~%float32 A5~%~%"))
+  (cl:format cl:nil "string id~%float32 A0~%float32 A1~%float32 A2~%float32 A3~%float32 A4~%float32 A5~%float32 A6~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <action>))
   (cl:+ 0
      4 (cl:length (cl:slot-value msg 'id))
+     4
      4
      4
      4
@@ -211,4 +233,5 @@
     (cl:cons ':A3 (A3 msg))
     (cl:cons ':A4 (A4 msg))
     (cl:cons ':A5 (A5 msg))
+    (cl:cons ':A6 (A6 msg))
 ))

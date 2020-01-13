@@ -33,40 +33,12 @@ if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/deepbuilder/msg" TYPE FILE FILES "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg")
-endif()
-
-if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/deepbuilder/srv" TYPE FILE FILES
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_is_ready.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_wait_for_ready.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_state.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_action.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_get_status.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_agent_presence.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_close.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_open.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_moveto.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setspeed.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setforce.srv"
+    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_plan_path.srv"
     "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_source.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_cam.srv"
     "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_block.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_state.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_robot_state.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_check_path.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_resolution.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_x.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_y.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_x.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_y.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_x.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_y.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_correction.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_get_values.srv"
+    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv"
+    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_update_state_mesh.srv"
     )
 endif()
 
@@ -91,7 +63,7 @@ if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspeci
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  execute_process(COMMAND "/usr/bin/python" -m compileall "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder")
+  execute_process(COMMAND "/usr/bin/python2" -m compileall "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")

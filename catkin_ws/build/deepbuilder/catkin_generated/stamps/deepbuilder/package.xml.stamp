@@ -69,6 +69,7 @@
   <depend>moveit_commander</depend>
   <depend>moveit_msgs</depend>
   <depend>pcl_ros</depend>
+  <depend>shape_msgs</depend>
   <exec_depend>message_runtime</exec_depend>
 
 

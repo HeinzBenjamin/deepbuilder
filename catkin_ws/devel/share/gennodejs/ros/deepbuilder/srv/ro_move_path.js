@@ -11,6 +11,7 @@ const _deserializer = _ros_msg_utils.Deserialize;
 const _arrayDeserializer = _deserializer.Array;
 const _finder = _ros_msg_utils.Find;
 const _getByteLength = _ros_msg_utils.getByteLength;
+let trajectory_msgs = _finder('trajectory_msgs');
 
 //-----------------------------------------------------------
 
@@ -22,20 +23,13 @@ class ro_move_pathRequest {
     if (initObj === null) {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.path = null;
-      this.speed = null;
     }
     else {
       if (initObj.hasOwnProperty('path')) {
         this.path = initObj.path
       }
       else {
-        this.path = [];
-      }
-      if (initObj.hasOwnProperty('speed')) {
-        this.speed = initObj.speed
-      }
-      else {
-        this.speed = 0.0;
+        this.path = new trajectory_msgs.msg.JointTrajectory();
       }
     }
   }
@@ -43,9 +37,7 @@ class ro_move_pathRequest {
   static serialize(obj, buffer, bufferOffset) {
     // Serializes a message object of type ro_move_pathRequest
     // Serialize message field [path]
-    bufferOffset = _arraySerializer.float32(obj.path, buffer, bufferOffset, null);
-    // Serialize message field [speed]
-    bufferOffset = _serializer.float32(obj.speed, buffer, bufferOffset);
+    bufferOffset = trajectory_msgs.msg.JointTrajectory.serialize(obj.path, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -54,16 +46,14 @@ class ro_move_pathRequest {
     let len;
     let data = new ro_move_pathRequest(null);
     // Deserialize message field [path]
-    data.path = _arrayDeserializer.float32(buffer, bufferOffset, null)
-    // Deserialize message field [speed]
-    data.speed = _deserializer.float32(buffer, bufferOffset);
+    data.path = trajectory_msgs.msg.JointTrajectory.deserialize(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
     let length = 0;
-    length += 4 * object.path.length;
-    return length + 8;
+    length += trajectory_msgs.msg.JointTrajectory.getMessageSize(object.path);
+    return length;
   }
 
   static datatype() {
@@ -73,14 +63,48 @@ class ro_move_pathRequest {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '134eb85ab074d54ec1eeb93e8a27abd7';
+    return 'afc39d389d2fae8a4a9041b5a5f1c8aa';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
-    float32[] path
-    float32 speed
+    trajectory_msgs/JointTrajectory path
+    
+    ================================================================================
+    MSG: trajectory_msgs/JointTrajectory
+    Header header
+    string[] joint_names
+    JointTrajectoryPoint[] points
+    ================================================================================
+    MSG: std_msgs/Header
+    # Standard metadata for higher-level stamped data types.
+    # This is generally used to communicate timestamped data 
+    # in a particular coordinate frame.
+    # 
+    # sequence ID: consecutively increasing ID 
+    uint32 seq
+    #Two-integer timestamp that is expressed as:
+    # * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
+    # * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
+    # time-handling sugar is provided by the client library
+    time stamp
+    #Frame this data is associated with
+    # 0: no frame
+    # 1: global frame
+    string frame_id
+    
+    ================================================================================
+    MSG: trajectory_msgs/JointTrajectoryPoint
+    # Each trajectory point specifies either positions[, velocities[, accelerations]]
+    # or positions[, effort] for the trajectory to be executed.
+    # All specified values are in the same order as the joint names in JointTrajectory.msg
+    
+    float64[] positions
+    float64[] velocities
+    float64[] accelerations
+    float64[] effort
+    duration time_from_start
     
     `;
   }
@@ -92,17 +116,10 @@ class ro_move_pathRequest {
     }
     const resolved = new ro_move_pathRequest(null);
     if (msg.path !== undefined) {
-      resolved.path = msg.path;
+      resolved.path = trajectory_msgs.msg.JointTrajectory.Resolve(msg.path)
     }
     else {
-      resolved.path = []
-    }
-
-    if (msg.speed !== undefined) {
-      resolved.speed = msg.speed;
-    }
-    else {
-      resolved.speed = 0.0
+      resolved.path = new trajectory_msgs.msg.JointTrajectory()
     }
 
     return resolved;
@@ -185,6 +202,6 @@ class ro_move_pathResponse {
 module.exports = {
   Request: ro_move_pathRequest,
   Response: ro_move_pathResponse,
-  md5sum() { return 'b4a3d2594e319909ad839e09a056ad1d'; },
+  md5sum() { return '8c34125c1c77b9e671e5d9698ccd6432'; },
   datatype() { return 'deepbuilder/ro_move_path'; }
 };

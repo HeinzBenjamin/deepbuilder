@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/ros/deepbuilder/catkin_ws/build
 include my_msgs/CMakeFiles/_my_msgs_generate_messages_check_deps_state.dir/progress.make
 
 my_msgs/CMakeFiles/_my_msgs_generate_messages_check_deps_state:
-	cd /home/ros/deepbuilder/catkin_ws/build/my_msgs && ../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py my_msgs /home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg geometry_msgs/Quaternion:geometry_msgs/Pose:geometry_msgs/Point
+	cd /home/ros/deepbuilder/catkin_ws/build/my_msgs && ../catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/kinetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py my_msgs /home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg geometry_msgs/Quaternion:geometry_msgs/Pose:geometry_msgs/Point
 
 _my_msgs_generate_messages_check_deps_state: my_msgs/CMakeFiles/_my_msgs_generate_messages_check_deps_state
 _my_msgs_generate_messages_check_deps_state: my_msgs/CMakeFiles/_my_msgs_generate_messages_check_deps_state.dir/build.make

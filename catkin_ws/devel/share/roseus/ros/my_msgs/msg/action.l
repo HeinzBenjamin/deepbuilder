@@ -14,7 +14,7 @@
 
 (defclass my_msgs::action
   :super ros::object
-  :slots (_id _A0 _A1 _A2 _A3 _A4 _A5 ))
+  :slots (_id _A0 _A1 _A2 _A3 _A4 _A5 _A6 ))
 
 (defmethod my_msgs::action
   (:init
@@ -26,6 +26,7 @@
     ((:A3 __A3) 0.0)
     ((:A4 __A4) 0.0)
     ((:A5 __A5) 0.0)
+    ((:A6 __A6) 0.0)
     )
    (send-super :init)
    (setq _id (string __id))
@@ -35,6 +36,7 @@
    (setq _A3 (float __A3))
    (setq _A4 (float __A4))
    (setq _A5 (float __A5))
+   (setq _A6 (float __A6))
    self)
   (:id
    (&optional __id)
@@ -57,6 +59,9 @@
   (:A5
    (&optional __A5)
    (if __A5 (setq _A5 __A5)) _A5)
+  (:A6
+   (&optional __A6)
+   (if __A6 (setq _A6 __A6)) _A6)
   (:serialization-length
    ()
    (+
@@ -73,6 +78,8 @@
     ;; float32 _A4
     4
     ;; float32 _A5
+    4
+    ;; float32 _A6
     4
     ))
   (:serialize
@@ -93,6 +100,8 @@
        (sys::poke _A4 (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;; float32 _A5
        (sys::poke _A5 (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
+     ;; float32 _A6
+       (sys::poke _A6 (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
@@ -111,11 +120,13 @@
      (setq _A4 (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;; float32 _A5
      (setq _A5 (sys::peek buf ptr- :float)) (incf ptr- 4)
+   ;; float32 _A6
+     (setq _A6 (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;;
    self)
   )
 
-(setf (get my_msgs::action :md5sum-) "f0ebae17eff0b0f79021baa2b4833127")
+(setf (get my_msgs::action :md5sum-) "c40b50724540a881a54a2f96dfd06062")
 (setf (get my_msgs::action :datatype-) "my_msgs/action")
 (setf (get my_msgs::action :definition-)
       "string id
@@ -125,10 +136,11 @@ float32 A2
 float32 A3
 float32 A4
 float32 A5
+float32 A6
 ")
 
 
 
-(provide :my_msgs/action "f0ebae17eff0b0f79021baa2b4833127")
+(provide :my_msgs/action "c40b50724540a881a54a2f96dfd06062")
 
 

@@ -1,18 +1,26 @@
 (cl:in-package my_msgs-msg)
 (cl:export '(ACTION_ID-VAL
           ACTION_ID
-          OUT_OF_REACH-VAL
-          OUT_OF_REACH
-          SELF_COLLISION-VAL
-          SELF_COLLISION
-          LAST_TCP-VAL
-          LAST_TCP
-          FASTEST_BOX-VAL
-          FASTEST_BOX
-          HIGHEST_BOX-VAL
-          HIGHEST_BOX
+          IS_PRINTABLE-VAL
+          IS_PRINTABLE
+          ACTION_TCP-VAL
+          ACTION_TCP
+          DISPLACED_TCPS-VAL
+          DISPLACED_TCPS
+          STATE_COMPRESSED-VAL
+          STATE_COMPRESSED
+          COMPRESSION_LOSS-VAL
+          COMPRESSION_LOSS
+          STATE_MESH_VERTICES-VAL
+          STATE_MESH_VERTICES
+          STATE_MESH_INDICES-VAL
+          STATE_MESH_INDICES
           CURRENT_HEIGHT-VAL
           CURRENT_HEIGHT
-          BOX_POSES-VAL
-          BOX_POSES
+          CURRENT_TCP_DISPLACEMENTS-VAL
+          CURRENT_TCP_DISPLACEMENTS
+          CURRENT_SMOOTHNESS-VAL
+          CURRENT_SMOOTHNESS
+          CURRENT_AREA-VAL
+          CURRENT_AREA
 ))

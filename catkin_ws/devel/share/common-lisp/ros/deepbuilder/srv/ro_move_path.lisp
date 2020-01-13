@@ -10,13 +10,8 @@
   ((path
     :reader path
     :initarg :path
-    :type (cl:vector cl:float)
-   :initform (cl:make-array 0 :element-type 'cl:float :initial-element 0.0))
-   (speed
-    :reader speed
-    :initarg :speed
-    :type cl:float
-    :initform 0.0))
+    :type trajectory_msgs-msg:JointTrajectory
+    :initform (cl:make-instance 'trajectory_msgs-msg:JointTrajectory)))
 )
 
 (cl:defclass ro_move_path-request (<ro_move_path-request>)
@@ -31,52 +26,13 @@
 (cl:defmethod path-val ((m <ro_move_path-request>))
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader deepbuilder-srv:path-val is deprecated.  Use deepbuilder-srv:path instead.")
   (path m))
-
-(cl:ensure-generic-function 'speed-val :lambda-list '(m))
-(cl:defmethod speed-val ((m <ro_move_path-request>))
-  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader deepbuilder-srv:speed-val is deprecated.  Use deepbuilder-srv:speed instead.")
-  (speed m))
 (cl:defmethod roslisp-msg-protocol:serialize ((msg <ro_move_path-request>) ostream)
   "Serializes a message object of type '<ro_move_path-request>"
-  (cl:let ((__ros_arr_len (cl:length (cl:slot-value msg 'path))))
-    (cl:write-byte (cl:ldb (cl:byte 8 0) __ros_arr_len) ostream)
-    (cl:write-byte (cl:ldb (cl:byte 8 8) __ros_arr_len) ostream)
-    (cl:write-byte (cl:ldb (cl:byte 8 16) __ros_arr_len) ostream)
-    (cl:write-byte (cl:ldb (cl:byte 8 24) __ros_arr_len) ostream))
-  (cl:map cl:nil #'(cl:lambda (ele) (cl:let ((bits (roslisp-utils:encode-single-float-bits ele)))
-    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
-    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
-    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
-    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream)))
-   (cl:slot-value msg 'path))
-  (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'speed))))
-    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
-    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
-    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
-    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
+  (roslisp-msg-protocol:serialize (cl:slot-value msg 'path) ostream)
 )
 (cl:defmethod roslisp-msg-protocol:deserialize ((msg <ro_move_path-request>) istream)
   "Deserializes a message object of type '<ro_move_path-request>"
-  (cl:let ((__ros_arr_len 0))
-    (cl:setf (cl:ldb (cl:byte 8 0) __ros_arr_len) (cl:read-byte istream))
-    (cl:setf (cl:ldb (cl:byte 8 8) __ros_arr_len) (cl:read-byte istream))
-    (cl:setf (cl:ldb (cl:byte 8 16) __ros_arr_len) (cl:read-byte istream))
-    (cl:setf (cl:ldb (cl:byte 8 24) __ros_arr_len) (cl:read-byte istream))
-  (cl:setf (cl:slot-value msg 'path) (cl:make-array __ros_arr_len))
-  (cl:let ((vals (cl:slot-value msg 'path)))
-    (cl:dotimes (i __ros_arr_len)
-    (cl:let ((bits 0))
-      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
-      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
-      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
-      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
-    (cl:setf (cl:aref vals i) (roslisp-utils:decode-single-float-bits bits))))))
-    (cl:let ((bits 0))
-      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
-      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
-      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
-      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
-    (cl:setf (cl:slot-value msg 'speed) (roslisp-utils:decode-single-float-bits bits)))
+  (roslisp-msg-protocol:deserialize (cl:slot-value msg 'path) istream)
   msg
 )
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<ro_move_path-request>)))
@@ -87,26 +43,24 @@
   "deepbuilder/ro_move_pathRequest")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<ro_move_path-request>)))
   "Returns md5sum for a message object of type '<ro_move_path-request>"
-  "b4a3d2594e319909ad839e09a056ad1d")
+  "8c34125c1c77b9e671e5d9698ccd6432")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'ro_move_path-request)))
   "Returns md5sum for a message object of type 'ro_move_path-request"
-  "b4a3d2594e319909ad839e09a056ad1d")
+  "8c34125c1c77b9e671e5d9698ccd6432")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<ro_move_path-request>)))
   "Returns full string definition for message of type '<ro_move_path-request>"
-  (cl:format cl:nil "float32[] path~%float32 speed~%~%~%"))
+  (cl:format cl:nil "trajectory_msgs/JointTrajectory path~%~%================================================================================~%MSG: trajectory_msgs/JointTrajectory~%Header header~%string[] joint_names~%JointTrajectoryPoint[] points~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')~%# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%# 0: no frame~%# 1: global frame~%string frame_id~%~%================================================================================~%MSG: trajectory_msgs/JointTrajectoryPoint~%# Each trajectory point specifies either positions[, velocities[, accelerations]]~%# or positions[, effort] for the trajectory to be executed.~%# All specified values are in the same order as the joint names in JointTrajectory.msg~%~%float64[] positions~%float64[] velocities~%float64[] accelerations~%float64[] effort~%duration time_from_start~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'ro_move_path-request)))
   "Returns full string definition for message of type 'ro_move_path-request"
-  (cl:format cl:nil "float32[] path~%float32 speed~%~%~%"))
+  (cl:format cl:nil "trajectory_msgs/JointTrajectory path~%~%================================================================================~%MSG: trajectory_msgs/JointTrajectory~%Header header~%string[] joint_names~%JointTrajectoryPoint[] points~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')~%# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%# 0: no frame~%# 1: global frame~%string frame_id~%~%================================================================================~%MSG: trajectory_msgs/JointTrajectoryPoint~%# Each trajectory point specifies either positions[, velocities[, accelerations]]~%# or positions[, effort] for the trajectory to be executed.~%# All specified values are in the same order as the joint names in JointTrajectory.msg~%~%float64[] positions~%float64[] velocities~%float64[] accelerations~%float64[] effort~%duration time_from_start~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <ro_move_path-request>))
   (cl:+ 0
-     4 (cl:reduce #'cl:+ (cl:slot-value msg 'path) :key #'(cl:lambda (ele) (cl:declare (cl:ignorable ele)) (cl:+ 4)))
-     4
+     (roslisp-msg-protocol:serialization-length (cl:slot-value msg 'path))
 ))
 (cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <ro_move_path-request>))
   "Converts a ROS message object to a list"
   (cl:list 'ro_move_path-request
     (cl:cons ':path (path msg))
-    (cl:cons ':speed (speed msg))
 ))
 ;//! \htmlinclude ro_move_path-response.msg.html
 
@@ -159,10 +113,10 @@
   "deepbuilder/ro_move_pathResponse")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<ro_move_path-response>)))
   "Returns md5sum for a message object of type '<ro_move_path-response>"
-  "b4a3d2594e319909ad839e09a056ad1d")
+  "8c34125c1c77b9e671e5d9698ccd6432")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'ro_move_path-response)))
   "Returns md5sum for a message object of type 'ro_move_path-response"
-  "b4a3d2594e319909ad839e09a056ad1d")
+  "8c34125c1c77b9e671e5d9698ccd6432")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<ro_move_path-response>)))
   "Returns full string definition for message of type '<ro_move_path-response>"
   (cl:format cl:nil "string message~%~%~%"))

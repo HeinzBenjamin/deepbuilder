@@ -128,7 +128,6 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/ros/deepbuilder/catkin_ws/build/gtest/cmake_install.cmake")
   include("/home/ros/deepbuilder/catkin_ws/build/my_msgs/cmake_install.cmake")
   include("/home/ros/deepbuilder/catkin_ws/build/deepbuilder/cmake_install.cmake")
-  include("/home/ros/deepbuilder/catkin_ws/build/ur10_robotiq/cmake_install.cmake")
 
 endif()
 

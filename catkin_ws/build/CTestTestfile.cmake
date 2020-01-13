@@ -7,4 +7,3 @@
 subdirs(gtest)
 subdirs(my_msgs)
 subdirs(deepbuilder)
-subdirs(ur10_robotiq)

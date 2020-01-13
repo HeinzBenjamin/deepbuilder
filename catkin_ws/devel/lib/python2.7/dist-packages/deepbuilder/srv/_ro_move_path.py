@@ -5,16 +5,53 @@ python3 = True if sys.hexversion > 0x03000000 else False
 import genpy
 import struct
 
+import trajectory_msgs.msg
+import genpy
+import std_msgs.msg
 
 class ro_move_pathRequest(genpy.Message):
-  _md5sum = "134eb85ab074d54ec1eeb93e8a27abd7"
+  _md5sum = "afc39d389d2fae8a4a9041b5a5f1c8aa"
   _type = "deepbuilder/ro_move_pathRequest"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """float32[] path
-float32 speed
+  _full_text = """trajectory_msgs/JointTrajectory path
+
+================================================================================
+MSG: trajectory_msgs/JointTrajectory
+Header header
+string[] joint_names
+JointTrajectoryPoint[] points
+================================================================================
+MSG: std_msgs/Header
+# Standard metadata for higher-level stamped data types.
+# This is generally used to communicate timestamped data 
+# in a particular coordinate frame.
+# 
+# sequence ID: consecutively increasing ID 
+uint32 seq
+#Two-integer timestamp that is expressed as:
+# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
+# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
+# time-handling sugar is provided by the client library
+time stamp
+#Frame this data is associated with
+# 0: no frame
+# 1: global frame
+string frame_id
+
+================================================================================
+MSG: trajectory_msgs/JointTrajectoryPoint
+# Each trajectory point specifies either positions[, velocities[, accelerations]]
+# or positions[, effort] for the trajectory to be executed.
+# All specified values are in the same order as the joint names in JointTrajectory.msg
+
+float64[] positions
+float64[] velocities
+float64[] accelerations
+float64[] effort
+duration time_from_start
 """
-  __slots__ = ['path','speed']
-  _slot_types = ['float32[]','float32']
+  __slots__ = ['path']
+  _slot_types = ['trajectory_msgs/JointTrajectory']
 
   def __init__(self, *args, **kwds):
     """
@@ -24,7 +61,7 @@ float32 speed
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       path,speed
+       path
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -34,12 +71,9 @@ float32 speed
       super(ro_move_pathRequest, self).__init__(*args, **kwds)
       #message fields cannot be None, assign default values for those that are
       if self.path is None:
-        self.path = []
-      if self.speed is None:
-        self.speed = 0.
+        self.path = trajectory_msgs.msg.JointTrajectory()
     else:
-      self.path = []
-      self.speed = 0.
+      self.path = trajectory_msgs.msg.JointTrajectory()
 
   def _get_types(self):
     """
@@ -53,11 +87,44 @@ float32 speed
     :param buff: buffer, ``StringIO``
     """
     try:
-      length = len(self.path)
+      _x = self
+      buff.write(_get_struct_3I().pack(_x.path.header.seq, _x.path.header.stamp.secs, _x.path.header.stamp.nsecs))
+      _x = self.path.header.frame_id
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      length = len(self.path.joint_names)
       buff.write(_struct_I.pack(length))
-      pattern = '<%sf'%length
-      buff.write(struct.pack(pattern, *self.path))
-      buff.write(_get_struct_f().pack(self.speed))
+      for val1 in self.path.joint_names:
+        length = len(val1)
+        if python3 or type(val1) == unicode:
+          val1 = val1.encode('utf-8')
+          length = len(val1)
+        buff.write(struct.pack('<I%ss'%length, length, val1))
+      length = len(self.path.points)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.path.points:
+        length = len(val1.positions)
+        buff.write(_struct_I.pack(length))
+        pattern = '<%sd'%length
+        buff.write(struct.pack(pattern, *val1.positions))
+        length = len(val1.velocities)
+        buff.write(_struct_I.pack(length))
+        pattern = '<%sd'%length
+        buff.write(struct.pack(pattern, *val1.velocities))
+        length = len(val1.accelerations)
+        buff.write(_struct_I.pack(length))
+        pattern = '<%sd'%length
+        buff.write(struct.pack(pattern, *val1.accelerations))
+        length = len(val1.effort)
+        buff.write(_struct_I.pack(length))
+        pattern = '<%sd'%length
+        buff.write(struct.pack(pattern, *val1.effort))
+        _v1 = val1.time_from_start
+        _x = _v1
+        buff.write(_get_struct_2i().pack(_x.secs, _x.nsecs))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -67,17 +134,77 @@ float32 speed
     :param str: byte array of serialized message, ``str``
     """
     try:
+      if self.path is None:
+        self.path = trajectory_msgs.msg.JointTrajectory()
       end = 0
+      _x = self
+      start = end
+      end += 12
+      (_x.path.header.seq, _x.path.header.stamp.secs, _x.path.header.stamp.nsecs,) = _get_struct_3I().unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
-      pattern = '<%sf'%length
       start = end
-      end += struct.calcsize(pattern)
-      self.path = struct.unpack(pattern, str[start:end])
+      end += length
+      if python3:
+        self.path.header.frame_id = str[start:end].decode('utf-8')
+      else:
+        self.path.header.frame_id = str[start:end]
       start = end
       end += 4
-      (self.speed,) = _get_struct_f().unpack(str[start:end])
+      (length,) = _struct_I.unpack(str[start:end])
+      self.path.joint_names = []
+      for i in range(0, length):
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1 = str[start:end].decode('utf-8')
+        else:
+          val1 = str[start:end]
+        self.path.joint_names.append(val1)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.path.points = []
+      for i in range(0, length):
+        val1 = trajectory_msgs.msg.JointTrajectoryPoint()
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        pattern = '<%sd'%length
+        start = end
+        end += struct.calcsize(pattern)
+        val1.positions = struct.unpack(pattern, str[start:end])
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        pattern = '<%sd'%length
+        start = end
+        end += struct.calcsize(pattern)
+        val1.velocities = struct.unpack(pattern, str[start:end])
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        pattern = '<%sd'%length
+        start = end
+        end += struct.calcsize(pattern)
+        val1.accelerations = struct.unpack(pattern, str[start:end])
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        pattern = '<%sd'%length
+        start = end
+        end += struct.calcsize(pattern)
+        val1.effort = struct.unpack(pattern, str[start:end])
+        _v2 = val1.time_from_start
+        _x = _v2
+        start = end
+        end += 8
+        (_x.secs, _x.nsecs,) = _get_struct_2i().unpack(str[start:end])
+        self.path.points.append(val1)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -90,11 +217,44 @@ float32 speed
     :param numpy: numpy python module
     """
     try:
-      length = len(self.path)
+      _x = self
+      buff.write(_get_struct_3I().pack(_x.path.header.seq, _x.path.header.stamp.secs, _x.path.header.stamp.nsecs))
+      _x = self.path.header.frame_id
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      length = len(self.path.joint_names)
       buff.write(_struct_I.pack(length))
-      pattern = '<%sf'%length
-      buff.write(self.path.tostring())
-      buff.write(_get_struct_f().pack(self.speed))
+      for val1 in self.path.joint_names:
+        length = len(val1)
+        if python3 or type(val1) == unicode:
+          val1 = val1.encode('utf-8')
+          length = len(val1)
+        buff.write(struct.pack('<I%ss'%length, length, val1))
+      length = len(self.path.points)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.path.points:
+        length = len(val1.positions)
+        buff.write(_struct_I.pack(length))
+        pattern = '<%sd'%length
+        buff.write(val1.positions.tostring())
+        length = len(val1.velocities)
+        buff.write(_struct_I.pack(length))
+        pattern = '<%sd'%length
+        buff.write(val1.velocities.tostring())
+        length = len(val1.accelerations)
+        buff.write(_struct_I.pack(length))
+        pattern = '<%sd'%length
+        buff.write(val1.accelerations.tostring())
+        length = len(val1.effort)
+        buff.write(_struct_I.pack(length))
+        pattern = '<%sd'%length
+        buff.write(val1.effort.tostring())
+        _v3 = val1.time_from_start
+        _x = _v3
+        buff.write(_get_struct_2i().pack(_x.secs, _x.nsecs))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -105,17 +265,77 @@ float32 speed
     :param numpy: numpy python module
     """
     try:
+      if self.path is None:
+        self.path = trajectory_msgs.msg.JointTrajectory()
       end = 0
+      _x = self
+      start = end
+      end += 12
+      (_x.path.header.seq, _x.path.header.stamp.secs, _x.path.header.stamp.nsecs,) = _get_struct_3I().unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
-      pattern = '<%sf'%length
       start = end
-      end += struct.calcsize(pattern)
-      self.path = numpy.frombuffer(str[start:end], dtype=numpy.float32, count=length)
+      end += length
+      if python3:
+        self.path.header.frame_id = str[start:end].decode('utf-8')
+      else:
+        self.path.header.frame_id = str[start:end]
       start = end
       end += 4
-      (self.speed,) = _get_struct_f().unpack(str[start:end])
+      (length,) = _struct_I.unpack(str[start:end])
+      self.path.joint_names = []
+      for i in range(0, length):
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1 = str[start:end].decode('utf-8')
+        else:
+          val1 = str[start:end]
+        self.path.joint_names.append(val1)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.path.points = []
+      for i in range(0, length):
+        val1 = trajectory_msgs.msg.JointTrajectoryPoint()
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        pattern = '<%sd'%length
+        start = end
+        end += struct.calcsize(pattern)
+        val1.positions = numpy.frombuffer(str[start:end], dtype=numpy.float64, count=length)
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        pattern = '<%sd'%length
+        start = end
+        end += struct.calcsize(pattern)
+        val1.velocities = numpy.frombuffer(str[start:end], dtype=numpy.float64, count=length)
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        pattern = '<%sd'%length
+        start = end
+        end += struct.calcsize(pattern)
+        val1.accelerations = numpy.frombuffer(str[start:end], dtype=numpy.float64, count=length)
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        pattern = '<%sd'%length
+        start = end
+        end += struct.calcsize(pattern)
+        val1.effort = numpy.frombuffer(str[start:end], dtype=numpy.float64, count=length)
+        _v4 = val1.time_from_start
+        _x = _v4
+        start = end
+        end += 8
+        (_x.secs, _x.nsecs,) = _get_struct_2i().unpack(str[start:end])
+        self.path.points.append(val1)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -124,12 +344,18 @@ _struct_I = genpy.struct_I
 def _get_struct_I():
     global _struct_I
     return _struct_I
-_struct_f = None
-def _get_struct_f():
-    global _struct_f
-    if _struct_f is None:
-        _struct_f = struct.Struct("<f")
-    return _struct_f
+_struct_3I = None
+def _get_struct_3I():
+    global _struct_3I
+    if _struct_3I is None:
+        _struct_3I = struct.Struct("<3I")
+    return _struct_3I
+_struct_2i = None
+def _get_struct_2i():
+    global _struct_2i
+    if _struct_2i is None:
+        _struct_2i = struct.Struct("<2i")
+    return _struct_2i
 # This Python file uses the following encoding: utf-8
 """autogenerated by genpy from deepbuilder/ro_move_pathResponse.msg. Do not edit."""
 import sys
@@ -254,6 +480,6 @@ def _get_struct_I():
     return _struct_I
 class ro_move_path(object):
   _type          = 'deepbuilder/ro_move_path'
-  _md5sum = 'b4a3d2594e319909ad839e09a056ad1d'
+  _md5sum = '8c34125c1c77b9e671e5d9698ccd6432'
   _request_class  = ro_move_pathRequest
   _response_class = ro_move_pathResponse

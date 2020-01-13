@@ -38,7 +38,7 @@ find_package(CUDA REQUIRED)
 SET(CUDA_NVCC_FLAGS "-arch=sm_61 -std=c++11" CACHE STRING "nvcc flags" FORCE)
 SET(CUDA_VERBOSE_BUILD ON CACHE BOOL "nvcc verbose" FORCE)
 SET(LIB_TYPE STATIC)
-CUDA_ADD_LIBRARY(cu_depth_cloud ${LIB_TYPE} src/depth_cloud.cu)
+#CUDA_ADD_LIBRARY(cu_depth_cloud ${LIB_TYPE} src/depth_cloud.cu)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -71,44 +71,18 @@ CUDA_ADD_LIBRARY(cu_depth_cloud ${LIB_TYPE} src/depth_cloud.cu)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  rt_status.msg
-#   Message2.msg
-)
+#add_message_files(
+#  FILES
+#)
 
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  rt_is_ready.srv
-  rt_wait_for_ready.srv
-  rt_set_state.srv
-  rt_set_action.srv
-  rt_get_status.srv
-  rt_set_agent_presence.srv
-  ro_gripper_close.srv
-  ro_gripper_open.srv
-  ro_gripper_moveto.srv
-  ro_gripper_setspeed.srv
-  ro_gripper_setforce.srv
+  ro_plan_path.srv
   ro_move_home.srv
-  ro_move_source.srv
-  ro_move_point.srv
-  ro_move_cam.srv
   ro_move_path.srv
-  ro_get_block.srv
-  ro_get_state.srv
-  ro_get_robot_state.srv
-  ro_check_path.srv
-  se_adjust_resolution.srv
-  se_adjust_fieldsize_x.srv
-  se_adjust_fieldsize_y.srv
-  se_adjust_field_offset_x.srv
-  se_adjust_field_offset_y.srv
-  se_adjust_field_start_x.srv
-  se_adjust_field_start_y.srv
-  se_adjust_correction.srv
-  se_get_values.srv
+  ro_move_point.srv
+  ro_update_state_mesh.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -125,6 +99,7 @@ generate_messages(
   std_msgs
   rosbridge_msgs
   geometry_msgs
+  shape_msgs
   sensor_msgs
   trajectory_msgs
 )
@@ -179,6 +154,7 @@ CATKIN_DEPENDS
   moveit_commander
   moveit_msgs
   pcl_ros
+  shape_msgs
 DEPENDS system_lib Boost
 )
 
@@ -195,19 +171,19 @@ include_directories(
 )
 
 ## Declare a C++ library
-add_executable(gripper_control src/gripper_control.cpp)
+#add_executable(gripper_control src/gripper_control.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-add_dependencies(gripper_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(gripper_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(runtime src/runtime.cpp)
-add_executable(depth_cloud src/depth_cloud.cpp)
-add_dependencies(depth_cloud cu_depth_cloud)
+#add_executable(runtime src/runtime.cpp)
+#add_executable(depth_cloud src/depth_cloud.cpp)
+#add_dependencies(depth_cloud cu_depth_cloud)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -217,13 +193,13 @@ add_dependencies(depth_cloud cu_depth_cloud)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(runtime ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(runtime ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 #add_dependencies(gripper_service_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(runtime ${catkin_LIBRARIES})
-target_link_libraries(gripper_control ${catkin_LIBRARIES})
-target_link_libraries(depth_cloud ${catkin_LIBRARIES} cu_depth_cloud)
+#target_link_libraries(runtime ${catkin_LIBRARIES})
+#target_link_libraries(gripper_control ${catkin_LIBRARIES})
+#target_link_libraries(depth_cloud ${catkin_LIBRARIES} cu_depth_cloud)
 
 
 #############

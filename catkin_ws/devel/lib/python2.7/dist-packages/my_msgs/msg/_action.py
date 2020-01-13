@@ -7,7 +7,7 @@ import struct
 
 
 class action(genpy.Message):
-  _md5sum = "f0ebae17eff0b0f79021baa2b4833127"
+  _md5sum = "c40b50724540a881a54a2f96dfd06062"
   _type = "my_msgs/action"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """string id
@@ -16,9 +16,10 @@ float32 A1
 float32 A2
 float32 A3
 float32 A4
-float32 A5"""
-  __slots__ = ['id','A0','A1','A2','A3','A4','A5']
-  _slot_types = ['string','float32','float32','float32','float32','float32','float32']
+float32 A5
+float32 A6"""
+  __slots__ = ['id','A0','A1','A2','A3','A4','A5','A6']
+  _slot_types = ['string','float32','float32','float32','float32','float32','float32','float32']
 
   def __init__(self, *args, **kwds):
     """
@@ -28,7 +29,7 @@ float32 A5"""
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       id,A0,A1,A2,A3,A4,A5
+       id,A0,A1,A2,A3,A4,A5,A6
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -51,6 +52,8 @@ float32 A5"""
         self.A4 = 0.
       if self.A5 is None:
         self.A5 = 0.
+      if self.A6 is None:
+        self.A6 = 0.
     else:
       self.id = ''
       self.A0 = 0.
@@ -59,6 +62,7 @@ float32 A5"""
       self.A3 = 0.
       self.A4 = 0.
       self.A5 = 0.
+      self.A6 = 0.
 
   def _get_types(self):
     """
@@ -79,7 +83,7 @@ float32 A5"""
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_get_struct_6f().pack(_x.A0, _x.A1, _x.A2, _x.A3, _x.A4, _x.A5))
+      buff.write(_get_struct_7f().pack(_x.A0, _x.A1, _x.A2, _x.A3, _x.A4, _x.A5, _x.A6))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -101,8 +105,8 @@ float32 A5"""
         self.id = str[start:end]
       _x = self
       start = end
-      end += 24
-      (_x.A0, _x.A1, _x.A2, _x.A3, _x.A4, _x.A5,) = _get_struct_6f().unpack(str[start:end])
+      end += 28
+      (_x.A0, _x.A1, _x.A2, _x.A3, _x.A4, _x.A5, _x.A6,) = _get_struct_7f().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -122,7 +126,7 @@ float32 A5"""
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_get_struct_6f().pack(_x.A0, _x.A1, _x.A2, _x.A3, _x.A4, _x.A5))
+      buff.write(_get_struct_7f().pack(_x.A0, _x.A1, _x.A2, _x.A3, _x.A4, _x.A5, _x.A6))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -145,8 +149,8 @@ float32 A5"""
         self.id = str[start:end]
       _x = self
       start = end
-      end += 24
-      (_x.A0, _x.A1, _x.A2, _x.A3, _x.A4, _x.A5,) = _get_struct_6f().unpack(str[start:end])
+      end += 28
+      (_x.A0, _x.A1, _x.A2, _x.A3, _x.A4, _x.A5, _x.A6,) = _get_struct_7f().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -155,9 +159,9 @@ _struct_I = genpy.struct_I
 def _get_struct_I():
     global _struct_I
     return _struct_I
-_struct_6f = None
-def _get_struct_6f():
-    global _struct_6f
-    if _struct_6f is None:
-        _struct_6f = struct.Struct("<6f")
-    return _struct_6f
+_struct_7f = None
+def _get_struct_7f():
+    global _struct_7f
+    if _struct_7f is None:
+        _struct_7f = struct.Struct("<7f")
+    return _struct_7f

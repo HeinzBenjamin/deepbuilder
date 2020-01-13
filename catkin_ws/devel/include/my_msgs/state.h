@@ -27,23 +27,31 @@ struct state_
 
   state_()
     : action_id()
-    , out_of_reach(false)
-    , self_collision(false)
-    , last_tcp()
-    , fastest_box(0)
-    , highest_box(0)
+    , is_printable(false)
+    , action_tcp()
+    , displaced_tcps()
+    , state_compressed()
+    , compression_loss(0.0)
+    , state_mesh_vertices()
+    , state_mesh_indices()
     , current_height(0.0)
-    , box_poses()  {
+    , current_tcp_displacements()
+    , current_smoothness(0.0)
+    , current_area(0.0)  {
     }
   state_(const ContainerAllocator& _alloc)
     : action_id(_alloc)
-    , out_of_reach(false)
-    , self_collision(false)
-    , last_tcp(_alloc)
-    , fastest_box(0)
-    , highest_box(0)
+    , is_printable(false)
+    , action_tcp(_alloc)
+    , displaced_tcps(_alloc)
+    , state_compressed(_alloc)
+    , compression_loss(0.0)
+    , state_mesh_vertices(_alloc)
+    , state_mesh_indices(_alloc)
     , current_height(0.0)
-    , box_poses(_alloc)  {
+    , current_tcp_displacements(_alloc)
+    , current_smoothness(0.0)
+    , current_area(0.0)  {
   (void)_alloc;
     }
 
@@ -52,26 +60,38 @@ struct state_
    typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _action_id_type;
   _action_id_type action_id;
 
-   typedef uint8_t _out_of_reach_type;
-  _out_of_reach_type out_of_reach;
+   typedef uint8_t _is_printable_type;
+  _is_printable_type is_printable;
 
-   typedef uint8_t _self_collision_type;
-  _self_collision_type self_collision;
+   typedef  ::geometry_msgs::Pose_<ContainerAllocator>  _action_tcp_type;
+  _action_tcp_type action_tcp;
 
-   typedef  ::geometry_msgs::Pose_<ContainerAllocator>  _last_tcp_type;
-  _last_tcp_type last_tcp;
+   typedef std::vector< ::geometry_msgs::Pose_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::geometry_msgs::Pose_<ContainerAllocator> >::other >  _displaced_tcps_type;
+  _displaced_tcps_type displaced_tcps;
 
-   typedef int32_t _fastest_box_type;
-  _fastest_box_type fastest_box;
+   typedef std::vector<float, typename ContainerAllocator::template rebind<float>::other >  _state_compressed_type;
+  _state_compressed_type state_compressed;
 
-   typedef int32_t _highest_box_type;
-  _highest_box_type highest_box;
+   typedef float _compression_loss_type;
+  _compression_loss_type compression_loss;
+
+   typedef std::vector<float, typename ContainerAllocator::template rebind<float>::other >  _state_mesh_vertices_type;
+  _state_mesh_vertices_type state_mesh_vertices;
+
+   typedef std::vector<int32_t, typename ContainerAllocator::template rebind<int32_t>::other >  _state_mesh_indices_type;
+  _state_mesh_indices_type state_mesh_indices;
 
    typedef float _current_height_type;
   _current_height_type current_height;
 
-   typedef std::vector< ::geometry_msgs::Pose_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::geometry_msgs::Pose_<ContainerAllocator> >::other >  _box_poses_type;
-  _box_poses_type box_poses;
+   typedef std::vector<float, typename ContainerAllocator::template rebind<float>::other >  _current_tcp_displacements_type;
+  _current_tcp_displacements_type current_tcp_displacements;
+
+   typedef float _current_smoothness_type;
+  _current_smoothness_type current_smoothness;
+
+   typedef float _current_area_type;
+  _current_area_type current_area;
 
 
 
@@ -151,12 +171,12 @@ struct MD5Sum< ::my_msgs::state_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "72cea1bd08eaaeaa5fb310c31bb88005";
+    return "b716ae9e4e97f8d790d147cc9fc70235";
   }
 
   static const char* value(const ::my_msgs::state_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x72cea1bd08eaaeaaULL;
-  static const uint64_t static_value2 = 0x5fb310c31bb88005ULL;
+  static const uint64_t static_value1 = 0xb716ae9e4e97f8d7ULL;
+  static const uint64_t static_value2 = 0x90d147cc9fc70235ULL;
 };
 
 template<class ContainerAllocator>
@@ -176,13 +196,17 @@ struct Definition< ::my_msgs::state_<ContainerAllocator> >
   static const char* value()
   {
     return "string action_id\n\
-bool out_of_reach\n\
-bool self_collision\n\
-geometry_msgs/Pose last_tcp\n\
-int32 fastest_box\n\
-int32 highest_box\n\
+bool is_printable\n\
+geometry_msgs/Pose action_tcp\n\
+geometry_msgs/Pose[] displaced_tcps\n\
+float32[] state_compressed\n\
+float32 compression_loss\n\
+float32[] state_mesh_vertices\n\
+int32[] state_mesh_indices\n\
 float32 current_height\n\
-geometry_msgs/Pose[] box_poses\n\
+float32[] current_tcp_displacements\n\
+float32 current_smoothness\n\
+float32 current_area\n\
 ================================================================================\n\
 MSG: geometry_msgs/Pose\n\
 # A representation of pose in free space, composed of position and orientation. \n\
@@ -223,13 +247,17 @@ namespace serialization
     template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
     {
       stream.next(m.action_id);
-      stream.next(m.out_of_reach);
-      stream.next(m.self_collision);
-      stream.next(m.last_tcp);
-      stream.next(m.fastest_box);
-      stream.next(m.highest_box);
+      stream.next(m.is_printable);
+      stream.next(m.action_tcp);
+      stream.next(m.displaced_tcps);
+      stream.next(m.state_compressed);
+      stream.next(m.compression_loss);
+      stream.next(m.state_mesh_vertices);
+      stream.next(m.state_mesh_indices);
       stream.next(m.current_height);
-      stream.next(m.box_poses);
+      stream.next(m.current_tcp_displacements);
+      stream.next(m.current_smoothness);
+      stream.next(m.current_area);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -250,27 +278,51 @@ struct Printer< ::my_msgs::state_<ContainerAllocator> >
   {
     s << indent << "action_id: ";
     Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.action_id);
-    s << indent << "out_of_reach: ";
-    Printer<uint8_t>::stream(s, indent + "  ", v.out_of_reach);
-    s << indent << "self_collision: ";
-    Printer<uint8_t>::stream(s, indent + "  ", v.self_collision);
-    s << indent << "last_tcp: ";
+    s << indent << "is_printable: ";
+    Printer<uint8_t>::stream(s, indent + "  ", v.is_printable);
+    s << indent << "action_tcp: ";
     s << std::endl;
-    Printer< ::geometry_msgs::Pose_<ContainerAllocator> >::stream(s, indent + "  ", v.last_tcp);
-    s << indent << "fastest_box: ";
-    Printer<int32_t>::stream(s, indent + "  ", v.fastest_box);
-    s << indent << "highest_box: ";
-    Printer<int32_t>::stream(s, indent + "  ", v.highest_box);
-    s << indent << "current_height: ";
-    Printer<float>::stream(s, indent + "  ", v.current_height);
-    s << indent << "box_poses[]" << std::endl;
-    for (size_t i = 0; i < v.box_poses.size(); ++i)
+    Printer< ::geometry_msgs::Pose_<ContainerAllocator> >::stream(s, indent + "  ", v.action_tcp);
+    s << indent << "displaced_tcps[]" << std::endl;
+    for (size_t i = 0; i < v.displaced_tcps.size(); ++i)
     {
-      s << indent << "  box_poses[" << i << "]: ";
+      s << indent << "  displaced_tcps[" << i << "]: ";
       s << std::endl;
       s << indent;
-      Printer< ::geometry_msgs::Pose_<ContainerAllocator> >::stream(s, indent + "    ", v.box_poses[i]);
+      Printer< ::geometry_msgs::Pose_<ContainerAllocator> >::stream(s, indent + "    ", v.displaced_tcps[i]);
     }
+    s << indent << "state_compressed[]" << std::endl;
+    for (size_t i = 0; i < v.state_compressed.size(); ++i)
+    {
+      s << indent << "  state_compressed[" << i << "]: ";
+      Printer<float>::stream(s, indent + "  ", v.state_compressed[i]);
+    }
+    s << indent << "compression_loss: ";
+    Printer<float>::stream(s, indent + "  ", v.compression_loss);
+    s << indent << "state_mesh_vertices[]" << std::endl;
+    for (size_t i = 0; i < v.state_mesh_vertices.size(); ++i)
+    {
+      s << indent << "  state_mesh_vertices[" << i << "]: ";
+      Printer<float>::stream(s, indent + "  ", v.state_mesh_vertices[i]);
+    }
+    s << indent << "state_mesh_indices[]" << std::endl;
+    for (size_t i = 0; i < v.state_mesh_indices.size(); ++i)
+    {
+      s << indent << "  state_mesh_indices[" << i << "]: ";
+      Printer<int32_t>::stream(s, indent + "  ", v.state_mesh_indices[i]);
+    }
+    s << indent << "current_height: ";
+    Printer<float>::stream(s, indent + "  ", v.current_height);
+    s << indent << "current_tcp_displacements[]" << std::endl;
+    for (size_t i = 0; i < v.current_tcp_displacements.size(); ++i)
+    {
+      s << indent << "  current_tcp_displacements[" << i << "]: ";
+      Printer<float>::stream(s, indent + "  ", v.current_tcp_displacements[i]);
+    }
+    s << indent << "current_smoothness: ";
+    Printer<float>::stream(s, indent + "  ", v.current_smoothness);
+    s << indent << "current_area: ";
+    Printer<float>::stream(s, indent + "  ", v.current_area);
   }
 };
 

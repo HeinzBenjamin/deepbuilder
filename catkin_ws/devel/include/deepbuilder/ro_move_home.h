@@ -40,7 +40,7 @@ template<>
 struct MD5Sum< ::deepbuilder::ro_move_home > {
   static const char* value()
   {
-    return "65f9af88059b07caeeaf7e2d659e542b";
+    return "401d05492656e71a256f6ab38acc170c";
   }
 
   static const char* value(const ::deepbuilder::ro_move_home&) { return value(); }

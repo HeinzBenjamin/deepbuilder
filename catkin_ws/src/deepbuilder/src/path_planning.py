@@ -1,190 +1,289 @@
 #!/usr/bin/env python
-import sys, copy, rospy, moveit_commander
-import moveit_msgs.msg
-import robot_control as rc
+import sys, rospy, moveit_commander, time
+from moveit_msgs.msg import *
+from shape_msgs.msg import *
 from geometry_msgs.msg import *
-from std_msgs.msg import *
 from deepbuilder.srv import *
 from visualization_msgs.msg import Marker
-from visualization_msgs.msg import MarkerArray
+from tf2_msgs.msg import TFMessage
 import settings
 
 robot = {}
-scene = {}
+scene = {} # is continually filled with 
 move_group = {}
-display_trajectory_publisher = {}
+arena = None
+state_mesh = Mesh()
+state_mesh_visualisation = None
+marker_pub_env = rospy.Publisher('/deepbuilder/robot/state_mesh', Marker,queue_size=1)
 
-
-class scene_objects():
+class arena_objects():
     #planes must start with pln, they're just PoseStamped objects
-    pln_floor = PoseStamped()
-    pln_floor.pose.orientation.w = 1.0
+    def __init__(self):
+        #wall planes
+        self.pln_handle_bar = PoseStamped()
+        self.pln_handle_bar.pose.orientation.x = 0.5
+        self.pln_handle_bar.pose.orientation.y = 0.5
+        self.pln_handle_bar.pose.orientation.z = 0.5
+        self.pln_handle_bar.pose.orientation.w = -0.5
+        self.pln_handle_bar.pose.position.y = -1.046
 
-    pln_handle_bar = PoseStamped()
-    pln_handle_bar.pose.orientation.x = 0.5
-    pln_handle_bar.pose.orientation.y = 0.5
-    pln_handle_bar.pose.orientation.z = 0.5
-    pln_handle_bar.pose.orientation.w = -0.5
-    pln_handle_bar.pose.position.y = -1.046
+        self.pln_ceiling = PoseStamped()
+        self.pln_ceiling.pose.position.z = 1.4
+        self.pln_ceiling.pose.orientation.y = 1.0
 
-    pln_ceiling = PoseStamped()
-    pln_ceiling.pose.position.z = 1.4
-    pln_ceiling.pose.orientation.y = 1.0
+        self.pln_back = PoseStamped()
+        self.pln_back.pose.position.y = 0.403
+        self.pln_back.pose.orientation.x = 0.5
+        self.pln_back.pose.orientation.y = 0.5
+        self.pln_back.pose.orientation.z = -0.5
+        self.pln_back.pose.orientation.w = 0.5
 
-    pln_back = PoseStamped()
-    pln_back.pose.position.y = 0.403
-    pln_back.pose.orientation.x = 0.5
-    pln_back.pose.orientation.y = 0.5
-    pln_back.pose.orientation.z = -0.5
-    pln_back.pose.orientation.w = 0.5
+        self.pln_left = PoseStamped()
+        self.pln_left.pose.position.x = 0.4925
+        self.pln_left.pose.orientation.x = 0.5
+        self.pln_left.pose.orientation.y = -0.5
+        self.pln_left.pose.orientation.z = -0.5
+        self.pln_left.pose.orientation.w = 0.5
 
-    pln_left = PoseStamped()
-    pln_left.pose.position.x = 0.4925
-    pln_left.pose.orientation.x = 0.5
-    pln_left.pose.orientation.y = -0.5
-    pln_left.pose.orientation.z = -0.5
-    pln_left.pose.orientation.w = 0.5
+        self.pln_right = PoseStamped()
+        self.pln_right.pose.position.x = -0.4925
+        self.pln_right.pose.orientation.x = 0.5
+        self.pln_right.pose.orientation.y = 0.5
+        self.pln_right.pose.orientation.z = 0.5
+        self.pln_right.pose.orientation.w = 0.5
 
-    pln_right = PoseStamped()
-    pln_right.pose.position.x = -0.4925
-    pln_right.pose.orientation.x = 0.5
-    pln_right.pose.orientation.y = 0.5
-    pln_right.pose.orientation.z = 0.5
-    pln_right.pose.orientation.w = 0.5
+        #table box
+        self.box_table = {}
+        self.box_table["pose"] = PoseStamped()
+        self.box_table["pose"].pose.position.x = 0.0
+        self.box_table["pose"].pose.position.y = -0.447
+        self.box_table["pose"].pose.position.z = -0.465
+        self.box_table["pose"].pose.orientation.w = 1.0
+        self.box_table["size"] = [0.795, 1.195, 0.93]
 
+def state_equals(state_a, state_b):
+    tolerance = 0.001
+    for i, s in enumerate(state_a):
+        if abs(s - state_b[i]) > tolerance:
+            return False
+    return True
 
-    #boxes must start with box, it's a dict of pose and size
-    box_source = {}
-    box_source["pose"] = PoseStamped()
-    box_source["pose"].pose.position.x = -0.32
-    box_source["pose"].pose.position.y = 0.32
-    box_source["pose"].pose.position.z = 0.3
-    box_source["pose"].pose.orientation.w = 1.0
-    box_source["size"] = [0.16, 0.12, 0.6]
-
-
-def move_home_moveit(req):
-    print "Moving home moveit..."
-    reqq = ro_move_pointRequest()
-    reqq.goal = settings.HOME_POSE
-    reqq.speed = req.speed
-    return str(move_point_moveit(reqq))
-
-def move_point_moveit(req):
-    print "Moving to point moveit..."
-    reqq = ro_check_pathRequest()
-    reqq.goal = req.goal
-    res = plan_path(reqq)
-    if res.message != "SUCCESS":
-        print res
-        return res
-    reqqq = ro_move_pathRequest()
+def sync_scene(expected_collision_objects):
+    global scene
     
-    ppath = []
-    for i in res.path.points:
-        ppath.extend(i.positions)
-    reqqq.speed = req.speed
-    reqqq.path = ppath
-    p = rospy.ServiceProxy('deepbuilder/robot/move_path', ro_move_path)
-    return p(reqqq)
+    present_objects = scene.get_objects()
+    synced = False
 
+    while not synced:
+        while len(present_objects) != len(expected_collision_objects):
+            time.sleep(0.05)
+            present_objects = scene.get_objects()
+        synced = True
+        for o in present_objects:
+            if o not in expected_collision_objects:
+                time.sleep(0.05)
+                present_objects = scene.get_objects()
+                synced = False
+                break
+    
 
 def plan_path(req):
     global move_group
-    res = ro_check_pathResponse()
+    global scene
+    global arena
+    global state_mesh
+    global robot
 
+    scene.remove_world_object() #clear scene, needs syncing later
     move_group.clear_pose_targets()
+    ii = move_group.get_joint_value_target()
 
-    # We want the Cartesian path to be interpolated at a resolution of 1 cm
-    # which is why we will specify 0.01 as the eef_step in Cartesian
-    # translation.  We will disable the jump threshold by setting it to 0.0 disabling:
-    plan = move_group.plan(req.goal)
-    if len(req.state) > 0 and req.session_name!='':
-        draw_learner_state(req.state, req.session_name)
+    #if req.state_pose is different from current robot pose, apply it to planning
+    joint_state = robot.get_current_state().joint_state    
+    if req.state_pose and len(req.state_pose) == 6 and not state_equals(joint_state.position, req.state_pose):
+        joint_state.position = req.state_pose
 
-    # Note: We are just planning, not asking move_group to actually move the robot yet:
-    res.path = plan.joint_trajectory
-    res.message = "SUCCESS" if len(plan.joint_trajectory.points) > 0 else "INVALID"
+    moveit_robot_state = RobotState()
+    moveit_robot_state.joint_state = joint_state
+    move_group.set_start_state(moveit_robot_state)
+    
+    print "Planning path for session [" + req.session + "] from\n" + str(joint_state.position) + " to\n" + str(req.goal_pose)
+    print "Detected restricting collisions mask\n[self_collision, wall_collision, table_collision, state_collision, full_scene]"
+
+    #default response
+    res = ro_plan_pathResponse()
+    res.collisions = [False, False, False, False, False]
+    res.message = ''
+    res.path = None
+
+    #attempting to plan on empty scene, if this fails, it's due to self collision
+    sync_scene('')
+    res.path = move_group.plan(req.goal_pose).joint_trajectory
+    if len(res.path.points) == 0:
+        res.message += "self collision"
+        res.collisions[0] = True
+        res.collisions[4] = True #collision in full scene
+        print str(res.collisions)
+        return res
+
+    #add walls to scene and replan
+    expected_scene_objects = [] #needed for syncing
+    for name in dir(arena):
+        if name.startswith('pln'):
+            obj = getattr(arena, name)
+            obj.header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
+            scene.add_plane(name, obj)
+            expected_scene_objects.append(name)
+
+    sync_scene(expected_scene_objects)
+    res.path = move_group.plan(req.goal_pose).joint_trajectory
+    if len(res.path.points) == 0:
+        res.message += "wall collision, "
+        res.collisions[1] = True
+        res.collisions[4] = True #collision in full scene
+
+    #clear scene, add table and replan
+    scene.remove_world_object()
+    expected_scene_objects = []
+    for name in dir(arena):
+        if name.startswith('box'):
+            obj = getattr(arena, name)
+            obj["pose"].header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
+            scene.add_box(name, obj["pose"], obj["size"])
+            expected_scene_objects.append(name)
+
+    sync_scene(expected_scene_objects)
+    res.path = move_group.plan(req.goal_pose).joint_trajectory
+    if len(res.path.points) == 0:
+        res.message += "table collision, "
+        res.collisions[2] = True
+        res.collisions[4] = True #collision in full scene
+
+    # clear scene, add state mesh and replan
+    scene.remove_world_object()
+    expected_scene_objects = []
+    if state_mesh and len(state_mesh.vertices) > 0 and len(state_mesh.triangles) > 0:
+        mesh_pose = PoseStamped()
+        mesh_pose.header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
+        mesh_pose.header.stamp = rospy.Time.now()
+        mesh_pose.pose.orientation.w = 1.0
+        scene.add_mesh_custom('state_mesh', mesh_pose, state_mesh)     
+        expected_scene_objects.append('state_mesh')   
+
+        sync_scene(expected_scene_objects)
+        res.path = move_group.plan(req.goal_pose).joint_trajectory
+        if len(res.path.points) == 0:
+            res.message += "state collision, "
+            res.collisions[3] = True
+            res.collisions[4] = True #collision in full scene
+
+    #if collisions were found in either of them, return 
+    if res.collisions[4]:
+        print str(res.collisions)
+        return res
+
+    #if no previous collisions in seperated objects, add planes and boxes back to scene and retry
+    for name in dir(arena):
+        if name.startswith('pln'):
+            obj = getattr(arena, name)
+            obj.header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
+            scene.add_plane(name, obj)
+            expected_scene_objects.append(name)
+        elif name.startswith('box'):
+            obj = getattr(arena, name)
+            obj["pose"].header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
+            scene.add_box(name, obj["pose"], obj["size"])
+            expected_scene_objects.append(name)
+
+    sync_scene(expected_scene_objects)
+    res.path = move_group.plan(req.goal_pose).joint_trajectory
+    if len(res.path.points) == 0:
+            res.message += "combination collision, "
+            res.collisions[4] = True #collision in full scene
+            print str(res.collisions)
+            return res
+
+    res.message = "SUCCESS"
+    print str(res.collisions)
     return res
 
     ## END_SUB_TUTORIAL
-marker_pub_state=rospy.Publisher('/deepbuilder/robot/learner_state_array', MarkerArray, queue_size=1)
 
-def draw_learner_state(state, session_name):
-    marker_array = MarkerArray()
-    resolution=12
-    minX = 0.373
-    maxX = -0.378
-    minY = -1.0215
-    maxY = -0.2755
-    m = Marker()
-    m.type = Marker.POINTS
-    m.action = Marker.ADD
-    m.header.frame_id = "/base"
-    m.header.stamp = rospy.Time.now()
-    m.ns = session_name
-    m.id=0
-    m.pose.orientation.w=1.0
-    m.scale.x=0.01
-    m.scale.y=0.01
-    m.scale.z=0.01
-    m.lifetime=rospy.Duration()
+def update_state_mesh(req):
+    global state_mesh
+    global state_mesh_visualisation
+    global marker_id
+    res = ro_update_state_meshResponse()
+    try:
+        state_mesh = Mesh() #mesh for collision checking and planning
+        
+        state_mesh_visualisation = Marker() #only rviz visualisation mesh
+        state_mesh_visualisation.header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
+        state_mesh_visualisation.header.stamp = rospy.Time.now()
+        state_mesh_visualisation.ns = 'state_mesh-' + req.session
+        state_mesh_visualisation.id = 1
+        state_mesh_visualisation.type = Marker.TRIANGLE_LIST if len(req.vertices) > 0 else Marker.POINTS
+        state_mesh_visualisation.action = Marker.ADD
+        state_mesh_visualisation.pose.orientation.w = 1.0
+        state_mesh_visualisation.scale.x = 1.0
+        state_mesh_visualisation.scale.y = 1.0
+        state_mesh_visualisation.scale.z = 1.0
 
-    i = 0
-    for iterY in range(resolution):
-        for iterX in range(resolution):
-            p = Point()
-            p.x = minX + ((maxX - minX) * (float(iterX) / float(resolution - 1)))
-            p.y = minY + ((maxY - minY) * (float(iterY) / float(resolution - 1)))
-            p.z = state[i]
-            c = ColorRGBA()
-            c.r = 0.4 * float(iterX) / float(resolution)
-            c.g = 0.8 * float(iterY) / float(resolution)
-            c.b = 0.4
-            c.a = 1.0
-            m.points.append(p)
-            m.colors.append(c)
-            i+=1
+        state_mesh_visualisation.color.r = 0.8
+        state_mesh_visualisation.color.g = 0.3
+        state_mesh_visualisation.color.b = 0.3
+        state_mesh_visualisation.color.a = 1.0 if len(req.vertices) > 0 else 0.0
+        state_mesh_visualisation.lifetime = rospy.Duration()
 
-    marker_array.markers.append(m)
-    marker_pub_state.publish(marker_array)
+        if len(req.vertices) == 0:
+            state_mesh_visualisation.points.append(Point())
+            res.message = "[path_planning] State mesh succefully reset"
+        else:
+            for i in range(len(req.vertices)/3):
+                p = Point()
+                p.x = req.vertices[i*3]*0.001 #bc mm vs m
+                p.y = req.vertices[i*3+1]*0.001
+                p.z = req.vertices[i*3+2]*0.001
+                state_mesh.vertices.append(p)
 
-def display_trajectory(plan, speed_factor):
-    # Copy class variables to local variables to make the web tutorials more clear.
-    # In practice, you should use the class variables directly unless you have a good
-    # reason not to.
-    global robot
-    global display_trajectory_publisher
+            for i in range(len(req.indices)/3):
+                f = MeshTriangle()         
+                f.vertex_indices[0] = req.indices[i*3]
+                f.vertex_indices[1] = req.indices[i*3+1]
+                f.vertex_indices[2] = req.indices[i*3+2]
+                state_mesh.triangles.append(f)
 
-    ## BEGIN_SUB_TUTORIAL display_trajectory
-    ##
-    ## Displaying a Trajectory
-    ## ^^^^^^^^^^^^^^^^^^^^^^^
-    ## You can ask RViz to visualize a plan (aka trajectory) for you. But the
-    ## group.plan() method does this automatically so this is not that useful
-    ## here (it just displays the same trajectory again):
-    ##
-    ## A `DisplayTrajectory`_ msg has two primary fields, trajectory_start and trajectory.
-    ## We populate the trajectory_start with our current robot state to copy over
-    ## any AttachedCollisionObjects and add our plan to the trajectory.
-    display_trajectory = moveit_msgs.msg.DisplayTrajectory()
-    display_trajectory.trajectory_start = robot.get_current_state()
-    display_trajectory.trajectory.append(plan)
-    #for i in range(len(display_trajectory.trajectory.joint_trajectory.points)):
-    #    display_trajectory.trajectory.joint_trajectory.points[i].time_from_start *= speed_factor
-    # Publish
-    display_trajectory_publisher.publish(display_trajectory)
+                state_mesh_visualisation.points.append(state_mesh.vertices[f.vertex_indices[0]])
+                state_mesh_visualisation.points.append(state_mesh.vertices[f.vertex_indices[1]])
+                state_mesh_visualisation.points.append(state_mesh.vertices[f.vertex_indices[2]])
 
-    ## END_SUB_TUTORIAL
+            res.message = "[path_planning] State mesh successfully updated"
+
+
+
+    except KeyboardInterrupt:
+        raise
+    
+    except:
+        res.message = "[path_planning ERROR] State mesh could not be updated:\n" + str(sys.exc_info()[0]) + "\n" + str(sys.exc_info()[1])
+    
+    return res
+    
+def draw_state_mesh(data):
+    if state_mesh_visualisation:
+        marker_pub_env.publish(state_mesh_visualisation)
 
 def main():
     global robot
     global scene
+    global arena
+    global state
     global move_group
-    global display_trajectory_publisher
+    
+    arena = arena_objects()
 
     moveit_commander.roscpp_initialize(sys.argv)
-    rospy.init_node('db_path_planning', anonymous=True)
+    rospy.init_node('deepbuilder_path_planning', anonymous=True)
 
     robot = moveit_commander.RobotCommander()
     scene = moveit_commander.PlanningSceneInterface()
@@ -192,30 +291,7 @@ def main():
     group_name = "ur10_deepbuilder_pg"
     move_group = moveit_commander.MoveGroupCommander(group_name)
 
-
-    display_trajectory_publisher = rospy.Publisher('/move_group/display_planned_path_speed',
-                                                   moveit_msgs.msg.DisplayTrajectory,
-                                                   queue_size=20)
-
     rospy.sleep(2)
-
-    for name in dir(scene_objects):
-        if name.startswith('pln'):
-            print("Adding collision plane to scene: " + name)
-            obj = getattr(scene_objects, name)
-            obj.header.frame_id = 'base'
-            scene.add_plane(name, obj)
-            scene.add_box('box_'+name, obj, [0.2,0.2,0.005])
-
-        elif name.startswith('box'):
-            print("Adding collision box to scene: " + name)
-            obj = getattr(scene_objects, name)
-            obj["pose"].header.frame_id = 'base'
-
-            scene.add_box(name, obj["pose"], obj["size"])
-
-        rospy.sleep(0.1)
-
 
     planning_frame = move_group.get_planning_frame()
     print "============ Reference frame: %s" % planning_frame
@@ -237,9 +313,14 @@ def main():
     print robot.get_current_state().joint_state.position
     
     
-    srv_home = rospy.Service('/deepbuilder/robot/check_path',ro_check_path, plan_path)
-    srv_home = rospy.Service('deepbuilder/robot/move_home_moveit',ro_move_home, move_home_moveit)
-    srv_pt_mv = rospy.Service('deepbuilder/robot/move_to_point_moveit', ro_move_point, move_point_moveit) 
+    srv_plan = rospy.Service('/deepbuilder/robot/plan_path',ro_plan_path, plan_path)
+    srv_up_msh = rospy.Service('/deepbuilder/robot/update_state_mesh', ro_update_state_mesh, update_state_mesh)
+
+    rospy.Subscriber("/tf", TFMessage, draw_state_mesh)
+
+    print "You can start planning via ROS service requests now"
     rospy.spin()
+
+    moveit_commander.roscpp_shutdown()
 
 if __name__ == '__main__': main()

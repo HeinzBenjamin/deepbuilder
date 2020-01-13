@@ -36,7 +36,6 @@ if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspeci
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/my_msgs/msg" TYPE FILE FILES
     "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg"
     "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg"
-    "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/float_array.msg"
     )
 endif()
 
@@ -61,7 +60,7 @@ if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspeci
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  execute_process(COMMAND "/usr/bin/python" -m compileall "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/my_msgs")
+  execute_process(COMMAND "/usr/bin/python2" -m compileall "/home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/my_msgs")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")

@@ -1,8 +1,8 @@
 # generated from genmsg/cmake/pkg-genmsg.cmake.em
 
-message(STATUS "deepbuilder: 1 messages, 29 services")
+message(STATUS "deepbuilder: 0 messages, 5 services")
 
-set(MSG_I_FLAGS "-Ideepbuilder:/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg;-Imy_msgs:/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg;-Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg;-Irosbridge_msgs:/opt/ros/kinetic/share/rosbridge_msgs/cmake/../msg;-Igeometry_msgs:/opt/ros/kinetic/share/geometry_msgs/cmake/../msg;-Isensor_msgs:/opt/ros/kinetic/share/sensor_msgs/cmake/../msg;-Itrajectory_msgs:/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg")
+set(MSG_I_FLAGS "-Imy_msgs:/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg;-Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg;-Irosbridge_msgs:/opt/ros/kinetic/share/rosbridge_msgs/cmake/../msg;-Igeometry_msgs:/opt/ros/kinetic/share/geometry_msgs/cmake/../msg;-Ishape_msgs:/opt/ros/kinetic/share/shape_msgs/cmake/../msg;-Isensor_msgs:/opt/ros/kinetic/share/sensor_msgs/cmake/../msg;-Itrajectory_msgs:/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg")
 
 # Find all generators
 find_package(gencpp REQUIRED)
@@ -17,154 +17,29 @@ add_custom_target(deepbuilder_generate_messages ALL)
 
 
 
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_open.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_open.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_moveto.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_moveto.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_check_path.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_check_path.srv" "trajectory_msgs/JointTrajectoryPoint:std_msgs/Header:trajectory_msgs/JointTrajectory"
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_robot_state.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_robot_state.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_block.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_block.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_x.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_x.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_agent_presence.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_agent_presence.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_x.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_x.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_resolution.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_resolution.srv" ""
-)
-
 get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv" NAME_WE)
 add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
   COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv" ""
 )
 
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_get_status.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv" NAME_WE)
 add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_get_status.srv" "my_msgs/state:geometry_msgs/Quaternion:geometry_msgs/Point:deepbuilder/rt_status:geometry_msgs/Pose:my_msgs/action"
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv" "trajectory_msgs/JointTrajectoryPoint:std_msgs/Header:trajectory_msgs/JointTrajectory"
 )
 
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_state.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_plan_path.srv" NAME_WE)
 add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_state.srv" "geometry_msgs/Quaternion:geometry_msgs/Pose:geometry_msgs/Point"
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_plan_path.srv" "trajectory_msgs/JointTrajectoryPoint:std_msgs/Header:trajectory_msgs/JointTrajectory"
 )
 
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setforce.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_update_state_mesh.srv" NAME_WE)
 add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setforce.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_get_values.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_get_values.srv" "my_msgs/float_array"
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_cam.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_cam.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_source.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_source.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg" "geometry_msgs/Quaternion:geometry_msgs/Pose:my_msgs/action:my_msgs/state:geometry_msgs/Point"
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_y.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_y.srv" ""
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_update_state_mesh.srv" ""
 )
 
 get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv" NAME_WE)
 add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
   COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_action.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_action.srv" "my_msgs/action"
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_close.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_close.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setspeed.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setspeed.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_y.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_y.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_y.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_y.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_wait_for_ready.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_wait_for_ready.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_state.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_state.srv" "geometry_msgs/Quaternion:geometry_msgs/Pose:my_msgs/state:geometry_msgs/Point"
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_is_ready.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_is_ready.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_x.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_x.srv" ""
-)
-
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_correction.srv" NAME_WE)
-add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "deepbuilder" "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_correction.srv" ""
 )
 
 #
@@ -173,106 +48,16 @@ add_custom_target(_deepbuilder_generate_messages_check_deps_${_filename}
 
 ### Section generating for lang: gencpp
 ### Generating Messages
-_generate_msg_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg"
-  "${MSG_I_FLAGS}"
-  "/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg"
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
 
 ### Generating Services
 _generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_open.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_moveto.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_state.srv"
-  "${MSG_I_FLAGS}"
-  "/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg"
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_get_values.srv"
-  "${MSG_I_FLAGS}"
-  "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/float_array.msg"
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_robot_state.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_block.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_x.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_agent_presence.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_x.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_resolution.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_get_status.srv"
-  "${MSG_I_FLAGS}"
-  "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg;/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg"
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_state.srv"
-  "${MSG_I_FLAGS}"
-  "/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg"
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setforce.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_check_path.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv"
   "${MSG_I_FLAGS}"
   "/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectoryPoint.msg;/opt/ros/kinetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectory.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
 )
 _generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_cam.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_update_state_mesh.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
@@ -284,75 +69,15 @@ _generate_srv_cpp(deepbuilder
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
 )
 _generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_y.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
 )
 _generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_source.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_plan_path.srv"
   "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_action.srv"
-  "${MSG_I_FLAGS}"
-  "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg"
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_close.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setspeed.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_y.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_y.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_wait_for_ready.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_is_ready.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_x.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_cpp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_correction.srv"
-  "${MSG_I_FLAGS}"
-  ""
+  "/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectoryPoint.msg;/opt/ros/kinetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectory.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/deepbuilder
 )
 
@@ -368,65 +93,15 @@ add_custom_target(deepbuilder_generate_messages_cpp
 add_dependencies(deepbuilder_generate_messages deepbuilder_generate_messages_cpp)
 
 # add dependencies to all check dependencies targets
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_open.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_moveto.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_check_path.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_robot_state.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_block.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_x.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_agent_presence.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_x.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_resolution.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_get_status.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_state.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setforce.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_get_values.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_cam.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_source.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_y.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_action.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_close.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setspeed.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_y.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_plan_path.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_y.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_update_state_mesh.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_wait_for_ready.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_state.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_is_ready.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_x.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_correction.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_cpp _deepbuilder_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
@@ -438,106 +113,16 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS deepbuilder_generate_messages_cpp)
 
 ### Section generating for lang: geneus
 ### Generating Messages
-_generate_msg_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg"
-  "${MSG_I_FLAGS}"
-  "/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg"
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
 
 ### Generating Services
 _generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_open.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_moveto.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_state.srv"
-  "${MSG_I_FLAGS}"
-  "/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg"
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_get_values.srv"
-  "${MSG_I_FLAGS}"
-  "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/float_array.msg"
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_robot_state.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_block.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_x.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_agent_presence.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_x.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_resolution.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_get_status.srv"
-  "${MSG_I_FLAGS}"
-  "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg;/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg"
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_state.srv"
-  "${MSG_I_FLAGS}"
-  "/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg"
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setforce.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_check_path.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv"
   "${MSG_I_FLAGS}"
   "/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectoryPoint.msg;/opt/ros/kinetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectory.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
 )
 _generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_cam.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_update_state_mesh.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
@@ -549,75 +134,15 @@ _generate_srv_eus(deepbuilder
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
 )
 _generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_y.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
 )
 _generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_source.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_plan_path.srv"
   "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_action.srv"
-  "${MSG_I_FLAGS}"
-  "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg"
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_close.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setspeed.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_y.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_y.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_wait_for_ready.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_is_ready.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_x.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_eus(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_correction.srv"
-  "${MSG_I_FLAGS}"
-  ""
+  "/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectoryPoint.msg;/opt/ros/kinetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectory.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/deepbuilder
 )
 
@@ -633,65 +158,15 @@ add_custom_target(deepbuilder_generate_messages_eus
 add_dependencies(deepbuilder_generate_messages deepbuilder_generate_messages_eus)
 
 # add dependencies to all check dependencies targets
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_open.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_moveto.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_check_path.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_robot_state.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_block.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_x.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_agent_presence.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_x.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_resolution.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_get_status.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_state.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setforce.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_get_values.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_cam.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_source.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_y.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_action.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_close.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setspeed.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_y.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_plan_path.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_y.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_update_state_mesh.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_wait_for_ready.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_state.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_is_ready.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_x.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_correction.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_eus _deepbuilder_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
@@ -703,106 +178,16 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS deepbuilder_generate_messages_eus)
 
 ### Section generating for lang: genlisp
 ### Generating Messages
-_generate_msg_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg"
-  "${MSG_I_FLAGS}"
-  "/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg"
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
 
 ### Generating Services
 _generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_open.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_moveto.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_state.srv"
-  "${MSG_I_FLAGS}"
-  "/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg"
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_get_values.srv"
-  "${MSG_I_FLAGS}"
-  "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/float_array.msg"
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_robot_state.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_block.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_x.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_agent_presence.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_x.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_resolution.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_get_status.srv"
-  "${MSG_I_FLAGS}"
-  "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg;/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg"
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_state.srv"
-  "${MSG_I_FLAGS}"
-  "/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg"
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setforce.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_check_path.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv"
   "${MSG_I_FLAGS}"
   "/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectoryPoint.msg;/opt/ros/kinetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectory.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
 )
 _generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_cam.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_update_state_mesh.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
@@ -814,75 +199,15 @@ _generate_srv_lisp(deepbuilder
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
 )
 _generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_y.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
 )
 _generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_source.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_plan_path.srv"
   "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_action.srv"
-  "${MSG_I_FLAGS}"
-  "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg"
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_close.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setspeed.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_y.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_y.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_wait_for_ready.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_is_ready.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_x.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_lisp(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_correction.srv"
-  "${MSG_I_FLAGS}"
-  ""
+  "/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectoryPoint.msg;/opt/ros/kinetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectory.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/deepbuilder
 )
 
@@ -898,65 +223,15 @@ add_custom_target(deepbuilder_generate_messages_lisp
 add_dependencies(deepbuilder_generate_messages deepbuilder_generate_messages_lisp)
 
 # add dependencies to all check dependencies targets
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_open.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_moveto.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_check_path.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_robot_state.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_block.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_x.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_agent_presence.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_x.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_resolution.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_get_status.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_state.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setforce.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_get_values.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_cam.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_source.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_y.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_action.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_close.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setspeed.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_y.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_plan_path.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_y.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_update_state_mesh.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_wait_for_ready.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_state.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_is_ready.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_x.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_correction.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_lisp _deepbuilder_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
@@ -968,106 +243,16 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS deepbuilder_generate_messages_lisp)
 
 ### Section generating for lang: gennodejs
 ### Generating Messages
-_generate_msg_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg"
-  "${MSG_I_FLAGS}"
-  "/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg"
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
 
 ### Generating Services
 _generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_open.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_moveto.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_state.srv"
-  "${MSG_I_FLAGS}"
-  "/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg"
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_get_values.srv"
-  "${MSG_I_FLAGS}"
-  "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/float_array.msg"
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_robot_state.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_block.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_x.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_agent_presence.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_x.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_resolution.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_get_status.srv"
-  "${MSG_I_FLAGS}"
-  "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg;/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg"
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_state.srv"
-  "${MSG_I_FLAGS}"
-  "/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg"
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setforce.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_check_path.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv"
   "${MSG_I_FLAGS}"
   "/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectoryPoint.msg;/opt/ros/kinetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectory.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
 )
 _generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_cam.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_update_state_mesh.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
@@ -1079,75 +264,15 @@ _generate_srv_nodejs(deepbuilder
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
 )
 _generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_y.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
 )
 _generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_source.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_plan_path.srv"
   "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_action.srv"
-  "${MSG_I_FLAGS}"
-  "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg"
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_close.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setspeed.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_y.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_y.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_wait_for_ready.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_is_ready.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_x.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_nodejs(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_correction.srv"
-  "${MSG_I_FLAGS}"
-  ""
+  "/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectoryPoint.msg;/opt/ros/kinetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectory.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/deepbuilder
 )
 
@@ -1163,65 +288,15 @@ add_custom_target(deepbuilder_generate_messages_nodejs
 add_dependencies(deepbuilder_generate_messages deepbuilder_generate_messages_nodejs)
 
 # add dependencies to all check dependencies targets
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_open.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_moveto.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_check_path.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_robot_state.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_block.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_x.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_agent_presence.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_x.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_resolution.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_get_status.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_state.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setforce.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_get_values.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_cam.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_source.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_y.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_action.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_close.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setspeed.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_y.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_plan_path.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_y.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_update_state_mesh.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_wait_for_ready.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_state.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_is_ready.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_x.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_correction.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_nodejs _deepbuilder_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
@@ -1233,106 +308,16 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS deepbuilder_generate_messages_nodej
 
 ### Section generating for lang: genpy
 ### Generating Messages
-_generate_msg_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg"
-  "${MSG_I_FLAGS}"
-  "/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg"
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
 
 ### Generating Services
 _generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_open.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_moveto.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_state.srv"
-  "${MSG_I_FLAGS}"
-  "/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg"
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_get_values.srv"
-  "${MSG_I_FLAGS}"
-  "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/float_array.msg"
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_robot_state.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_block.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_x.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_agent_presence.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_x.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_resolution.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_get_status.srv"
-  "${MSG_I_FLAGS}"
-  "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/state.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg;/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg"
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_state.srv"
-  "${MSG_I_FLAGS}"
-  "/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/kinetic/share/geometry_msgs/cmake/../msg/Point.msg"
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setforce.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_check_path.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv"
   "${MSG_I_FLAGS}"
   "/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectoryPoint.msg;/opt/ros/kinetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectory.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
 )
 _generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_cam.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_update_state_mesh.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
@@ -1344,75 +329,15 @@ _generate_srv_py(deepbuilder
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
 )
 _generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_y.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
 )
 _generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_source.srv"
+  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_plan_path.srv"
   "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_action.srv"
-  "${MSG_I_FLAGS}"
-  "/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg"
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_close.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setspeed.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_y.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_y.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_wait_for_ready.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_is_ready.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_x.srv"
-  "${MSG_I_FLAGS}"
-  ""
-  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
-)
-_generate_srv_py(deepbuilder
-  "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_correction.srv"
-  "${MSG_I_FLAGS}"
-  ""
+  "/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectoryPoint.msg;/opt/ros/kinetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg/JointTrajectory.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
 )
 
@@ -1428,65 +353,15 @@ add_custom_target(deepbuilder_generate_messages_py
 add_dependencies(deepbuilder_generate_messages deepbuilder_generate_messages_py)
 
 # add dependencies to all check dependencies targets
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_open.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_moveto.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_check_path.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_robot_state.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_block.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_x.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_agent_presence.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_x.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_resolution.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_home.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_get_status.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_get_state.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setforce.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_get_values.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_cam.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_source.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/msg/rt_status.msg" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_fieldsize_y.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_action.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_close.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_gripper_setspeed.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_start_y.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_plan_path.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_y.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_update_state_mesh.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_wait_for_ready.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_set_state.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/rt_is_ready.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_field_offset_x.srv" NAME_WE)
-add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_adjust_correction.srv" NAME_WE)
+get_filename_component(_filename "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv" NAME_WE)
 add_dependencies(deepbuilder_generate_messages_py _deepbuilder_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
@@ -1517,6 +392,9 @@ endif()
 if(TARGET geometry_msgs_generate_messages_cpp)
   add_dependencies(deepbuilder_generate_messages_cpp geometry_msgs_generate_messages_cpp)
 endif()
+if(TARGET shape_msgs_generate_messages_cpp)
+  add_dependencies(deepbuilder_generate_messages_cpp shape_msgs_generate_messages_cpp)
+endif()
 if(TARGET sensor_msgs_generate_messages_cpp)
   add_dependencies(deepbuilder_generate_messages_cpp sensor_msgs_generate_messages_cpp)
 endif()
@@ -1542,6 +420,9 @@ if(TARGET rosbridge_msgs_generate_messages_eus)
 endif()
 if(TARGET geometry_msgs_generate_messages_eus)
   add_dependencies(deepbuilder_generate_messages_eus geometry_msgs_generate_messages_eus)
+endif()
+if(TARGET shape_msgs_generate_messages_eus)
+  add_dependencies(deepbuilder_generate_messages_eus shape_msgs_generate_messages_eus)
 endif()
 if(TARGET sensor_msgs_generate_messages_eus)
   add_dependencies(deepbuilder_generate_messages_eus sensor_msgs_generate_messages_eus)
@@ -1569,6 +450,9 @@ endif()
 if(TARGET geometry_msgs_generate_messages_lisp)
   add_dependencies(deepbuilder_generate_messages_lisp geometry_msgs_generate_messages_lisp)
 endif()
+if(TARGET shape_msgs_generate_messages_lisp)
+  add_dependencies(deepbuilder_generate_messages_lisp shape_msgs_generate_messages_lisp)
+endif()
 if(TARGET sensor_msgs_generate_messages_lisp)
   add_dependencies(deepbuilder_generate_messages_lisp sensor_msgs_generate_messages_lisp)
 endif()
@@ -1595,6 +479,9 @@ endif()
 if(TARGET geometry_msgs_generate_messages_nodejs)
   add_dependencies(deepbuilder_generate_messages_nodejs geometry_msgs_generate_messages_nodejs)
 endif()
+if(TARGET shape_msgs_generate_messages_nodejs)
+  add_dependencies(deepbuilder_generate_messages_nodejs shape_msgs_generate_messages_nodejs)
+endif()
 if(TARGET sensor_msgs_generate_messages_nodejs)
   add_dependencies(deepbuilder_generate_messages_nodejs sensor_msgs_generate_messages_nodejs)
 endif()
@@ -1603,7 +490,7 @@ if(TARGET trajectory_msgs_generate_messages_nodejs)
 endif()
 
 if(genpy_INSTALL_DIR AND EXISTS ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder)
-  install(CODE "execute_process(COMMAND \"/usr/bin/python\" -m compileall \"${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder\")")
+  install(CODE "execute_process(COMMAND \"/usr/bin/python2\" -m compileall \"${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder\")")
   # install generated code
   install(
     DIRECTORY ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/deepbuilder
@@ -1621,6 +508,9 @@ if(TARGET rosbridge_msgs_generate_messages_py)
 endif()
 if(TARGET geometry_msgs_generate_messages_py)
   add_dependencies(deepbuilder_generate_messages_py geometry_msgs_generate_messages_py)
+endif()
+if(TARGET shape_msgs_generate_messages_py)
+  add_dependencies(deepbuilder_generate_messages_py shape_msgs_generate_messages_py)
 endif()
 if(TARGET sensor_msgs_generate_messages_py)
   add_dependencies(deepbuilder_generate_messages_py sensor_msgs_generate_messages_py)

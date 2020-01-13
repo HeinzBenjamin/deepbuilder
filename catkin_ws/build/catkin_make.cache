@@ -1,2 +1,2 @@
-deepbuilder:my_msgs:ur10_robotiq
+deepbuilder:my_msgs
 -DCATKIN_DEVEL_PREFIX=/home/ros/deepbuilder/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/ros/deepbuilder/catkin_ws/install -G Unix Makefiles

@@ -8,17 +8,21 @@ import struct
 import geometry_msgs.msg
 
 class state(genpy.Message):
-  _md5sum = "72cea1bd08eaaeaa5fb310c31bb88005"
+  _md5sum = "b716ae9e4e97f8d790d147cc9fc70235"
   _type = "my_msgs/state"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """string action_id
-bool out_of_reach
-bool self_collision
-geometry_msgs/Pose last_tcp
-int32 fastest_box
-int32 highest_box
+bool is_printable
+geometry_msgs/Pose action_tcp
+geometry_msgs/Pose[] displaced_tcps
+float32[] state_compressed
+float32 compression_loss
+float32[] state_mesh_vertices
+int32[] state_mesh_indices
 float32 current_height
-geometry_msgs/Pose[] box_poses
+float32[] current_tcp_displacements
+float32 current_smoothness
+float32 current_area
 ================================================================================
 MSG: geometry_msgs/Pose
 # A representation of pose in free space, composed of position and orientation. 
@@ -41,8 +45,8 @@ float64 y
 float64 z
 float64 w
 """
-  __slots__ = ['action_id','out_of_reach','self_collision','last_tcp','fastest_box','highest_box','current_height','box_poses']
-  _slot_types = ['string','bool','bool','geometry_msgs/Pose','int32','int32','float32','geometry_msgs/Pose[]']
+  __slots__ = ['action_id','is_printable','action_tcp','displaced_tcps','state_compressed','compression_loss','state_mesh_vertices','state_mesh_indices','current_height','current_tcp_displacements','current_smoothness','current_area']
+  _slot_types = ['string','bool','geometry_msgs/Pose','geometry_msgs/Pose[]','float32[]','float32','float32[]','int32[]','float32','float32[]','float32','float32']
 
   def __init__(self, *args, **kwds):
     """
@@ -52,7 +56,7 @@ float64 w
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       action_id,out_of_reach,self_collision,last_tcp,fastest_box,highest_box,current_height,box_poses
+       action_id,is_printable,action_tcp,displaced_tcps,state_compressed,compression_loss,state_mesh_vertices,state_mesh_indices,current_height,current_tcp_displacements,current_smoothness,current_area
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -63,29 +67,41 @@ float64 w
       #message fields cannot be None, assign default values for those that are
       if self.action_id is None:
         self.action_id = ''
-      if self.out_of_reach is None:
-        self.out_of_reach = False
-      if self.self_collision is None:
-        self.self_collision = False
-      if self.last_tcp is None:
-        self.last_tcp = geometry_msgs.msg.Pose()
-      if self.fastest_box is None:
-        self.fastest_box = 0
-      if self.highest_box is None:
-        self.highest_box = 0
+      if self.is_printable is None:
+        self.is_printable = False
+      if self.action_tcp is None:
+        self.action_tcp = geometry_msgs.msg.Pose()
+      if self.displaced_tcps is None:
+        self.displaced_tcps = []
+      if self.state_compressed is None:
+        self.state_compressed = []
+      if self.compression_loss is None:
+        self.compression_loss = 0.
+      if self.state_mesh_vertices is None:
+        self.state_mesh_vertices = []
+      if self.state_mesh_indices is None:
+        self.state_mesh_indices = []
       if self.current_height is None:
         self.current_height = 0.
-      if self.box_poses is None:
-        self.box_poses = []
+      if self.current_tcp_displacements is None:
+        self.current_tcp_displacements = []
+      if self.current_smoothness is None:
+        self.current_smoothness = 0.
+      if self.current_area is None:
+        self.current_area = 0.
     else:
       self.action_id = ''
-      self.out_of_reach = False
-      self.self_collision = False
-      self.last_tcp = geometry_msgs.msg.Pose()
-      self.fastest_box = 0
-      self.highest_box = 0
+      self.is_printable = False
+      self.action_tcp = geometry_msgs.msg.Pose()
+      self.displaced_tcps = []
+      self.state_compressed = []
+      self.compression_loss = 0.
+      self.state_mesh_vertices = []
+      self.state_mesh_indices = []
       self.current_height = 0.
-      self.box_poses = []
+      self.current_tcp_displacements = []
+      self.current_smoothness = 0.
+      self.current_area = 0.
 
   def _get_types(self):
     """
@@ -106,16 +122,36 @@ float64 w
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_get_struct_2B7d2if().pack(_x.out_of_reach, _x.self_collision, _x.last_tcp.position.x, _x.last_tcp.position.y, _x.last_tcp.position.z, _x.last_tcp.orientation.x, _x.last_tcp.orientation.y, _x.last_tcp.orientation.z, _x.last_tcp.orientation.w, _x.fastest_box, _x.highest_box, _x.current_height))
-      length = len(self.box_poses)
+      buff.write(_get_struct_B7d().pack(_x.is_printable, _x.action_tcp.position.x, _x.action_tcp.position.y, _x.action_tcp.position.z, _x.action_tcp.orientation.x, _x.action_tcp.orientation.y, _x.action_tcp.orientation.z, _x.action_tcp.orientation.w))
+      length = len(self.displaced_tcps)
       buff.write(_struct_I.pack(length))
-      for val1 in self.box_poses:
+      for val1 in self.displaced_tcps:
         _v1 = val1.position
         _x = _v1
         buff.write(_get_struct_3d().pack(_x.x, _x.y, _x.z))
         _v2 = val1.orientation
         _x = _v2
         buff.write(_get_struct_4d().pack(_x.x, _x.y, _x.z, _x.w))
+      length = len(self.state_compressed)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%sf'%length
+      buff.write(struct.pack(pattern, *self.state_compressed))
+      buff.write(_get_struct_f().pack(self.compression_loss))
+      length = len(self.state_mesh_vertices)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%sf'%length
+      buff.write(struct.pack(pattern, *self.state_mesh_vertices))
+      length = len(self.state_mesh_indices)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%si'%length
+      buff.write(struct.pack(pattern, *self.state_mesh_indices))
+      buff.write(_get_struct_f().pack(self.current_height))
+      length = len(self.current_tcp_displacements)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%sf'%length
+      buff.write(struct.pack(pattern, *self.current_tcp_displacements))
+      _x = self
+      buff.write(_get_struct_2f().pack(_x.current_smoothness, _x.current_area))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -125,10 +161,10 @@ float64 w
     :param str: byte array of serialized message, ``str``
     """
     try:
-      if self.last_tcp is None:
-        self.last_tcp = geometry_msgs.msg.Pose()
-      if self.box_poses is None:
-        self.box_poses = None
+      if self.action_tcp is None:
+        self.action_tcp = geometry_msgs.msg.Pose()
+      if self.displaced_tcps is None:
+        self.displaced_tcps = None
       end = 0
       start = end
       end += 4
@@ -141,14 +177,13 @@ float64 w
         self.action_id = str[start:end]
       _x = self
       start = end
-      end += 70
-      (_x.out_of_reach, _x.self_collision, _x.last_tcp.position.x, _x.last_tcp.position.y, _x.last_tcp.position.z, _x.last_tcp.orientation.x, _x.last_tcp.orientation.y, _x.last_tcp.orientation.z, _x.last_tcp.orientation.w, _x.fastest_box, _x.highest_box, _x.current_height,) = _get_struct_2B7d2if().unpack(str[start:end])
-      self.out_of_reach = bool(self.out_of_reach)
-      self.self_collision = bool(self.self_collision)
+      end += 57
+      (_x.is_printable, _x.action_tcp.position.x, _x.action_tcp.position.y, _x.action_tcp.position.z, _x.action_tcp.orientation.x, _x.action_tcp.orientation.y, _x.action_tcp.orientation.z, _x.action_tcp.orientation.w,) = _get_struct_B7d().unpack(str[start:end])
+      self.is_printable = bool(self.is_printable)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
-      self.box_poses = []
+      self.displaced_tcps = []
       for i in range(0, length):
         val1 = geometry_msgs.msg.Pose()
         _v3 = val1.position
@@ -161,7 +196,45 @@ float64 w
         start = end
         end += 32
         (_x.x, _x.y, _x.z, _x.w,) = _get_struct_4d().unpack(str[start:end])
-        self.box_poses.append(val1)
+        self.displaced_tcps.append(val1)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%sf'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.state_compressed = struct.unpack(pattern, str[start:end])
+      start = end
+      end += 4
+      (self.compression_loss,) = _get_struct_f().unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%sf'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.state_mesh_vertices = struct.unpack(pattern, str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%si'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.state_mesh_indices = struct.unpack(pattern, str[start:end])
+      start = end
+      end += 4
+      (self.current_height,) = _get_struct_f().unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%sf'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.current_tcp_displacements = struct.unpack(pattern, str[start:end])
+      _x = self
+      start = end
+      end += 8
+      (_x.current_smoothness, _x.current_area,) = _get_struct_2f().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -181,16 +254,36 @@ float64 w
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_get_struct_2B7d2if().pack(_x.out_of_reach, _x.self_collision, _x.last_tcp.position.x, _x.last_tcp.position.y, _x.last_tcp.position.z, _x.last_tcp.orientation.x, _x.last_tcp.orientation.y, _x.last_tcp.orientation.z, _x.last_tcp.orientation.w, _x.fastest_box, _x.highest_box, _x.current_height))
-      length = len(self.box_poses)
+      buff.write(_get_struct_B7d().pack(_x.is_printable, _x.action_tcp.position.x, _x.action_tcp.position.y, _x.action_tcp.position.z, _x.action_tcp.orientation.x, _x.action_tcp.orientation.y, _x.action_tcp.orientation.z, _x.action_tcp.orientation.w))
+      length = len(self.displaced_tcps)
       buff.write(_struct_I.pack(length))
-      for val1 in self.box_poses:
+      for val1 in self.displaced_tcps:
         _v5 = val1.position
         _x = _v5
         buff.write(_get_struct_3d().pack(_x.x, _x.y, _x.z))
         _v6 = val1.orientation
         _x = _v6
         buff.write(_get_struct_4d().pack(_x.x, _x.y, _x.z, _x.w))
+      length = len(self.state_compressed)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%sf'%length
+      buff.write(self.state_compressed.tostring())
+      buff.write(_get_struct_f().pack(self.compression_loss))
+      length = len(self.state_mesh_vertices)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%sf'%length
+      buff.write(self.state_mesh_vertices.tostring())
+      length = len(self.state_mesh_indices)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%si'%length
+      buff.write(self.state_mesh_indices.tostring())
+      buff.write(_get_struct_f().pack(self.current_height))
+      length = len(self.current_tcp_displacements)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%sf'%length
+      buff.write(self.current_tcp_displacements.tostring())
+      _x = self
+      buff.write(_get_struct_2f().pack(_x.current_smoothness, _x.current_area))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -201,10 +294,10 @@ float64 w
     :param numpy: numpy python module
     """
     try:
-      if self.last_tcp is None:
-        self.last_tcp = geometry_msgs.msg.Pose()
-      if self.box_poses is None:
-        self.box_poses = None
+      if self.action_tcp is None:
+        self.action_tcp = geometry_msgs.msg.Pose()
+      if self.displaced_tcps is None:
+        self.displaced_tcps = None
       end = 0
       start = end
       end += 4
@@ -217,14 +310,13 @@ float64 w
         self.action_id = str[start:end]
       _x = self
       start = end
-      end += 70
-      (_x.out_of_reach, _x.self_collision, _x.last_tcp.position.x, _x.last_tcp.position.y, _x.last_tcp.position.z, _x.last_tcp.orientation.x, _x.last_tcp.orientation.y, _x.last_tcp.orientation.z, _x.last_tcp.orientation.w, _x.fastest_box, _x.highest_box, _x.current_height,) = _get_struct_2B7d2if().unpack(str[start:end])
-      self.out_of_reach = bool(self.out_of_reach)
-      self.self_collision = bool(self.self_collision)
+      end += 57
+      (_x.is_printable, _x.action_tcp.position.x, _x.action_tcp.position.y, _x.action_tcp.position.z, _x.action_tcp.orientation.x, _x.action_tcp.orientation.y, _x.action_tcp.orientation.z, _x.action_tcp.orientation.w,) = _get_struct_B7d().unpack(str[start:end])
+      self.is_printable = bool(self.is_printable)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
-      self.box_poses = []
+      self.displaced_tcps = []
       for i in range(0, length):
         val1 = geometry_msgs.msg.Pose()
         _v7 = val1.position
@@ -237,7 +329,45 @@ float64 w
         start = end
         end += 32
         (_x.x, _x.y, _x.z, _x.w,) = _get_struct_4d().unpack(str[start:end])
-        self.box_poses.append(val1)
+        self.displaced_tcps.append(val1)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%sf'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.state_compressed = numpy.frombuffer(str[start:end], dtype=numpy.float32, count=length)
+      start = end
+      end += 4
+      (self.compression_loss,) = _get_struct_f().unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%sf'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.state_mesh_vertices = numpy.frombuffer(str[start:end], dtype=numpy.float32, count=length)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%si'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.state_mesh_indices = numpy.frombuffer(str[start:end], dtype=numpy.int32, count=length)
+      start = end
+      end += 4
+      (self.current_height,) = _get_struct_f().unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%sf'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.current_tcp_displacements = numpy.frombuffer(str[start:end], dtype=numpy.float32, count=length)
+      _x = self
+      start = end
+      end += 8
+      (_x.current_smoothness, _x.current_area,) = _get_struct_2f().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -252,12 +382,24 @@ def _get_struct_4d():
     if _struct_4d is None:
         _struct_4d = struct.Struct("<4d")
     return _struct_4d
-_struct_2B7d2if = None
-def _get_struct_2B7d2if():
-    global _struct_2B7d2if
-    if _struct_2B7d2if is None:
-        _struct_2B7d2if = struct.Struct("<2B7d2if")
-    return _struct_2B7d2if
+_struct_f = None
+def _get_struct_f():
+    global _struct_f
+    if _struct_f is None:
+        _struct_f = struct.Struct("<f")
+    return _struct_f
+_struct_B7d = None
+def _get_struct_B7d():
+    global _struct_B7d
+    if _struct_B7d is None:
+        _struct_B7d = struct.Struct("<B7d")
+    return _struct_B7d
+_struct_2f = None
+def _get_struct_2f():
+    global _struct_2f
+    if _struct_2f is None:
+        _struct_2f = struct.Struct("<2f")
+    return _struct_2f
 _struct_3d = None
 def _get_struct_3d():
     global _struct_3d

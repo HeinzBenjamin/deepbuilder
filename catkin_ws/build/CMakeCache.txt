@@ -354,10 +354,10 @@ LSB_RELEASE_EXECUTABLE:FILEPATH=/usr/bin/lsb_release
 NOSETESTS:FILEPATH=/usr/bin/nosetests-2.7
 
 //Path to a program.
-PYTHON_EXECUTABLE:FILEPATH=/usr/bin/python
+PYTHON_EXECUTABLE:FILEPATH=/usr/bin/python2
 
 //Specify specific Python version to use ('major.minor' or 'major')
-PYTHON_VERSION:STRING=
+PYTHON_VERSION:STRING=2
 
 //Value Computed by CMake
 Project_BINARY_DIR:STATIC=/home/ros/deepbuilder/catkin_ws/build
@@ -494,12 +494,6 @@ hardware_interface_DIR:PATH=/opt/ros/kinetic/share/hardware_interface/cmake
 
 //The directory containing a CMake configuration file for industrial_msgs.
 industrial_msgs_DIR:PATH=/opt/ros/kinetic/share/industrial_msgs/cmake
-
-//Value Computed by CMake
-launch_BINARY_DIR:STATIC=/home/ros/deepbuilder/catkin_ws/build/ur10_robotiq
-
-//Value Computed by CMake
-launch_SOURCE_DIR:STATIC=/home/ros/deepbuilder/catkin_ws/src/ur10_robotiq
 
 //Path to a library.
 lib:FILEPATH=/opt/ros/kinetic/lib/libtopic_tools.so
@@ -750,7 +744,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=6
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=5
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -872,7 +866,7 @@ CUDA_run_nvcc:INTERNAL=/usr/share/cmake-3.5/Modules/FindCUDA/run_nvcc.cmake
 //Details about finding CUDA
 FIND_PACKAGE_MESSAGE_DETAILS_CUDA:INTERNAL=[/usr/local/cuda-9.0][/usr/local/cuda-9.0/bin/nvcc][/usr/local/cuda-9.0/include][/usr/local/cuda-9.0/lib64/libcudart.so][v9.0()]
 //Details about finding PythonInterp
-FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[/usr/bin/python][v2.7.12()]
+FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[/usr/bin/python2][v2.7.12()]
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
 GMOCK_FROM_SOURCE_FOUND:INTERNAL=TRUE

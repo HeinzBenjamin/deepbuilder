@@ -17,17 +17,17 @@ configuration={
     'learning_rate': 0.02,
     'momentum': 0.7,
     'weight_decay' : 0.0,
-    'bottleneck': 256
+    'bottleneck': 144
 }
 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     #args relevant for env setup
-    parser.add_argument('--test_samples_directory',type=str,default='/home/ros/deepbuilder/autoencoder_training/training_data/thingy_solid_lvl6_torch_conv3d/test/')
-    parser.add_argument('--train_samples_directory',type=str,default='/home/ros/deepbuilder/autoencoder_training/training_data/thingy_solid_lvl6_torch_conv3d/train/')
+    parser.add_argument('--test_samples_directory',type=str,default='/home/ros/deepbuilder_backup_191230/autoencoder_training/training_data/thingy_solid_lvl6_torch_conv3d/test/')
+    parser.add_argument('--train_samples_directory',type=str,default='/home/ros/deepbuilder_backup_191230/autoencoder_training/training_data/thingy_solid_lvl6_torch_conv3d/train/')
     parser.add_argument('--samples_per_epoch',type=int,default=2000)
-    parser.add_argument('--model_directory',type=str,default='/home/ros/deepbuilder/autoencoder_training/trained_models/conv3d/')
+    parser.add_argument('--model_directory',type=str,default='/home/ros/deepbuilder_backup_191230/autoencoder_training/trained_models/conv3d/')
     parser.add_argument('--num_epochs',type=int,default=9999999999)
     parser.add_argument('--random_order',type=int,default=1)
     parser.add_argument('--noise_std',type=float,default=1.5/750.0)

@@ -1,31 +1,23 @@
 <launch>
-    <arg name="gh_ip" default="192.168.137.1" />
-    <arg name="ur_ip" default="192.168.0.10" />
-    <arg name="ros_rate" default="10" />
-
     <node name="rosbridge_server" pkg="rosbridge_server" type="rosbridge_websocket" />
-    <node name="db_fake_robot" pkg="deepbuilder" type="fake_robot.py" output="screen" />
-    <node name="db_runtime" pkg="deepbuilder" type="runtime" output="screen" args="$(arg gh_ip) $(arg ros_rate)"/>
-    <node name="db_learner" pkg="deepbuilder" type="learner.py" output="screen"/>
-    <node name="db_robot" pkg="deepbuilder" type="robot_control.py" output="screen" args="$(arg ur_ip)"/>
-    <!--node name="db_gripper" pkg="deepbuilder" type="gripper_control" output="screen" /-->
-
+    <node name="deepbuilder_fake_robot" pkg="deepbuilder" type="fake_robot.py" output="screen" />
+    <!--node name="deepbuilder_robot_control" pkg="deepbuilder" type="robot_control.py" output="screen" /-->    
 
 <!-- Load the URDF, SRDF and other .yaml configuration files on the param server -->
-  <include file="$(find ur10_deepbuilder_moveit_config)/launch/planning_context.launch">
+  <include file="$(find ur10_deepbuilder2_moveit_config)/launch/planning_context.launch">
     <arg name="load_robot_description" value="true"/>
   </include>
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" />
 
     <!-- Run the main MoveIt! executable without trajectory execution (we do not have controllers configured by default) -->
-  <include file="$(find ur10_deepbuilder_moveit_config)/launch/move_group.launch">
-    <arg name="allow_trajectory_execution" value="true"/>
+  <include file="$(find ur10_deepbuilder2_moveit_config)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" value="false"/>
     <arg name="fake_execution" value="false"/>
     <arg name="info" value="true"/>
     <arg name="debug" value="false"/>
   </include>
 
-  <node name="db_path_planning" pkg="deepbuilder" type="path_planning.py" output="screen" />
+  <node name="deepbuilder_path_planning" pkg="deepbuilder" type="path_planning.py" output="screen" />  
   <node name="rviz" pkg="rviz" type="rviz" />
 </launch>

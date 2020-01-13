@@ -39,15 +39,19 @@ class autoencoder64(nn.Module):
             nn.Conv3d(in_channels = 256, out_channels = 512, kernel_size = 4, stride = 2, padding = 0), #down sampled to 4^3
             nn.BatchNorm3d(512),
             Flatten(),
-            nn.Linear(4096, 1024),
+            nn.Linear(4096, 1296),
             nn.ReLU(True),
-            nn.Linear(1024, bottle_neck_size))
+            nn.Linear(1296, 432),
+            nn.ReLU(True),
+            nn.Linear(432, bottle_neck_size))
             
         
         self.decoder = nn.Sequential(
-            nn.Linear(bottle_neck_size, 1024),
+            nn.Linear(bottle_neck_size, 432),
             nn.ReLU(True),
-            nn.Linear(1024, 4096),
+            nn.Linear(432, 1296),
+            nn.ReLU(True),
+            nn.Linear(1296, 4096),
             nn.ReLU(True),
             Stack64(),
             nn.ConvTranspose3d(in_channels = 64, out_channels = 256, kernel_size = 4, stride=2, padding = 1),
@@ -84,7 +88,7 @@ class autoencoder64(nn.Module):
     
     def encode(self, x):
         if len(x.shape) == 1:
-            x = x.view(32,32,32)
+            x = x.view(64,64,64)
         while len(x.shape) < 5:
             x = Variable(x).unsqueeze(0)
 

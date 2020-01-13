@@ -1,2 +1,2 @@
-/usr/bin/ar qc /home/ros/deepbuilder/catkin_ws/devel/lib/libcu_depth_cloud.a  CMakeFiles/cu_depth_cloud.dir/src/cu_depth_cloud_generated_depth_cloud.cu.o
+/usr/bin/ar qc /home/ros/deepbuilder/catkin_ws/devel/lib/libcu_depth_cloud.a  
 /usr/bin/ranlib /home/ros/deepbuilder/catkin_ws/devel/lib/libcu_depth_cloud.a

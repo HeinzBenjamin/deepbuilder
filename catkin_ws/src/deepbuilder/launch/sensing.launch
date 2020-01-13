@@ -1,6 +1,0 @@
-<launch>
-    <arg name="ros_rate" default="10" />
-    <arg name="gh_ip" default="192.168.0.100" />
-    <node name="db_runtime" pkg="deepbuilder" type="runtime" output="screen" args="$(arg gh_ip) $(arg ros_rate)"/>
-    <node name="rviz" pkg="rviz" type="rviz" />
-</launch>

@@ -1,6 +1,0 @@
-float32[] goal
-float32[] state
-string session_name
----
-trajectory_msgs/JointTrajectory path
-string message

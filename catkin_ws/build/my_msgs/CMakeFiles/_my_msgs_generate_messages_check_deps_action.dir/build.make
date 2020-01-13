@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/ros/deepbuilder/catkin_ws/build
 include my_msgs/CMakeFiles/_my_msgs_generate_messages_check_deps_action.dir/progress.make
 
 my_msgs/CMakeFiles/_my_msgs_generate_messages_check_deps_action:
-	cd /home/ros/deepbuilder/catkin_ws/build/my_msgs && ../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py my_msgs /home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg 
+	cd /home/ros/deepbuilder/catkin_ws/build/my_msgs && ../catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/kinetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py my_msgs /home/ros/deepbuilder/catkin_ws/src/my_msgs/msg/action.msg 
 
 _my_msgs_generate_messages_check_deps_action: my_msgs/CMakeFiles/_my_msgs_generate_messages_check_deps_action
 _my_msgs_generate_messages_check_deps_action: my_msgs/CMakeFiles/_my_msgs_generate_messages_check_deps_action.dir/build.make

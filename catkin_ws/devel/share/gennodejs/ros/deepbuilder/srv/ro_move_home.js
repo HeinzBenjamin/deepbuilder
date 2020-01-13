@@ -22,7 +22,6 @@ class ro_move_homeRequest {
     if (initObj === null) {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.speed = null;
-      this.tcp_mode = null;
     }
     else {
       if (initObj.hasOwnProperty('speed')) {
@@ -31,12 +30,6 @@ class ro_move_homeRequest {
       else {
         this.speed = 0.0;
       }
-      if (initObj.hasOwnProperty('tcp_mode')) {
-        this.tcp_mode = initObj.tcp_mode
-      }
-      else {
-        this.tcp_mode = false;
-      }
     }
   }
 
@@ -44,8 +37,6 @@ class ro_move_homeRequest {
     // Serializes a message object of type ro_move_homeRequest
     // Serialize message field [speed]
     bufferOffset = _serializer.float32(obj.speed, buffer, bufferOffset);
-    // Serialize message field [tcp_mode]
-    bufferOffset = _serializer.bool(obj.tcp_mode, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -55,13 +46,11 @@ class ro_move_homeRequest {
     let data = new ro_move_homeRequest(null);
     // Deserialize message field [speed]
     data.speed = _deserializer.float32(buffer, bufferOffset);
-    // Deserialize message field [tcp_mode]
-    data.tcp_mode = _deserializer.bool(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
-    return 5;
+    return 4;
   }
 
   static datatype() {
@@ -71,15 +60,13 @@ class ro_move_homeRequest {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '6ce4a00139165109ed979ea81926125d';
+    return 'ca65bba734a79b4a6707341d829f4d5c';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
     float32 speed
-    bool tcp_mode
-    
     
     `;
   }
@@ -95,13 +82,6 @@ class ro_move_homeRequest {
     }
     else {
       resolved.speed = 0.0
-    }
-
-    if (msg.tcp_mode !== undefined) {
-      resolved.tcp_mode = msg.tcp_mode;
-    }
-    else {
-      resolved.tcp_mode = false
     }
 
     return resolved;
@@ -184,6 +164,6 @@ class ro_move_homeResponse {
 module.exports = {
   Request: ro_move_homeRequest,
   Response: ro_move_homeResponse,
-  md5sum() { return '65f9af88059b07caeeaf7e2d659e542b'; },
+  md5sum() { return '401d05492656e71a256f6ab38acc170c'; },
   datatype() { return 'deepbuilder/ro_move_home'; }
 };

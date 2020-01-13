@@ -1,8 +1,0 @@
-prefix=/home/ros/deepbuilder/catkin_ws/devel
-
-Name: launch
-Description: Description of launch
-Version: 0.3.0
-Cflags: 
-Libs: -L/home/ros/deepbuilder/catkin_ws/devel/lib 
-Requires: 

@@ -5,3 +5,4 @@ float32 A2
 float32 A3
 float32 A4
 float32 A5
+float32 A6

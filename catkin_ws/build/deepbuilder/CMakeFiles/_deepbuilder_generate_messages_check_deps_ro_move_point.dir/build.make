@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/ros/deepbuilder/catkin_ws/build
 include deepbuilder/CMakeFiles/_deepbuilder_generate_messages_check_deps_ro_move_point.dir/progress.make
 
 deepbuilder/CMakeFiles/_deepbuilder_generate_messages_check_deps_ro_move_point:
-	cd /home/ros/deepbuilder/catkin_ws/build/deepbuilder && ../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py deepbuilder /home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv 
+	cd /home/ros/deepbuilder/catkin_ws/build/deepbuilder && ../catkin_generated/env_cached.sh /usr/bin/python2 /opt/ros/kinetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py deepbuilder /home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv 
 
 _deepbuilder_generate_messages_check_deps_ro_move_point: deepbuilder/CMakeFiles/_deepbuilder_generate_messages_check_deps_ro_move_point
 _deepbuilder_generate_messages_check_deps_ro_move_point: deepbuilder/CMakeFiles/_deepbuilder_generate_messages_check_deps_ro_move_point.dir/build.make
