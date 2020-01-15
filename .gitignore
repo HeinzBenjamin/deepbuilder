@@ -2,7 +2,6 @@ learning_ws/doc/
 learning_ws/rlkit/
 learning_ws/archive/
 learning_ws/.vscode/
-learning_rlkit/rlkit/.vscode/
 autoencoder_training/training_data
 autoencoder_training/trained_models
 .vs/

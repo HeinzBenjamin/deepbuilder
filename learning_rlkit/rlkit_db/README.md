@@ -1,5 +1,6 @@
 # RLkit_db
-deepbuilder adaptation of:
+deepbuilder adaptation of RLkit by https://github.com/vitchyr:
+
 Reinforcement learning framework and algorithms implemented in PyTorch.
 
 Implemented algorithms:
