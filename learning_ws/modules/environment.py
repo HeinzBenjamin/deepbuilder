@@ -66,7 +66,7 @@ class DeepBuilderEnv(gym.Env):
 
         self.max_rounds = 20
         self.round = 0
-        self.fh_needs_reset = True  
+        self.fh_needs_reset = True
 
     '''
     accepts a torch tensor of size [act_dim] as action

@@ -1,10 +1,10 @@
 import roslibpy, time, math
-import settings
+from . import settings
 #HOME_POSE = [1.1334346532821655,-1.7553976217852991,0.8690872192382812,-0.6843889395343226,-1.5728209654437464,-0.424158]
 
 class Connection():
     def __init__(self, session_name = ''):
-        self.client = roslibpy.Ros(host='localhost', port=9090)
+        self.client = roslibpy.Ros(host=settings.ROS_HOST, port=settings.ROS_PORT)
         self.client.run()
         self.session_name = session_name
         self.srv_status = roslibpy.Service(self.client, '/rosout/get_loggers', 'roscpp/GetLoggers')
@@ -89,10 +89,10 @@ class Connection():
                 print('ROS Service could not be reached. Make sure it is running. Retrying in 5 sec...')
                 time.sleep(5)
                 result = None
-        return result
+        return result.data
 
     def reset_state_mesh(self):
-        return self.srv_update_msh.call({'session': self.session_name, 'vertices':[], 'indices':[]})
+        return self.srv_update_msh.call({'session': self.session_name, 'vertices':[], 'indices':[]}).data
 
     
 
