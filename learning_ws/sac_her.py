@@ -1,42 +1,64 @@
-import gym
+import gym, torch
 
-import rlkit.torch.pytorch_util as ptu
-from rlkit.data_management.obs_dict_replay_buffer import ObsDictRelabelingBuffer
-from rlkit.launchers.launcher_util import setup_logger
-from rlkit.samplers.data_collector import GoalConditionedPathCollector
-from rlkit.torch.her.her import HERTrainer
-from rlkit.torch.networks import FlattenMlp
-from rlkit.torch.sac.policies import MakeDeterministic, TanhGaussianPolicy
-from rlkit.torch.sac.sac import SACTrainer
-from rlkit.torch.torch_rl_algorithm import TorchBatchRLAlgorithm
+import rlkit_db.torch.pytorch_util as ptu
+from rlkit_db.data_management.obs_dict_replay_buffer import ObsDictRelabelingBuffer
+from rlkit_db.launchers.launcher_util import setup_logger
+from rlkit_db.samplers.data_collector import GoalConditionedPathCollector
+from rlkit_db.torch.her.her import HERTrainer
+from rlkit_db.torch.networks import FlattenMlp
+from rlkit_db.torch.sac.policies import MakeDeterministic, TanhGaussianPolicy
+from rlkit_db.torch.sac.sac import SACTrainer
+from rlkit_db.torch.torch_rl_algorithm import TorchBatchRLAlgorithm
 from modules import environment_goal as env
 
 def experiment(variant):
-    core_env = env.DeepBuilderGoalEnv("sac_her_test", is_simulation = True)
-    eval_env = env.NormalizedActions(core_env)
-    expl_env = env.NormalizedActions(core_env)
+    environment = env.NormalizedActions(env.DeepBuilderGoalEnv(**variant['env_kwargs']))
 
     observation_key = 'observation'
     desired_goal_key = 'desired_goal'
 
     achieved_goal_key = desired_goal_key.replace("desired", "achieved")
     replay_buffer_expl = ObsDictRelabelingBuffer(
-        env=eval_env,
+        env=environment,
         observation_key=observation_key,
         desired_goal_key=desired_goal_key,
         achieved_goal_key=achieved_goal_key,
         **variant['replay_buffer_kwargs']
     )
     replay_buffer_eval = ObsDictRelabelingBuffer(
-        env=eval_env,
+        env=environment,
         observation_key=observation_key,
         desired_goal_key=desired_goal_key,
         achieved_goal_key=achieved_goal_key,
         **variant['replay_buffer_kwargs']
     )
-    obs_dim = eval_env.observation_space.spaces['observation'].low.size
-    action_dim = eval_env.action_space.low.size
-    goal_dim = eval_env.observation_space.spaces['desired_goal'].low.size
+
+    
+    
+    if variant['reuse_replay_buffer'] != '':
+        prev_data = torch.load(variant['reuse_replay_buffer'])
+        n = prev_data['replay_buffer_expl/top']
+
+        replay_buffer_expl._top = n
+        replay_buffer_expl._size = n
+        replay_buffer_expl._actions[:n] = prev_data['replay_buffer_expl/actions']
+        replay_buffer_expl._terminals[:n] = prev_data['replay_buffer_expl/terminals']
+        replay_buffer_expl._idx_to_future_obs_idx[:n] = prev_data['replay_buffer_expl/idx_to_future_obs_idx']
+
+        replay_buffer_expl._obs['achieved_goal'][:n] = prev_data['replay_buffer_expl/observation']['achieved_goal']
+        replay_buffer_expl._obs['desired_goal'][:n] = prev_data['replay_buffer_expl/observation']['desired_goal']
+        replay_buffer_expl._obs['observation'][:n] = prev_data['replay_buffer_expl/observation']['observation']
+
+        replay_buffer_expl._next_obs['achieved_goal'][:n] = prev_data['replay_buffer_expl/next_obs']['achieved_goal']
+        replay_buffer_expl._next_obs['desired_goal'][:n] = prev_data['replay_buffer_expl/next_obs']['desired_goal']
+        replay_buffer_expl._next_obs['observation'][:n] = prev_data['replay_buffer_expl/next_obs']['observation']
+    
+    
+
+
+    obs_dim = environment.observation_space.spaces['observation'].low.size
+    action_dim = environment.action_space.low.size
+    goal_dim = environment.observation_space.spaces['desired_goal'].low.size
     qf1 = FlattenMlp(
         input_size=obs_dim + action_dim + goal_dim,
         output_size=1,
@@ -64,7 +86,7 @@ def experiment(variant):
     )
     eval_policy = MakeDeterministic(policy)
     trainer = SACTrainer(
-        env=eval_env,
+        env=environment,
         policy=policy,
         qf1=qf1,
         qf2=qf2,
@@ -74,21 +96,20 @@ def experiment(variant):
     )
     trainer = HERTrainer(trainer)
     eval_path_collector = GoalConditionedPathCollector(
-        eval_env,
+        environment,
         eval_policy,
         observation_key=observation_key,
         desired_goal_key=desired_goal_key,
     )
     expl_path_collector = GoalConditionedPathCollector(
-        expl_env,
+        environment,
         policy,
         observation_key=observation_key,
         desired_goal_key=desired_goal_key,
     )
     algorithm = TorchBatchRLAlgorithm(
         trainer=trainer,
-        exploration_env=expl_env,
-        evaluation_env=eval_env,
+        environment=environment,
         exploration_data_collector=expl_path_collector,
         evaluation_data_collector=eval_path_collector,
         replay_buffer_expl=replay_buffer_expl,
@@ -101,17 +122,33 @@ def experiment(variant):
 
 
 if __name__ == "__main__":
+
+    session_name = "200116-hs-long-test"
+
     variant = dict(
         algorithm='HER-SAC',
         version='normal',
+        reuse_replay_buffer='',
+        env_kwargs=dict(
+            session_name=session_name,            
+            rhino_pid=20600,
+            is_simulation=True,
+            action_dim=7, 
+            observation_dim=144,
+            goal_dim=10,
+            observation_noise_mean=0.0,
+            observation_noise_std=0.00005,
+            max_steps_per_play=30,
+            terminate_at_collision=False,
+            populate_simulation=3
+        ),
         algo_kwargs=dict(
             batch_size=128,
-            num_epochs=100,
-            num_eval_steps_per_epoch=5000,
-            num_expl_steps_per_train_loop=1000,
-            num_trains_per_train_loop=1000,
-            min_num_steps_before_training=1000,
-            max_path_length=50,
+            num_epochs=99999,
+            num_eval_plays_per_epoch=0,
+            num_expl_plays_per_epoch=50,            
+            num_train_loops_per_epoch=100,
+            num_plays_before_training=100,            
         ),
         sac_trainer_kwargs=dict(
             discount=0.99,
@@ -134,5 +171,5 @@ if __name__ == "__main__":
             hidden_sizes=[400, 300],
         ),
     )
-    setup_logger('her-sac-fetch-experiment', variant=variant)
+    setup_logger(session_name, variant=variant, snapshot_mode="gap_and_last", snapshot_gap=10)
     experiment(variant)

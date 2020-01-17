@@ -1,4 +1,5 @@
-import roslibpy, time, math
+import roslibpy, time, math, signal
+from contextlib import contextmanager
 from . import settings
 #HOME_POSE = [1.1334346532821655,-1.7553976217852991,0.8690872192382812,-0.6843889395343226,-1.5728209654437464,-0.424158]
 
@@ -75,30 +76,73 @@ class Connection():
         value['session'] = self.session_name if self.session_name != '' else 'anonymous'
         value['goal_pose'] = goal_pose
         value['state_pose'] = state_pose
-        request = roslibpy.ServiceRequest(value)
-        path = []
+
         result = None
         if state_mesh != {}:
             state_mesh['session'] = self.session_name
-            srv_response = self.srv_update_msh.call(state_mesh)
+            srv_response = self.safe_request('srv_update_msh', state_mesh)
             print(srv_response['message'])
-        while result == None:
-            try:
-                result = self.srv_path.call(request)
-            except:
-                print('ROS Service could not be reached. Make sure it is running. Retrying in 5 sec...')
-                time.sleep(5)
-                result = None
+
+        result = self.safe_request('srv_path', value)
+
         return result.data
 
     def reset_state_mesh(self):
-        return self.srv_update_msh.call({'session': self.session_name, 'vertices':[], 'indices':[]}).data
+        return self.safe_request('srv_update_msh', {'session': self.session_name, 'vertices':[], 'indices':[]})
 
-    
+    def reset_client(self):
+        self.client.close()
+        time.sleep(0.5)
+        self.client.connect()
+        time.sleep(0.5)
+        self.srv_status = roslibpy.Service(self.client, '/rosout/get_loggers', 'roscpp/GetLoggers')
+        self.srv_path = roslibpy.Service(self.client, '/deepbuilder/robot/plan_path', '/deepbuilder/ro_plan_path')
+        self.srv_update_msh = roslibpy.Service(self.client, '/deepbuilder/robot/update_state_mesh', '/deepbuilder/ro_update_state_mesh')
 
+        self.srv_get_sensor_vals = roslibpy.Service(self.client, '/deepbuilder/sensing/get_values', '/deepbuilder/se_get_values')
+        self.srv_get_joint_states = roslibpy.Service(self.client, '/deepbuilder/robot/get_robot_state', '/deepbuilder/ro_get_robot_state')
+        self.srv_move_path = roslibpy.Service(self.client, '/deepbuilder/robot/move_path', '/deepbuilder/ro_move_path')
+
+    def safe_request(self, proxy_name, value):
+        result = None
+        
+        while True:
+            request = roslibpy.ServiceRequest(value)
+            proxy = self.__getattribute__(proxy_name)
+            try:
+                with timeout(settings.ROS_PATH_SRV_TIMEOUT):
+                    result = proxy.call(request)
+            except Exception as e:
+                print("{}\nError when in ROS service request. Retrying... ".format(e))
+                result = None
+                time.sleep(0.5)
+                continue
+
+            if result == None:
+                print("ROS service timeout")
+                self.reset_client()
+            else:
+                break
+
+        return result
 
     def __del__(self):
         self.client.terminate()
+
+
+@contextmanager
+def timeout(time):
+    signal.signal(signal.SIGALRM, raise_timeout)
+    signal.alarm(time)
+    try:
+        yield
+    except TimeoutError:
+        pass
+    finally:
+        signal.signal(signal.SIGALRM, signal.SIG_IGN)
+
+def raise_timeout(signum, frame):
+    raise TimeoutError
 
 
 if __name__ == '__main__':
