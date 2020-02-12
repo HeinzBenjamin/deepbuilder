@@ -21,7 +21,12 @@
     :reader session
     :initarg :session
     :type cl:string
-    :initform ""))
+    :initform "")
+   (speed
+    :reader speed
+    :initarg :speed
+    :type cl:float
+    :initform 0.0))
 )
 
 (cl:defclass ro_plan_path-request (<ro_plan_path-request>)
@@ -46,6 +51,11 @@
 (cl:defmethod session-val ((m <ro_plan_path-request>))
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader deepbuilder-srv:session-val is deprecated.  Use deepbuilder-srv:session instead.")
   (session m))
+
+(cl:ensure-generic-function 'speed-val :lambda-list '(m))
+(cl:defmethod speed-val ((m <ro_plan_path-request>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader deepbuilder-srv:speed-val is deprecated.  Use deepbuilder-srv:speed instead.")
+  (speed m))
 (cl:defmethod roslisp-msg-protocol:serialize ((msg <ro_plan_path-request>) ostream)
   "Serializes a message object of type '<ro_plan_path-request>"
   (cl:let ((__ros_arr_len (cl:length (cl:slot-value msg 'goal_pose))))
@@ -76,6 +86,11 @@
     (cl:write-byte (cl:ldb (cl:byte 8 16) __ros_str_len) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 24) __ros_str_len) ostream))
   (cl:map cl:nil #'(cl:lambda (c) (cl:write-byte (cl:char-code c) ostream)) (cl:slot-value msg 'session))
+  (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'speed))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
 )
 (cl:defmethod roslisp-msg-protocol:deserialize ((msg <ro_plan_path-request>) istream)
   "Deserializes a message object of type '<ro_plan_path-request>"
@@ -115,6 +130,12 @@
       (cl:setf (cl:slot-value msg 'session) (cl:make-string __ros_str_len))
       (cl:dotimes (__ros_str_idx __ros_str_len msg)
         (cl:setf (cl:char (cl:slot-value msg 'session) __ros_str_idx) (cl:code-char (cl:read-byte istream)))))
+    (cl:let ((bits 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
+    (cl:setf (cl:slot-value msg 'speed) (roslisp-utils:decode-single-float-bits bits)))
   msg
 )
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<ro_plan_path-request>)))
@@ -125,21 +146,22 @@
   "deepbuilder/ro_plan_pathRequest")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<ro_plan_path-request>)))
   "Returns md5sum for a message object of type '<ro_plan_path-request>"
-  "78c6500ddd5c10d7648d9ddb0962d4ee")
+  "6bb18060add6f8092d505a812c13f49f")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'ro_plan_path-request)))
   "Returns md5sum for a message object of type 'ro_plan_path-request"
-  "78c6500ddd5c10d7648d9ddb0962d4ee")
+  "6bb18060add6f8092d505a812c13f49f")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<ro_plan_path-request>)))
   "Returns full string definition for message of type '<ro_plan_path-request>"
-  (cl:format cl:nil "float32[] goal_pose~%float32[] state_pose~%string session~%~%~%"))
+  (cl:format cl:nil "float32[] goal_pose~%float32[] state_pose~%string session~%float32 speed~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'ro_plan_path-request)))
   "Returns full string definition for message of type 'ro_plan_path-request"
-  (cl:format cl:nil "float32[] goal_pose~%float32[] state_pose~%string session~%~%~%"))
+  (cl:format cl:nil "float32[] goal_pose~%float32[] state_pose~%string session~%float32 speed~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <ro_plan_path-request>))
   (cl:+ 0
      4 (cl:reduce #'cl:+ (cl:slot-value msg 'goal_pose) :key #'(cl:lambda (ele) (cl:declare (cl:ignorable ele)) (cl:+ 4)))
      4 (cl:reduce #'cl:+ (cl:slot-value msg 'state_pose) :key #'(cl:lambda (ele) (cl:declare (cl:ignorable ele)) (cl:+ 4)))
      4 (cl:length (cl:slot-value msg 'session))
+     4
 ))
 (cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <ro_plan_path-request>))
   "Converts a ROS message object to a list"
@@ -147,6 +169,7 @@
     (cl:cons ':goal_pose (goal_pose msg))
     (cl:cons ':state_pose (state_pose msg))
     (cl:cons ':session (session msg))
+    (cl:cons ':speed (speed msg))
 ))
 ;//! \htmlinclude ro_plan_path-response.msg.html
 
@@ -237,10 +260,10 @@
   "deepbuilder/ro_plan_pathResponse")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<ro_plan_path-response>)))
   "Returns md5sum for a message object of type '<ro_plan_path-response>"
-  "78c6500ddd5c10d7648d9ddb0962d4ee")
+  "6bb18060add6f8092d505a812c13f49f")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'ro_plan_path-response)))
   "Returns md5sum for a message object of type 'ro_plan_path-response"
-  "78c6500ddd5c10d7648d9ddb0962d4ee")
+  "6bb18060add6f8092d505a812c13f49f")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<ro_plan_path-response>)))
   "Returns full string definition for message of type '<ro_plan_path-response>"
   (cl:format cl:nil "trajectory_msgs/JointTrajectory path~%~%bool[] collisions~%string message~%~%================================================================================~%MSG: trajectory_msgs/JointTrajectory~%Header header~%string[] joint_names~%JointTrajectoryPoint[] points~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')~%# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%# 0: no frame~%# 1: global frame~%string frame_id~%~%================================================================================~%MSG: trajectory_msgs/JointTrajectoryPoint~%# Each trajectory point specifies either positions[, velocities[, accelerations]]~%# or positions[, effort] for the trajectory to be executed.~%# All specified values are in the same order as the joint names in JointTrajectory.msg~%~%float64[] positions~%float64[] velocities~%float64[] accelerations~%float64[] effort~%duration time_from_start~%~%~%"))

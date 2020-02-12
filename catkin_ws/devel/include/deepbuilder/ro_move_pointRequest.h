@@ -24,22 +24,27 @@ struct ro_move_pointRequest_
   typedef ro_move_pointRequest_<ContainerAllocator> Type;
 
   ro_move_pointRequest_()
-    : goal()
-    , speed(0.0)  {
+    : goal_pose()
+    , speed(0.0)
+    , wait(false)  {
     }
   ro_move_pointRequest_(const ContainerAllocator& _alloc)
-    : goal(_alloc)
-    , speed(0.0)  {
+    : goal_pose(_alloc)
+    , speed(0.0)
+    , wait(false)  {
   (void)_alloc;
     }
 
 
 
-   typedef std::vector<float, typename ContainerAllocator::template rebind<float>::other >  _goal_type;
-  _goal_type goal;
+   typedef std::vector<float, typename ContainerAllocator::template rebind<float>::other >  _goal_pose_type;
+  _goal_pose_type goal_pose;
 
    typedef float _speed_type;
   _speed_type speed;
+
+   typedef uint8_t _wait_type;
+  _wait_type wait;
 
 
 
@@ -76,7 +81,7 @@ namespace message_traits
 
 
 // BOOLTRAITS {'IsFixedSize': False, 'IsMessage': True, 'HasHeader': False}
-// {'shape_msgs': ['/opt/ros/kinetic/share/shape_msgs/cmake/../msg'], 'std_msgs': ['/opt/ros/kinetic/share/std_msgs/cmake/../msg'], 'trajectory_msgs': ['/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg'], 'sensor_msgs': ['/opt/ros/kinetic/share/sensor_msgs/cmake/../msg'], 'geometry_msgs': ['/opt/ros/kinetic/share/geometry_msgs/cmake/../msg'], 'my_msgs': ['/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg'], 'rosbridge_msgs': ['/opt/ros/kinetic/share/rosbridge_msgs/cmake/../msg']}
+// {'shape_msgs': ['/opt/ros/kinetic/share/shape_msgs/cmake/../msg'], 'sensor_msgs': ['/opt/ros/kinetic/share/sensor_msgs/cmake/../msg'], 'moveit_msgs': ['/opt/ros/kinetic/share/moveit_msgs/cmake/../msg'], 'trajectory_msgs': ['/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg'], 'std_msgs': ['/opt/ros/kinetic/share/std_msgs/cmake/../msg'], 'object_recognition_msgs': ['/opt/ros/kinetic/share/object_recognition_msgs/cmake/../msg'], 'octomap_msgs': ['/opt/ros/kinetic/share/octomap_msgs/cmake/../msg'], 'geometry_msgs': ['/opt/ros/kinetic/share/geometry_msgs/cmake/../msg'], 'my_msgs': ['/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg'], 'actionlib_msgs': ['/opt/ros/kinetic/share/actionlib_msgs/cmake/../msg'], 'rosbridge_msgs': ['/opt/ros/kinetic/share/rosbridge_msgs/cmake/../msg']}
 
 // !!!!!!!!!!! ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_parsed_fields', 'constants', 'fields', 'full_name', 'has_header', 'header_present', 'names', 'package', 'parsed_fields', 'short_name', 'text', 'types']
 
@@ -119,12 +124,12 @@ struct MD5Sum< ::deepbuilder::ro_move_pointRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "2e0655060714c46e883f8bd4da7a9873";
+    return "6807ec73b5603e91e4046e58d434e2e1";
   }
 
   static const char* value(const ::deepbuilder::ro_move_pointRequest_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x2e0655060714c46eULL;
-  static const uint64_t static_value2 = 0x883f8bd4da7a9873ULL;
+  static const uint64_t static_value1 = 0x6807ec73b5603e91ULL;
+  static const uint64_t static_value2 = 0xe4046e58d434e2e1ULL;
 };
 
 template<class ContainerAllocator>
@@ -143,8 +148,9 @@ struct Definition< ::deepbuilder::ro_move_pointRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "float32[] goal\n\
+    return "float32[] goal_pose\n\
 float32 speed\n\
+bool wait\n\
 ";
   }
 
@@ -163,8 +169,9 @@ namespace serialization
   {
     template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
     {
-      stream.next(m.goal);
+      stream.next(m.goal_pose);
       stream.next(m.speed);
+      stream.next(m.wait);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -183,14 +190,16 @@ struct Printer< ::deepbuilder::ro_move_pointRequest_<ContainerAllocator> >
 {
   template<typename Stream> static void stream(Stream& s, const std::string& indent, const ::deepbuilder::ro_move_pointRequest_<ContainerAllocator>& v)
   {
-    s << indent << "goal[]" << std::endl;
-    for (size_t i = 0; i < v.goal.size(); ++i)
+    s << indent << "goal_pose[]" << std::endl;
+    for (size_t i = 0; i < v.goal_pose.size(); ++i)
     {
-      s << indent << "  goal[" << i << "]: ";
-      Printer<float>::stream(s, indent + "  ", v.goal[i]);
+      s << indent << "  goal_pose[" << i << "]: ";
+      Printer<float>::stream(s, indent + "  ", v.goal_pose[i]);
     }
     s << indent << "speed: ";
     Printer<float>::stream(s, indent + "  ", v.speed);
+    s << indent << "wait: ";
+    Printer<uint8_t>::stream(s, indent + "  ", v.wait);
   }
 };
 

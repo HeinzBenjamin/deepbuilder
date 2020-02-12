@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-import sys, rospy, moveit_commander, time
+import sys, rospy, moveit_commander, time, copy, math, json
 from moveit_msgs.msg import *
+from moveit_msgs.srv import *
 from shape_msgs.msg import *
 from geometry_msgs.msg import *
 from deepbuilder.srv import *
-from visualization_msgs.msg import Marker
+from std_msgs.msg import *
+from visualization_msgs.msg import Marker, MarkerArray
 from tf2_msgs.msg import TFMessage
 import settings
 
@@ -14,7 +16,11 @@ move_group = {}
 arena = None
 state_mesh = Mesh()
 state_mesh_visualisation = None
+group_name = ''
 marker_pub_env = rospy.Publisher('/deepbuilder/robot/state_mesh', Marker,queue_size=1)
+marker_pub_path = rospy.Publisher('/deepbuilder/robot/print_path', MarkerArray, queue_size=1)
+srv_proxy_fk = rospy.ServiceProxy('/compute_fk', GetPositionFK)
+srv_proxy_ik = rospy.ServiceProxy('/compute_ik', GetPositionIK)
 
 class arena_objects():
     #planes must start with pln, they're just PoseStamped objects
@@ -25,7 +31,7 @@ class arena_objects():
         self.pln_handle_bar.pose.orientation.y = 0.5
         self.pln_handle_bar.pose.orientation.z = 0.5
         self.pln_handle_bar.pose.orientation.w = -0.5
-        self.pln_handle_bar.pose.position.y = -1.046
+        self.pln_handle_bar.pose.position.y = -1.146
 
         self.pln_ceiling = PoseStamped()
         self.pln_ceiling.pose.position.z = 1.4
@@ -61,8 +67,46 @@ class arena_objects():
         self.box_table["pose"].pose.orientation.w = 1.0
         self.box_table["size"] = [0.795, 1.195, 0.93]
 
-def state_equals(state_a, state_b):
-    tolerance = 0.001
+        self.box_heatplate = {}
+        self.box_heatplate["pose"] = PoseStamped()
+        self.box_heatplate["pose"].pose.position.x = 0.0
+        self.box_heatplate["pose"].pose.position.y = -0.647
+        self.box_heatplate["pose"].pose.position.z = 0.0
+        self.box_heatplate["pose"].pose.orientation.w = 1.0
+        self.box_heatplate["size"] = [0.22, 0.22, 0.001]
+
+def tcp_marker(pose, ns, i, r, g, b):
+    m_p = Marker()
+    m_p.header.frame_id = '/world'
+    m_p.header.stamp = rospy.Time.now()
+    m_p.ns = ns
+    m_p.id = i
+    m_p.type=Marker.CUBE
+    m_p.action = Marker.ADD
+    m_p.pose.position.x = pose[0]
+    m_p.pose.position.y = pose[1]
+    m_p.pose.position.z = pose[2]
+    m_p.scale.x = 0.0005
+    m_p.scale.y = 0.001
+    m_p.scale.z = 0.006
+    m_p.pose.orientation.x = pose[3]
+    m_p.pose.orientation.y = pose[4]
+    m_p.pose.orientation.z = pose[5]
+    m_p.pose.orientation.w = pose[6]
+    m_p.color.a = 1.0    
+    m_p.color.r = r
+    m_p.color.g = g
+    m_p.color.b = b
+    return m_p
+
+
+def partition_list(lst, partition_size=7):
+    o_list = []
+    for i in range(0, len(lst), partition_size):
+        o_list.append(lst[i:i+partition_size])
+    return o_list
+
+def state_equals(state_a, state_b, tolerance = 0.001):
     for i, s in enumerate(state_a):
         if abs(s - state_b[i]) > tolerance:
             return False
@@ -86,6 +130,109 @@ def sync_scene(expected_collision_objects):
                 synced = False
                 break
     
+def plan_cartesian(req):
+    #maybe this?
+    #global move_group
+    global robot
+    global scene
+    global move_group
+    global state_mesh
+    global group_name
+    res = ro_plan_cartesianResponse()  
+    #remove any previous targets
+    move_group.clear_pose_targets()
+    robot_config = settings.ROBOT_CONFIG()
+    
+    
+    way_points = partition_list(req.way_points)
+    
+    current_tcp = move_group.get_current_pose("extruder_tip_link").pose
+
+    m_a = MarkerArray()
+
+    m_a.markers.append(tcp_marker(
+        [current_tcp.position.x, 
+        current_tcp.position.y,
+        current_tcp.position.z,
+        current_tcp.orientation.x,
+        current_tcp.orientation.y,
+        current_tcp.orientation.z,
+        current_tcp.orientation.w], 'current_tcp', 0, 1.0,0.0, 0.3))
+
+    
+    first_robot_state = copy.deepcopy(robot.get_current_state())
+    first_robot_state.joint_state.position = req.first_way_point_joint_states
+
+    last_robot_state = copy.deepcopy(robot.get_current_state())
+    last_robot_state.joint_state.position = req.last_way_point_joint_states
+
+    move_group.set_start_state(first_robot_state)
+    
+    mg_way_points = []
+    i = 0
+    for p in way_points:
+        x = p[0] * 0.001
+        y = p[1] * 0.001
+        z = p[2] * 0.001
+        m_a.markers.append(tcp_marker(            
+            [x, y, z, p[3], p[4], p[5], p[6]],
+            'print_path', i, float(i) / len(way_points), 1.0 - (float(i) / len(way_points)), 1.0))
+
+        m_wp = copy.deepcopy(current_tcp)
+        m_wp.position.x = x
+        m_wp.position.y = y
+        m_wp.position.z = z
+        m_wp.orientation.x = p[3]
+        m_wp.orientation.y = p[4]
+        m_wp.orientation.z = p[5]
+        m_wp.orientation.w = p[6]
+        mg_way_points.append(m_wp)
+        i += 1
+    
+    #fk_res = srv_proxy_fk.call(header = Header(), fk_link_names = ["extruder_tip_link"], robot_state = last_robot_state)
+    #mg_way_points.append(fk_res.pose_stamped[0].pose)
+
+    marker_pub_path.publish(m_a)
+
+
+    
+    
+    #moveit_robot_state.joint_state = way_points[0]
+    (moveit_trajectory, fraction) = move_group.compute_cartesian_path(mg_way_points, robot_config['eef_step'], robot_config['jump_threshold'])
+    print "Cartesian motion planned to " + str(fraction*100.0) + "%"
+    speed = robot_config['print_speed'] if req.speed == None else req.speed
+    moveit_trajectory = move_group.retime_trajectory(robot.get_current_state(), moveit_trajectory, robot_config['print_speed'])
+
+    m_t = Marker()
+    m_t.ns = "motion-trajectory"
+    m_t.id = 0
+    m_t.header.frame_id = '/world'
+    m_t.header.stamp = rospy.Time.now()
+    m_t.type=Marker.POINTS
+    m_t.action = Marker.ADD
+    m_t.scale.x = 0.0005
+    m_t.color.a = 1.0
+    tmp_state = robot.get_current_state()
+    for t in moveit_trajectory.joint_trajectory.points:
+        #draw path points
+        tmp_state.joint_state.position = t.positions
+        fk_res = srv_proxy_fk.call(header=Header(), robot_state = tmp_state, fk_link_names = ["extruder_tip_link"])
+        m_t.points.append(
+            Point(
+                x=fk_res.pose_stamped[0].pose.position.x,
+                y=fk_res.pose_stamped[0].pose.position.y,
+                z=fk_res.pose_stamped[0].pose.position.z))        
+
+    m_a.markers.append(m_t)
+    marker_pub_path.publish(m_a)      
+
+    res.message = 'SUCCESS' if fraction == 1.0 else 'fraction: ' + str(fraction)
+    res.motion_plan = moveit_trajectory.joint_trajectory
+    res.collisions = []
+
+    return res
+
+
 
 def plan_path(req):
     global move_group
@@ -94,6 +241,7 @@ def plan_path(req):
     global state_mesh
     global robot
 
+    robot_config = settings.ROBOT_CONFIG()
     scene.remove_world_object() #clear scene, needs syncing later
     move_group.clear_pose_targets()
     ii = move_group.get_joint_value_target()
@@ -196,13 +344,17 @@ def plan_path(req):
             expected_scene_objects.append(name)
 
     sync_scene(expected_scene_objects)
-    res.path = move_group.plan(req.goal_pose).joint_trajectory
-    if len(res.path.points) == 0:
+    traj = move_group.plan(req.goal_pose)
+    
+    if len(traj.joint_trajectory.points) == 0:
             res.message += "combination collision, "
             res.collisions[4] = True #collision in full scene
             print str(res.collisions)
             return res
 
+    speed = robot_config['jogging_speed'] if req.speed == None else req.speed
+    traj = move_group.retime_trajectory(ref_state_in = robot.get_current_state(), traj_in = traj, velocity_scaling_factor = robot_config['jogging_speed'])
+    res.path = traj.joint_trajectory
     res.message = "SUCCESS"
     print str(res.collisions)
     return res
@@ -279,6 +431,7 @@ def main():
     global arena
     global state
     global move_group
+    global group_name
     
     arena = arena_objects()
 
@@ -314,6 +467,7 @@ def main():
     
     
     srv_plan = rospy.Service('/deepbuilder/robot/plan_path',ro_plan_path, plan_path)
+    srv_motion = rospy.Service('deepbuilder/robot/plan_cartesian', ro_plan_cartesian, plan_cartesian)
     srv_up_msh = rospy.Service('/deepbuilder/robot/update_state_mesh', ro_update_state_mesh, update_state_mesh)
 
     rospy.Subscriber("/tf", TFMessage, draw_state_mesh)

@@ -162,7 +162,7 @@ foreach(t ${deepbuilder_EXPORTED_TARGETS})
   endif()
 endforeach()
 
-set(depends "roscpp;rospy;std_msgs;my_msgs;geometry_msgs;rosbridge_msgs;actionlib;control_msgs;controller_manager;hardware_interface;industrial_msgs;sensor_msgs;trajectory_msgs;ur_msgs;moveit_commander;moveit_msgs;pcl_ros;shape_msgs")
+set(depends "roscpp;rospy;std_msgs;my_msgs;geometry_msgs;rosbridge_msgs;actionlib;control_msgs;controller_manager;hardware_interface;industrial_msgs;sensor_msgs;trajectory_msgs;ur_msgs;moveit_commander;moveit_msgs;pcl_ros;shape_msgs;trajectory_msgs")
 foreach(depend ${depends})
   string(REPLACE " " ";" depend_list ${depend})
   # the package name of the dependency must be kept in a unique variable so that it is not overwritten in recursive calls

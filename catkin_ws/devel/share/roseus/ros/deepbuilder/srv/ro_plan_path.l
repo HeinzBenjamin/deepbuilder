@@ -22,7 +22,7 @@
 
 (defclass deepbuilder::ro_plan_pathRequest
   :super ros::object
-  :slots (_goal_pose _state_pose _session ))
+  :slots (_goal_pose _state_pose _session _speed ))
 
 (defmethod deepbuilder::ro_plan_pathRequest
   (:init
@@ -30,11 +30,13 @@
     ((:goal_pose __goal_pose) (make-array 0 :initial-element 0.0 :element-type :float))
     ((:state_pose __state_pose) (make-array 0 :initial-element 0.0 :element-type :float))
     ((:session __session) "")
+    ((:speed __speed) 0.0)
     )
    (send-super :init)
    (setq _goal_pose __goal_pose)
    (setq _state_pose __state_pose)
    (setq _session (string __session))
+   (setq _speed (float __speed))
    self)
   (:goal_pose
    (&optional __goal_pose)
@@ -45,6 +47,9 @@
   (:session
    (&optional __session)
    (if __session (setq _session __session)) _session)
+  (:speed
+   (&optional __speed)
+   (if __speed (setq _speed __speed)) _speed)
   (:serialization-length
    ()
    (+
@@ -54,6 +59,8 @@
     (* 4    (length _state_pose)) 4
     ;; string _session
     4 (length _session)
+    ;; float32 _speed
+    4
     ))
   (:serialize
    (&optional strm)
@@ -71,6 +78,8 @@
        )
      ;; string _session
        (write-long (length _session) s) (princ _session s)
+     ;; float32 _speed
+       (sys::poke _speed (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
@@ -91,6 +100,8 @@
      ))
    ;; string _session
      (let (n) (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4) (setq _session (subseq buf ptr- (+ ptr- n))) (incf ptr- n))
+   ;; float32 _speed
+     (setq _speed (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;;
    self)
   )
@@ -170,7 +181,7 @@
   :super ros::object
   :slots ())
 
-(setf (get deepbuilder::ro_plan_path :md5sum-) "78c6500ddd5c10d7648d9ddb0962d4ee")
+(setf (get deepbuilder::ro_plan_path :md5sum-) "6bb18060add6f8092d505a812c13f49f")
 (setf (get deepbuilder::ro_plan_path :datatype-) "deepbuilder/ro_plan_path")
 (setf (get deepbuilder::ro_plan_path :request) deepbuilder::ro_plan_pathRequest)
 (setf (get deepbuilder::ro_plan_path :response) deepbuilder::ro_plan_pathResponse)
@@ -178,12 +189,13 @@
 (defmethod deepbuilder::ro_plan_pathRequest
   (:response () (instance deepbuilder::ro_plan_pathResponse :init)))
 
-(setf (get deepbuilder::ro_plan_pathRequest :md5sum-) "78c6500ddd5c10d7648d9ddb0962d4ee")
+(setf (get deepbuilder::ro_plan_pathRequest :md5sum-) "6bb18060add6f8092d505a812c13f49f")
 (setf (get deepbuilder::ro_plan_pathRequest :datatype-) "deepbuilder/ro_plan_pathRequest")
 (setf (get deepbuilder::ro_plan_pathRequest :definition-)
       "float32[] goal_pose
 float32[] state_pose
 string session
+float32 speed
 ---
 trajectory_msgs/JointTrajectory path
 
@@ -226,12 +238,13 @@ float64[] effort
 duration time_from_start
 ")
 
-(setf (get deepbuilder::ro_plan_pathResponse :md5sum-) "78c6500ddd5c10d7648d9ddb0962d4ee")
+(setf (get deepbuilder::ro_plan_pathResponse :md5sum-) "6bb18060add6f8092d505a812c13f49f")
 (setf (get deepbuilder::ro_plan_pathResponse :datatype-) "deepbuilder/ro_plan_pathResponse")
 (setf (get deepbuilder::ro_plan_pathResponse :definition-)
       "float32[] goal_pose
 float32[] state_pose
 string session
+float32 speed
 ---
 trajectory_msgs/JointTrajectory path
 
@@ -276,6 +289,6 @@ duration time_from_start
 
 
 
-(provide :deepbuilder/ro_plan_path "78c6500ddd5c10d7648d9ddb0962d4ee")
+(provide :deepbuilder/ro_plan_path "6bb18060add6f8092d505a812c13f49f")
 
 

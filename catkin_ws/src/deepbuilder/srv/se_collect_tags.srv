@@ -1,0 +1,7 @@
+trajectory_msgs/JointTrajectory path #path that the robot follows while collecting tags
+int32[] pairs #define if multiple tag pairs identifiy the same block
+int32[] pair_lengths #lengths of said tag pairs
+---
+float32[] tag_poses #flat array of 7d poses
+int8[] types #0: box type 0, 1: box type 0, 2: box type 0, 3: standalone tag
+int8[] ids #idea of first tag associated with box or being the standalone tag

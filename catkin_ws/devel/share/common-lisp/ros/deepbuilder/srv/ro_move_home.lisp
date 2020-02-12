@@ -11,7 +11,12 @@
     :reader speed
     :initarg :speed
     :type cl:float
-    :initform 0.0))
+    :initform 0.0)
+   (wait
+    :reader wait
+    :initarg :wait
+    :type cl:boolean
+    :initform cl:nil))
 )
 
 (cl:defclass ro_move_home-request (<ro_move_home-request>)
@@ -26,6 +31,11 @@
 (cl:defmethod speed-val ((m <ro_move_home-request>))
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader deepbuilder-srv:speed-val is deprecated.  Use deepbuilder-srv:speed instead.")
   (speed m))
+
+(cl:ensure-generic-function 'wait-val :lambda-list '(m))
+(cl:defmethod wait-val ((m <ro_move_home-request>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader deepbuilder-srv:wait-val is deprecated.  Use deepbuilder-srv:wait instead.")
+  (wait m))
 (cl:defmethod roslisp-msg-protocol:serialize ((msg <ro_move_home-request>) ostream)
   "Serializes a message object of type '<ro_move_home-request>"
   (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'speed))))
@@ -33,6 +43,7 @@
     (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
+  (cl:write-byte (cl:ldb (cl:byte 8 0) (cl:if (cl:slot-value msg 'wait) 1 0)) ostream)
 )
 (cl:defmethod roslisp-msg-protocol:deserialize ((msg <ro_move_home-request>) istream)
   "Deserializes a message object of type '<ro_move_home-request>"
@@ -42,6 +53,7 @@
       (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
     (cl:setf (cl:slot-value msg 'speed) (roslisp-utils:decode-single-float-bits bits)))
+    (cl:setf (cl:slot-value msg 'wait) (cl:not (cl:zerop (cl:read-byte istream))))
   msg
 )
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<ro_move_home-request>)))
@@ -52,24 +64,26 @@
   "deepbuilder/ro_move_homeRequest")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<ro_move_home-request>)))
   "Returns md5sum for a message object of type '<ro_move_home-request>"
-  "401d05492656e71a256f6ab38acc170c")
+  "c30317d3d3699e0839f659b2d971bd95")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'ro_move_home-request)))
   "Returns md5sum for a message object of type 'ro_move_home-request"
-  "401d05492656e71a256f6ab38acc170c")
+  "c30317d3d3699e0839f659b2d971bd95")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<ro_move_home-request>)))
   "Returns full string definition for message of type '<ro_move_home-request>"
-  (cl:format cl:nil "float32 speed~%~%~%"))
+  (cl:format cl:nil "float32 speed~%bool wait~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'ro_move_home-request)))
   "Returns full string definition for message of type 'ro_move_home-request"
-  (cl:format cl:nil "float32 speed~%~%~%"))
+  (cl:format cl:nil "float32 speed~%bool wait~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <ro_move_home-request>))
   (cl:+ 0
      4
+     1
 ))
 (cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <ro_move_home-request>))
   "Converts a ROS message object to a list"
   (cl:list 'ro_move_home-request
     (cl:cons ':speed (speed msg))
+    (cl:cons ':wait (wait msg))
 ))
 ;//! \htmlinclude ro_move_home-response.msg.html
 
@@ -122,10 +136,10 @@
   "deepbuilder/ro_move_homeResponse")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<ro_move_home-response>)))
   "Returns md5sum for a message object of type '<ro_move_home-response>"
-  "401d05492656e71a256f6ab38acc170c")
+  "c30317d3d3699e0839f659b2d971bd95")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'ro_move_home-response)))
   "Returns md5sum for a message object of type 'ro_move_home-response"
-  "401d05492656e71a256f6ab38acc170c")
+  "c30317d3d3699e0839f659b2d971bd95")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<ro_move_home-response>)))
   "Returns full string definition for message of type '<ro_move_home-response>"
   (cl:format cl:nil "string message~%~%~%"))

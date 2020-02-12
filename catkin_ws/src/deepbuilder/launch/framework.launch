@@ -1,0 +1,23 @@
+<launch>
+
+    <node name="rosbridge_server" pkg="rosbridge_server" type="rosbridge_websocket" />
+    <!-- Load the URDF, SRDF and other .yaml configuration files on the param server -->
+    <include file="$(find ur10_deepbuilder2_moveit_config)/launch/planning_context.launch">
+        <arg name="load_robot_description" value="true"/>
+    </include>
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" />
+
+    <!-- Run the main MoveIt! executable without trajectory execution (we do not have controllers configured by default) -->
+    <include file="$(find ur10_deepbuilder2_moveit_config)/launch/move_group.launch">
+        <arg name="allow_trajectory_execution" value="false"/>
+        <arg name="fake_execution" value="false"/>
+        <arg name="info" value="true"/>
+        <arg name="debug" value="false"/>
+    </include>
+
+    
+
+    <node name="rviz" pkg="rviz" type="rviz" args="/home/ros/.rviz/full.rviz" />
+
+</launch>

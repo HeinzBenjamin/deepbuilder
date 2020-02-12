@@ -31,6 +31,9 @@ def multitask_rollout(
         dict_obs.append(obs)
         if observation_key:
             obs = obs[observation_key]
+        if obs.size != env.env.observation_dim or goal.size != env.env.goal_dim:
+            print(colored("\nInvalid data dimensions [obs:{}, goal:{}]. Is AE_SERVER running? Sample corrupted. GH_OUT raised".format(obs.size, goal.size), color='magenta', attrs=['bold']))
+            raise ValueError('GH_OUT', 'GH_OUT')
         concatenated = np.hstack((obs, goal))
         a, agent_info = agent.get_action(concatenated, **get_action_kwargs)
         next_obs, rew, done, env_info = env.step(a)

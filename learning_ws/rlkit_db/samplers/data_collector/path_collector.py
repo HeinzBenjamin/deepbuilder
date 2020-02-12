@@ -134,7 +134,16 @@ class GoalConditionedPathCollector(PathCollector):
                 
             except ValueError as err:
                 if err.args[0] == "GH_OUT":
-                    print(colored("GH_OUT was thrown during play. Play is restarted. No path was recorded.", color='magenta'))
+                    print(colored("GH_OUT was thrown during play. Play is restarted. No path was recorded.", color='magenta', attrs=['bold']))
+                    continue
+
+            except (KeyboardInterrupt):
+                cont = input("\nPause! Replay current play? [y/n]")
+                if cont == 'n':
+                    print("Ending training. Chie chie bye bye")
+                    exit()
+                else:
+                    print("Continuing training...")
                     continue
 
             num_steps_collected += len(path['actions'])

@@ -11,7 +11,12 @@
     :reader path
     :initarg :path
     :type trajectory_msgs-msg:JointTrajectory
-    :initform (cl:make-instance 'trajectory_msgs-msg:JointTrajectory)))
+    :initform (cl:make-instance 'trajectory_msgs-msg:JointTrajectory))
+   (wait
+    :reader wait
+    :initarg :wait
+    :type cl:boolean
+    :initform cl:nil))
 )
 
 (cl:defclass ro_move_path-request (<ro_move_path-request>)
@@ -26,13 +31,20 @@
 (cl:defmethod path-val ((m <ro_move_path-request>))
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader deepbuilder-srv:path-val is deprecated.  Use deepbuilder-srv:path instead.")
   (path m))
+
+(cl:ensure-generic-function 'wait-val :lambda-list '(m))
+(cl:defmethod wait-val ((m <ro_move_path-request>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader deepbuilder-srv:wait-val is deprecated.  Use deepbuilder-srv:wait instead.")
+  (wait m))
 (cl:defmethod roslisp-msg-protocol:serialize ((msg <ro_move_path-request>) ostream)
   "Serializes a message object of type '<ro_move_path-request>"
   (roslisp-msg-protocol:serialize (cl:slot-value msg 'path) ostream)
+  (cl:write-byte (cl:ldb (cl:byte 8 0) (cl:if (cl:slot-value msg 'wait) 1 0)) ostream)
 )
 (cl:defmethod roslisp-msg-protocol:deserialize ((msg <ro_move_path-request>) istream)
   "Deserializes a message object of type '<ro_move_path-request>"
   (roslisp-msg-protocol:deserialize (cl:slot-value msg 'path) istream)
+    (cl:setf (cl:slot-value msg 'wait) (cl:not (cl:zerop (cl:read-byte istream))))
   msg
 )
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<ro_move_path-request>)))
@@ -43,24 +55,26 @@
   "deepbuilder/ro_move_pathRequest")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<ro_move_path-request>)))
   "Returns md5sum for a message object of type '<ro_move_path-request>"
-  "8c34125c1c77b9e671e5d9698ccd6432")
+  "2e66b98388464afecfb23731a1f9334b")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'ro_move_path-request)))
   "Returns md5sum for a message object of type 'ro_move_path-request"
-  "8c34125c1c77b9e671e5d9698ccd6432")
+  "2e66b98388464afecfb23731a1f9334b")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<ro_move_path-request>)))
   "Returns full string definition for message of type '<ro_move_path-request>"
-  (cl:format cl:nil "trajectory_msgs/JointTrajectory path~%~%================================================================================~%MSG: trajectory_msgs/JointTrajectory~%Header header~%string[] joint_names~%JointTrajectoryPoint[] points~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')~%# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%# 0: no frame~%# 1: global frame~%string frame_id~%~%================================================================================~%MSG: trajectory_msgs/JointTrajectoryPoint~%# Each trajectory point specifies either positions[, velocities[, accelerations]]~%# or positions[, effort] for the trajectory to be executed.~%# All specified values are in the same order as the joint names in JointTrajectory.msg~%~%float64[] positions~%float64[] velocities~%float64[] accelerations~%float64[] effort~%duration time_from_start~%~%~%"))
+  (cl:format cl:nil "trajectory_msgs/JointTrajectory path~%bool wait~%~%================================================================================~%MSG: trajectory_msgs/JointTrajectory~%Header header~%string[] joint_names~%JointTrajectoryPoint[] points~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')~%# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%# 0: no frame~%# 1: global frame~%string frame_id~%~%================================================================================~%MSG: trajectory_msgs/JointTrajectoryPoint~%# Each trajectory point specifies either positions[, velocities[, accelerations]]~%# or positions[, effort] for the trajectory to be executed.~%# All specified values are in the same order as the joint names in JointTrajectory.msg~%~%float64[] positions~%float64[] velocities~%float64[] accelerations~%float64[] effort~%duration time_from_start~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'ro_move_path-request)))
   "Returns full string definition for message of type 'ro_move_path-request"
-  (cl:format cl:nil "trajectory_msgs/JointTrajectory path~%~%================================================================================~%MSG: trajectory_msgs/JointTrajectory~%Header header~%string[] joint_names~%JointTrajectoryPoint[] points~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')~%# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%# 0: no frame~%# 1: global frame~%string frame_id~%~%================================================================================~%MSG: trajectory_msgs/JointTrajectoryPoint~%# Each trajectory point specifies either positions[, velocities[, accelerations]]~%# or positions[, effort] for the trajectory to be executed.~%# All specified values are in the same order as the joint names in JointTrajectory.msg~%~%float64[] positions~%float64[] velocities~%float64[] accelerations~%float64[] effort~%duration time_from_start~%~%~%"))
+  (cl:format cl:nil "trajectory_msgs/JointTrajectory path~%bool wait~%~%================================================================================~%MSG: trajectory_msgs/JointTrajectory~%Header header~%string[] joint_names~%JointTrajectoryPoint[] points~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')~%# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%# 0: no frame~%# 1: global frame~%string frame_id~%~%================================================================================~%MSG: trajectory_msgs/JointTrajectoryPoint~%# Each trajectory point specifies either positions[, velocities[, accelerations]]~%# or positions[, effort] for the trajectory to be executed.~%# All specified values are in the same order as the joint names in JointTrajectory.msg~%~%float64[] positions~%float64[] velocities~%float64[] accelerations~%float64[] effort~%duration time_from_start~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <ro_move_path-request>))
   (cl:+ 0
      (roslisp-msg-protocol:serialization-length (cl:slot-value msg 'path))
+     1
 ))
 (cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <ro_move_path-request>))
   "Converts a ROS message object to a list"
   (cl:list 'ro_move_path-request
     (cl:cons ':path (path msg))
+    (cl:cons ':wait (wait msg))
 ))
 ;//! \htmlinclude ro_move_path-response.msg.html
 
@@ -113,10 +127,10 @@
   "deepbuilder/ro_move_pathResponse")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<ro_move_path-response>)))
   "Returns md5sum for a message object of type '<ro_move_path-response>"
-  "8c34125c1c77b9e671e5d9698ccd6432")
+  "2e66b98388464afecfb23731a1f9334b")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'ro_move_path-response)))
   "Returns md5sum for a message object of type 'ro_move_path-response"
-  "8c34125c1c77b9e671e5d9698ccd6432")
+  "2e66b98388464afecfb23731a1f9334b")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<ro_move_path-response>)))
   "Returns full string definition for message of type '<ro_move_path-response>"
   (cl:format cl:nil "string message~%~%~%"))

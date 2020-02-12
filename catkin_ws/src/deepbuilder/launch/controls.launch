@@ -1,0 +1,8 @@
+<launch>
+    
+    <node name="deepbuilder_path_planning" pkg="deepbuilder" type="path_planning.py" output="screen" /> 
+    <node name="deepbuilder_robot_control" pkg="deepbuilder" type="robot_control.py" output="screen" />
+    <node name="deepbuilder_extruder_control" pkg="deepbuilder" type="extruder_control.py" output="screen" />   
+    <node name="deepbuilder_twincat_control" pkg="deepbuilder" type="twincat_control.py" output="screen" />   
+  
+</launch>

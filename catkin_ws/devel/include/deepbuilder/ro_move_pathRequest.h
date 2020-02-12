@@ -25,10 +25,12 @@ struct ro_move_pathRequest_
   typedef ro_move_pathRequest_<ContainerAllocator> Type;
 
   ro_move_pathRequest_()
-    : path()  {
+    : path()
+    , wait(false)  {
     }
   ro_move_pathRequest_(const ContainerAllocator& _alloc)
-    : path(_alloc)  {
+    : path(_alloc)
+    , wait(false)  {
   (void)_alloc;
     }
 
@@ -36,6 +38,9 @@ struct ro_move_pathRequest_
 
    typedef  ::trajectory_msgs::JointTrajectory_<ContainerAllocator>  _path_type;
   _path_type path;
+
+   typedef uint8_t _wait_type;
+  _wait_type wait;
 
 
 
@@ -72,7 +77,7 @@ namespace message_traits
 
 
 // BOOLTRAITS {'IsFixedSize': False, 'IsMessage': True, 'HasHeader': False}
-// {'shape_msgs': ['/opt/ros/kinetic/share/shape_msgs/cmake/../msg'], 'std_msgs': ['/opt/ros/kinetic/share/std_msgs/cmake/../msg'], 'trajectory_msgs': ['/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg'], 'sensor_msgs': ['/opt/ros/kinetic/share/sensor_msgs/cmake/../msg'], 'geometry_msgs': ['/opt/ros/kinetic/share/geometry_msgs/cmake/../msg'], 'my_msgs': ['/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg'], 'rosbridge_msgs': ['/opt/ros/kinetic/share/rosbridge_msgs/cmake/../msg']}
+// {'shape_msgs': ['/opt/ros/kinetic/share/shape_msgs/cmake/../msg'], 'sensor_msgs': ['/opt/ros/kinetic/share/sensor_msgs/cmake/../msg'], 'moveit_msgs': ['/opt/ros/kinetic/share/moveit_msgs/cmake/../msg'], 'trajectory_msgs': ['/opt/ros/kinetic/share/trajectory_msgs/cmake/../msg'], 'std_msgs': ['/opt/ros/kinetic/share/std_msgs/cmake/../msg'], 'object_recognition_msgs': ['/opt/ros/kinetic/share/object_recognition_msgs/cmake/../msg'], 'octomap_msgs': ['/opt/ros/kinetic/share/octomap_msgs/cmake/../msg'], 'geometry_msgs': ['/opt/ros/kinetic/share/geometry_msgs/cmake/../msg'], 'my_msgs': ['/home/ros/deepbuilder/catkin_ws/src/my_msgs/msg'], 'actionlib_msgs': ['/opt/ros/kinetic/share/actionlib_msgs/cmake/../msg'], 'rosbridge_msgs': ['/opt/ros/kinetic/share/rosbridge_msgs/cmake/../msg']}
 
 // !!!!!!!!!!! ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_parsed_fields', 'constants', 'fields', 'full_name', 'has_header', 'header_present', 'names', 'package', 'parsed_fields', 'short_name', 'text', 'types']
 
@@ -115,12 +120,12 @@ struct MD5Sum< ::deepbuilder::ro_move_pathRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "afc39d389d2fae8a4a9041b5a5f1c8aa";
+    return "37e9e49841fe90e96af9e250c8875ce5";
   }
 
   static const char* value(const ::deepbuilder::ro_move_pathRequest_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xafc39d389d2fae8aULL;
-  static const uint64_t static_value2 = 0x4a9041b5a5f1c8aaULL;
+  static const uint64_t static_value1 = 0x37e9e49841fe90e9ULL;
+  static const uint64_t static_value2 = 0x6af9e250c8875ce5ULL;
 };
 
 template<class ContainerAllocator>
@@ -140,6 +145,7 @@ struct Definition< ::deepbuilder::ro_move_pathRequest_<ContainerAllocator> >
   static const char* value()
   {
     return "trajectory_msgs/JointTrajectory path\n\
+bool wait\n\
 \n\
 ================================================================================\n\
 MSG: trajectory_msgs/JointTrajectory\n\
@@ -194,6 +200,7 @@ namespace serialization
     template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
     {
       stream.next(m.path);
+      stream.next(m.wait);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -215,6 +222,8 @@ struct Printer< ::deepbuilder::ro_move_pathRequest_<ContainerAllocator> >
     s << indent << "path: ";
     s << std::endl;
     Printer< ::trajectory_msgs::JointTrajectory_<ContainerAllocator> >::stream(s, indent + "  ", v.path);
+    s << indent << "wait: ";
+    Printer<uint8_t>::stream(s, indent + "  ", v.wait);
   }
 };
 

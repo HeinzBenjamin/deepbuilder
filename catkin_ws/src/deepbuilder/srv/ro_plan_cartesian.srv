@@ -1,0 +1,9 @@
+float32[] first_way_point_joint_states #passed along as first and last point of path
+float32[] last_way_point_joint_states
+float32[] way_points #as flat array of consecutive 7d cartesian (mm scale)
+float32 speed
+---
+trajectory_msgs/JointTrajectory motion_plan #incomplete motion plan is suppleid when collisions occur
+#collisions[0]: self_collision  -  collisions[1]: wall_collision  -  collisions[2]: table_collision  -  collisions[3]: state_collision  -  collisions[4]: full_scene
+bool[] collisions #flat array of 5d collision mask per waypoint
+string message #if not 'SUCCESS' incomplete motion_plan is supplied and collision can be found in 'collisions'

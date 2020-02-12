@@ -1,0 +1,9 @@
+<launch>
+<include file="$(find spinnaker_sdk_camera_driver)/launch/acquisition.launch" />
+
+    <node name="image_proc" pkg="image_proc" type="image_proc" output="screen" ns="camera_array/cam0" />
+
+<include file="$(find apriltag_ros)/launch/continuous_detection.launch" />
+
+<!--node name="deepbuilder_sensing" pkg="deepbuilder" type="sensing.py" output="screen" /-->
+</launch>

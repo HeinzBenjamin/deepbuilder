@@ -1,10 +1,17 @@
-import gym, torch, uuid, time, requests, json, datetime
+import gym, torch, uuid, time, requests, json, datetime, random
 from termcolor import colored
 import numpy as np
 from gym import spaces
+'''
 from . import ros_communication as rc
 from . import settings
 from . import util
+'''
+import ros_communication as rc
+import settings
+import util
+
+
 
 # important rlkit files:
 # rlkit/core/batch_rl_algorithm.py
@@ -38,7 +45,7 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         observation_dim=144,
         goal_dim=10,
         observation_noise_mean=0.0,
-        observation_noise_std=0.00005,
+        observation_noise_std=0.0008,
         terminate_at_collision=False,
         max_steps_per_play=30,
         populate_simulation=True
@@ -49,7 +56,7 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         #things relevant for connections
         self.session_name = session_name
         self.is_simulation = is_simulation
-        np.set_printoptions(precision = 3, suppress=True)
+        np.set_printoptions(precision = 5, suppress=True)
 
 
         self.action_id = '00000000'
@@ -75,13 +82,12 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         self.reward_range = (-1.0, 7.01)
 
         #holds actual values
-        self.state_array = self.default_observation()
         self.action_array = np.zeros(self.action_dim, dtype=np.float32)
         self.reward = 0
         self.done=False
 
         self.observation_dict = {}
-        self.observation_dict['observation'] = self.state_array.copy()
+        self.observation_dict['observation'] = []
         self.observation_dict['desired_goal'] = self.goal_dict_to_tensor(self.default_desired_goal())
         self.observation_dict['achieved_goal'] = self.goal_dict_to_tensor(self.default_achieved_goal())
 
@@ -94,9 +100,12 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         self.observation_space = spaces.Dict()
         self.observation_space.spaces['observation'] = self.observation
         self.observation_space.spaces['desired_goal'] = self.desired_goal
-        self.observation_space.spaces['achieved_goal'] = self.achieved_goal
+        self.observation_space.spaces['achieved_goal'] = self.achieved_goal        
 
-        
+        #stuff for printing
+        self.print_speed = 0.001
+        self.nozzle_speed_factor = 0.1
+        self.print_heat = 200
 
         '''HIDDEN MEMBERS'''
         self.__ros_comm = None
@@ -105,8 +114,7 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         #guid generation
         self.is_synced = False
         self.print_db("\n {}      Phase: {}      Play: {}      Step: {}".format(self.session_name, self.phase, self.current_play+1, self.current_step+1), color='red')
-        #previous observation becomes current state
-        self.state_array = self.observation_dict['observation'].copy()  
+        #previous observation becomes current state 
 
         self.action_id = str(uuid.uuid4().hex)[:8]
         info = "{}--{}--{}--{}".format(self.session_name, self.action_id, self.current_play, self.current_step)
@@ -137,7 +145,8 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
             self.current_play += 1
 
          
-        self.observation_dict['achieved_goal'] = self.goal_dict_to_tensor(achieved_goal_dict)                
+        self.observation_dict['achieved_goal'] = self.goal_dict_to_tensor(achieved_goal_dict)
+        self.observation_dict['observation'] += np.random.normal(loc=self.observation_noise_mean, scale=self.observation_noise_std, size=[self.observation_dim])
 
         self.reward = self.compute_reward(self.observation_dict['achieved_goal'], self.observation_dict['desired_goal'], '')
 
@@ -146,7 +155,11 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         self.current_step += 1
 
         self.is_synced = True
-        self.print_db("[{}-{}] Done: {}, Achieved Goal: {}, Reward: {}".format(self.session_name, self.action_id, self.done, self.observation_dict['achieved_goal'], self.reward), color='blue')
+        self.print_db("[{}-{}] Achieved Goal: {}".format(self.session_name, self.action_id, self.observation_dict['achieved_goal']), color='blue')
+        self.print_db("[{}-{}] Compressed state: {}, ...".format(self.session_name, self.action_id, self.observation_dict['observation'][0:3]), color='blue')
+        self.print_db("[{}-{}] Done: {}".format(self.session_name, self.action_id, self.done), color='blue', end="")
+        self.print_db("      Reward: {}".format(self.reward), color='blue', attrs=['bold'])
+        
 
         #rlkit requries us to return quote 'next_o, r, d, env_info' as simple lists and numbers
         return self.observation_dict, self.reward, self.done, info
@@ -179,13 +192,6 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         goal_dict['current_area'] = -0.5 #corresponds to a quarter of the totally available area being covered (anchor area subtracted)
         goal_dict['deformation'] = 0.95 # corresponds to a average displacement of 2cm for the recorded tcps. the goal is to get that or less
         return goal_dict
-
-    
-    def default_observation(self, add_noise=True):
-        obs = np.array(settings.DEFAULT_OBSERVATION, dtype=np.float32)
-        if add_noise:
-            obs += np.random.normal(loc=self.observation_noise_mean, scale=self.observation_noise_std, size=obs.size)
-        return obs
 
     def fill_goal_dict_from_moveit_collisions(self, goal_dict, collisions):
         #success case
@@ -296,10 +302,11 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         self.state_mesh = {}
 
         if self.is_simulation:
-            self.FH_Reset()
+            sim_res = self.FH_Reset()
+            self.observation_dict['observation'] = sim_res["state_compressed"]
             self.RhinoSimulation(settings.HOME_POSE)
-        self.state = self.default_observation()
-        self.observation_dict['observation'] = self.state.copy()
+
+        self.observation_dict['observation'] += np.random.normal(loc=self.observation_noise_mean, scale=self.observation_noise_std, size=[self.observation_dim])
         self.achieved_goal_dict = self.default_achieved_goal()
         self.observation_dict['achieved_goal'] = self.goal_dict_to_tensor(self.achieved_goal_dict)
 
@@ -311,7 +318,9 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
 
     def ros_comm(self):
         if self.__ros_comm == None:
+            print("Connecting to ROS...")
             self.__ros_comm = rc.Connection(self.session_name)
+            print("...Done!")
         return self.__ros_comm
 
 
@@ -330,13 +339,42 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         self.SafeRequest('fh_reset', p, settings.TIMEOUT_FH)
         time.sleep(settings.TIME_RESET_BTN)
         p["reset"]=False
-        p["populate_sim"]=self.populate_simulation
-        return self.SafeRequest('fh_reset', p, settings.TIMEOUT_FH)
+        pop = self.current_play % 10 < self.populate_simulation * 10
+        p["populate_sim"]= 0 if not pop else random.randint(0, 99999)
+        
+        simulation_result = self.SafeRequest('fh_reset', p, settings.TIMEOUT_FH)
+
+        if pop and int(self.rhino_pid) > 0:
+            self.state_mesh = dict(vertices = simulation_result['state_mesh_vertices'], indices=simulation_result['state_mesh_indices'])
+            self.ros_comm().test_pose(settings.HOME_POSE, state_mesh=self.state_mesh)
+
+        return simulation_result
 
     def FH_Run(self, run):
         p={}
         p["run"]=run
         return self.SafeRequest('fh_run', p, settings.TIMEOUT_FH)
+
+    #print_plan should be a dict containing three members: way_points_cartesian as a flat array of 7d way points, 'first_way_point_joint_states' and 'last_way_point_joint_states' (required for planning)
+    def print_path_with_robot(self, action, print_plan):
+        print_plan["action"] = action[0:6]
+        return self.ros_comm().print_path(print_plan)
+
+    def get_tags(self):
+        return self.ros_comm().get_tags()
+
+    def get_print_path(self, action, tags):
+        p = {}
+        p["action"] = []
+        for a in range(len(action)):
+            p["action"].append("A"+str(a)+"="+str(action[a]))
+
+        p["tag_poses"] = tags['tag_poses']
+        p["tag_ids"] = tags['ids']
+        p["tag_types"] = tags['types']
+        
+
+        return self.SafeRequest('get_path', p, settings.TIMEOUT_ACTION)
 
     def SafeRequest(self, controller, _params, _timeout):
         _params["rhino_pid"]=self.rhino_pid
@@ -347,12 +385,12 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
             try:
                 r = requests.get(settings.RHINOREMOTE_URL + controller, params = _params, timeout = _timeout, headers={'Cache-Control': 'no-cache'})
 
-                if r.text == "inready request":
-                    raise ValueError('INready REQUEST', 'INready REQUEST')
+                if r.text == "invalid request":
+                    raise ValueError('Invalid request', 'Invalid request')
 
                 j = json.loads(r.text)
 
-                if j["rhino_pid"] != self.rhino_pid:
+                if int(j["rhino_pid"]) != int(self.rhino_pid):
                     self.rhino_pid = j["rhino_pid"]
                     if controller != 'fh_reset':
                         raise ValueError('GH_OUT', 'GH_OUT')
@@ -381,19 +419,34 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
                 print("Retrying... Wish me luck")
                 continue
 
-    def print_db(self, text, color):
-        print(colored(text, color=color, attrs=['dark'] if self.phase == 'eval' else []))
+    def print_db(self, text, color, end="\n", attrs=[]):
+        attributes = (['dark'] if self.phase == 'eval' else [])
+        attributes.extend(attrs)
+        print(colored(text, color=color, attrs=attributes), end=end)
 
 if __name__ == "__main__":
     env = NormalizedActions(DeepBuilderGoalEnv(session_name = "debug_sess", is_simulation = True))
-    env.env.rhino_pid = 10380
+    env.env.rhino_pid = 9928
     while True:
         try:
-            env.reset()
-            for i in range(20):         
-                bla = env.step(np.random.uniform(low=-np.pi, high=np.pi, size=(7,)))
-                #input("Press Enter")
+            _in = input("action: ")
+            action = list(map(float, _in.split(',')))
+            tags = env.get_tags()
+            print_plan = env.get_print_path(action, tags)
+            _in = input("Got GH print path. [y/n] to continue printing or skip")
+            if _in == 'y':
+                try:
+                    msg = env.print_path_with_robot(action, print_plan)
+                    print(msg)
+                except Exception as e:
+                    print(e)
+            elif _in == 'n':
+                continue
+            else:
+                break
         except ValueError as err:
             if err.args[0] == "GH_OUT":
                 print("GH was out")
+            else:
+                raise
     print("done bye")

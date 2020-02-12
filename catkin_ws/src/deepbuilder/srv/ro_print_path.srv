@@ -1,0 +1,7 @@
+float32[] action #joint vals of action
+float32[] first_way_point_joint_states
+float32[] last_way_point_joint_states
+float32[] way_points_cartesian #7d cartesian, mm scale
+int32[] num_way_points #number of waypoints specific to each layer
+---
+string message

@@ -20,24 +20,31 @@
 
 (defclass deepbuilder::ro_move_homeRequest
   :super ros::object
-  :slots (_speed ))
+  :slots (_speed _wait ))
 
 (defmethod deepbuilder::ro_move_homeRequest
   (:init
    (&key
     ((:speed __speed) 0.0)
+    ((:wait __wait) nil)
     )
    (send-super :init)
    (setq _speed (float __speed))
+   (setq _wait __wait)
    self)
   (:speed
    (&optional __speed)
    (if __speed (setq _speed __speed)) _speed)
+  (:wait
+   (&optional __wait)
+   (if __wait (setq _wait __wait)) _wait)
   (:serialization-length
    ()
    (+
     ;; float32 _speed
     4
+    ;; bool _wait
+    1
     ))
   (:serialize
    (&optional strm)
@@ -45,12 +52,16 @@
               (make-string-output-stream (send self :serialization-length)))))
      ;; float32 _speed
        (sys::poke _speed (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
+     ;; bool _wait
+       (if _wait (write-byte -1 s) (write-byte 0 s))
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
    (buf &optional (ptr- 0))
    ;; float32 _speed
      (setq _speed (sys::peek buf ptr- :float)) (incf ptr- 4)
+   ;; bool _wait
+     (setq _wait (not (= 0 (sys::peek buf ptr- :char)))) (incf ptr- 1)
    ;;
    self)
   )
@@ -96,7 +107,7 @@
   :super ros::object
   :slots ())
 
-(setf (get deepbuilder::ro_move_home :md5sum-) "401d05492656e71a256f6ab38acc170c")
+(setf (get deepbuilder::ro_move_home :md5sum-) "c30317d3d3699e0839f659b2d971bd95")
 (setf (get deepbuilder::ro_move_home :datatype-) "deepbuilder/ro_move_home")
 (setf (get deepbuilder::ro_move_home :request) deepbuilder::ro_move_homeRequest)
 (setf (get deepbuilder::ro_move_home :response) deepbuilder::ro_move_homeResponse)
@@ -104,24 +115,26 @@
 (defmethod deepbuilder::ro_move_homeRequest
   (:response () (instance deepbuilder::ro_move_homeResponse :init)))
 
-(setf (get deepbuilder::ro_move_homeRequest :md5sum-) "401d05492656e71a256f6ab38acc170c")
+(setf (get deepbuilder::ro_move_homeRequest :md5sum-) "c30317d3d3699e0839f659b2d971bd95")
 (setf (get deepbuilder::ro_move_homeRequest :datatype-) "deepbuilder/ro_move_homeRequest")
 (setf (get deepbuilder::ro_move_homeRequest :definition-)
       "float32 speed
+bool wait
 ---
 string message
 ")
 
-(setf (get deepbuilder::ro_move_homeResponse :md5sum-) "401d05492656e71a256f6ab38acc170c")
+(setf (get deepbuilder::ro_move_homeResponse :md5sum-) "c30317d3d3699e0839f659b2d971bd95")
 (setf (get deepbuilder::ro_move_homeResponse :datatype-) "deepbuilder/ro_move_homeResponse")
 (setf (get deepbuilder::ro_move_homeResponse :definition-)
       "float32 speed
+bool wait
 ---
 string message
 ")
 
 
 
-(provide :deepbuilder/ro_move_home "401d05492656e71a256f6ab38acc170c")
+(provide :deepbuilder/ro_move_home "c30317d3d3699e0839f659b2d971bd95")
 
 

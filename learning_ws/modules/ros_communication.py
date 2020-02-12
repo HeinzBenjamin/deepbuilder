@@ -1,6 +1,8 @@
 import roslibpy, time, math, signal
 from contextlib import contextmanager
-from . import settings
+#from . import settings
+import settings
+
 #HOME_POSE = [1.1334346532821655,-1.7553976217852991,0.8690872192382812,-0.6843889395343226,-1.5728209654437464,-0.424158]
 
 class Connection():
@@ -11,10 +13,12 @@ class Connection():
         self.srv_status = roslibpy.Service(self.client, '/rosout/get_loggers', 'roscpp/GetLoggers')
         self.srv_path = roslibpy.Service(self.client, '/deepbuilder/robot/plan_path', '/deepbuilder/ro_plan_path')
         self.srv_update_msh = roslibpy.Service(self.client, '/deepbuilder/robot/update_state_mesh', '/deepbuilder/ro_update_state_mesh')
+        self.srv_get_tags = roslibpy.Service(self.client, '/deepbuilder/sensing/get_tags', '/deepbuilder/se_get_tags')
 
         self.srv_get_sensor_vals = roslibpy.Service(self.client, '/deepbuilder/sensing/get_values', '/deepbuilder/se_get_values')
         self.srv_get_joint_states = roslibpy.Service(self.client, '/deepbuilder/robot/get_robot_state', '/deepbuilder/ro_get_robot_state')
         self.srv_move_path = roslibpy.Service(self.client, '/deepbuilder/robot/move_path', '/deepbuilder/ro_move_path')
+        self.srv_print_path = roslibpy.Service(self.client, '/deepbuilder/robot/print_path', '/deepbuilder/ro_print_path')
 
     def ROS_status(self):
         request = roslibpy.ServiceRequest()
@@ -22,24 +26,18 @@ class Connection():
         result = self.srv_status.call(request)
         print('Service response: {}'.format(result['loggers']))
 
+    
+    def get_tags(self):
+        return self.safe_request('srv_get_tags', {}).data
+
+    #way_points: flat array of joint poses in print path; not including current state
+    #speed: general print speed. not per waypoint
+    def print_path(self, print_plan):       
+        request = roslibpy.ServiceRequest(values=print_plan)
+        res = self.srv_print_path.call(request)
+        return res['message']
 
     '''NEEDS REVISION
-    def move_path(self, path, speed, double_check = True):
-        if double_check:
-            _in = input("Goal pose is valid, continue at speed "+str(speed)+"? [y, n or enter number to overwrite speed]")
-            if _in != 'y':
-                if _in == 'n':
-                    return False
-                else:
-                    speed = speed if float(_in) == 'Nan' else min([0.6, float(_in)])
-
-        vals = {}
-        vals["speed"] = speed
-        vals["path"] = [item for sublist in path for item in sublist]
-        request = roslibpy.ServiceRequest(values=vals)
-        self.srv_move_path.call(request)
-        return True
-
     def move_home(self, keep_asking = True):
         is_home, _, _ = self.is_robot_in_position(settings.HOME_POSE, 0.01)
         if is_home:
@@ -76,6 +74,7 @@ class Connection():
         value['session'] = self.session_name if self.session_name != '' else 'anonymous'
         value['goal_pose'] = goal_pose
         value['state_pose'] = state_pose
+        value["speed"] = 1.0
 
         result = None
         if state_mesh != {}:

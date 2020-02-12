@@ -1,3 +1,4 @@
 trajectory_msgs/JointTrajectory path
+bool wait
 ---
 string message

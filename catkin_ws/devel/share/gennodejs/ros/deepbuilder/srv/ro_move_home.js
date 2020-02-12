@@ -22,6 +22,7 @@ class ro_move_homeRequest {
     if (initObj === null) {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.speed = null;
+      this.wait = null;
     }
     else {
       if (initObj.hasOwnProperty('speed')) {
@@ -30,6 +31,12 @@ class ro_move_homeRequest {
       else {
         this.speed = 0.0;
       }
+      if (initObj.hasOwnProperty('wait')) {
+        this.wait = initObj.wait
+      }
+      else {
+        this.wait = false;
+      }
     }
   }
 
@@ -37,6 +44,8 @@ class ro_move_homeRequest {
     // Serializes a message object of type ro_move_homeRequest
     // Serialize message field [speed]
     bufferOffset = _serializer.float32(obj.speed, buffer, bufferOffset);
+    // Serialize message field [wait]
+    bufferOffset = _serializer.bool(obj.wait, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -46,11 +55,13 @@ class ro_move_homeRequest {
     let data = new ro_move_homeRequest(null);
     // Deserialize message field [speed]
     data.speed = _deserializer.float32(buffer, bufferOffset);
+    // Deserialize message field [wait]
+    data.wait = _deserializer.bool(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
-    return 4;
+    return 5;
   }
 
   static datatype() {
@@ -60,13 +71,14 @@ class ro_move_homeRequest {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'ca65bba734a79b4a6707341d829f4d5c';
+    return 'a01f7c35bb601b46efedc398eecf213f';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
     float32 speed
+    bool wait
     
     `;
   }
@@ -82,6 +94,13 @@ class ro_move_homeRequest {
     }
     else {
       resolved.speed = 0.0
+    }
+
+    if (msg.wait !== undefined) {
+      resolved.wait = msg.wait;
+    }
+    else {
+      resolved.wait = false
     }
 
     return resolved;
@@ -164,6 +183,6 @@ class ro_move_homeResponse {
 module.exports = {
   Request: ro_move_homeRequest,
   Response: ro_move_homeResponse,
-  md5sum() { return '401d05492656e71a256f6ab38acc170c'; },
+  md5sum() { return 'c30317d3d3699e0839f659b2d971bd95'; },
   datatype() { return 'deepbuilder/ro_move_home'; }
 };

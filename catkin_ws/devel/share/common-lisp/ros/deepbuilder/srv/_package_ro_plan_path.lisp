@@ -5,6 +5,8 @@
           STATE_POSE
           SESSION-VAL
           SESSION
+          SPEED-VAL
+          SPEED
           PATH-VAL
           PATH
           COLLISIONS-VAL

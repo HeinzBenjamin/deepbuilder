@@ -15,7 +15,7 @@ def main():
     rate = rospy.Rate(100.0)
 
     js.name = ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']
-    js.position = settings.HOME_POSITION
+    js.position = settings.HOME_POSE
     js.velocity = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     js.effort = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 

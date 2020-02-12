@@ -23,6 +23,7 @@ class ro_move_pathRequest {
     if (initObj === null) {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.path = null;
+      this.wait = null;
     }
     else {
       if (initObj.hasOwnProperty('path')) {
@@ -31,6 +32,12 @@ class ro_move_pathRequest {
       else {
         this.path = new trajectory_msgs.msg.JointTrajectory();
       }
+      if (initObj.hasOwnProperty('wait')) {
+        this.wait = initObj.wait
+      }
+      else {
+        this.wait = false;
+      }
     }
   }
 
@@ -38,6 +45,8 @@ class ro_move_pathRequest {
     // Serializes a message object of type ro_move_pathRequest
     // Serialize message field [path]
     bufferOffset = trajectory_msgs.msg.JointTrajectory.serialize(obj.path, buffer, bufferOffset);
+    // Serialize message field [wait]
+    bufferOffset = _serializer.bool(obj.wait, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -47,13 +56,15 @@ class ro_move_pathRequest {
     let data = new ro_move_pathRequest(null);
     // Deserialize message field [path]
     data.path = trajectory_msgs.msg.JointTrajectory.deserialize(buffer, bufferOffset);
+    // Deserialize message field [wait]
+    data.wait = _deserializer.bool(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
     let length = 0;
     length += trajectory_msgs.msg.JointTrajectory.getMessageSize(object.path);
-    return length;
+    return length + 1;
   }
 
   static datatype() {
@@ -63,13 +74,14 @@ class ro_move_pathRequest {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'afc39d389d2fae8a4a9041b5a5f1c8aa';
+    return '37e9e49841fe90e96af9e250c8875ce5';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
     trajectory_msgs/JointTrajectory path
+    bool wait
     
     ================================================================================
     MSG: trajectory_msgs/JointTrajectory
@@ -120,6 +132,13 @@ class ro_move_pathRequest {
     }
     else {
       resolved.path = new trajectory_msgs.msg.JointTrajectory()
+    }
+
+    if (msg.wait !== undefined) {
+      resolved.wait = msg.wait;
+    }
+    else {
+      resolved.wait = false
     }
 
     return resolved;
@@ -202,6 +221,6 @@ class ro_move_pathResponse {
 module.exports = {
   Request: ro_move_pathRequest,
   Response: ro_move_pathResponse,
-  md5sum() { return '8c34125c1c77b9e671e5d9698ccd6432'; },
+  md5sum() { return '2e66b98388464afecfb23731a1f9334b'; },
   datatype() { return 'deepbuilder/ro_move_path'; }
 };

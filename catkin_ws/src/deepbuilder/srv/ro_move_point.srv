@@ -1,4 +1,5 @@
-float32[] goal
+float32[] goal_pose
 float32 speed
+bool wait
 ---
 string message

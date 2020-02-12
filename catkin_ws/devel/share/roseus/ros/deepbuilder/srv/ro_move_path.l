@@ -22,15 +22,17 @@
 
 (defclass deepbuilder::ro_move_pathRequest
   :super ros::object
-  :slots (_path ))
+  :slots (_path _wait ))
 
 (defmethod deepbuilder::ro_move_pathRequest
   (:init
    (&key
     ((:path __path) (instance trajectory_msgs::JointTrajectory :init))
+    ((:wait __wait) nil)
     )
    (send-super :init)
    (setq _path __path)
+   (setq _wait __wait)
    self)
   (:path
    (&rest __path)
@@ -39,11 +41,16 @@
      (progn
        (if __path (setq _path (car __path)))
        _path)))
+  (:wait
+   (&optional __wait)
+   (if __wait (setq _wait __wait)) _wait)
   (:serialization-length
    ()
    (+
     ;; trajectory_msgs/JointTrajectory _path
     (send _path :serialization-length)
+    ;; bool _wait
+    1
     ))
   (:serialize
    (&optional strm)
@@ -51,12 +58,16 @@
               (make-string-output-stream (send self :serialization-length)))))
      ;; trajectory_msgs/JointTrajectory _path
        (send _path :serialize s)
+     ;; bool _wait
+       (if _wait (write-byte -1 s) (write-byte 0 s))
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
    (buf &optional (ptr- 0))
    ;; trajectory_msgs/JointTrajectory _path
      (send _path :deserialize buf ptr-) (incf ptr- (send _path :serialization-length))
+   ;; bool _wait
+     (setq _wait (not (= 0 (sys::peek buf ptr- :char)))) (incf ptr- 1)
    ;;
    self)
   )
@@ -102,7 +113,7 @@
   :super ros::object
   :slots ())
 
-(setf (get deepbuilder::ro_move_path :md5sum-) "8c34125c1c77b9e671e5d9698ccd6432")
+(setf (get deepbuilder::ro_move_path :md5sum-) "2e66b98388464afecfb23731a1f9334b")
 (setf (get deepbuilder::ro_move_path :datatype-) "deepbuilder/ro_move_path")
 (setf (get deepbuilder::ro_move_path :request) deepbuilder::ro_move_pathRequest)
 (setf (get deepbuilder::ro_move_path :response) deepbuilder::ro_move_pathResponse)
@@ -110,10 +121,11 @@
 (defmethod deepbuilder::ro_move_pathRequest
   (:response () (instance deepbuilder::ro_move_pathResponse :init)))
 
-(setf (get deepbuilder::ro_move_pathRequest :md5sum-) "8c34125c1c77b9e671e5d9698ccd6432")
+(setf (get deepbuilder::ro_move_pathRequest :md5sum-) "2e66b98388464afecfb23731a1f9334b")
 (setf (get deepbuilder::ro_move_pathRequest :datatype-) "deepbuilder/ro_move_pathRequest")
 (setf (get deepbuilder::ro_move_pathRequest :definition-)
       "trajectory_msgs/JointTrajectory path
+bool wait
 
 ================================================================================
 MSG: trajectory_msgs/JointTrajectory
@@ -153,10 +165,11 @@ duration time_from_start
 string message
 ")
 
-(setf (get deepbuilder::ro_move_pathResponse :md5sum-) "8c34125c1c77b9e671e5d9698ccd6432")
+(setf (get deepbuilder::ro_move_pathResponse :md5sum-) "2e66b98388464afecfb23731a1f9334b")
 (setf (get deepbuilder::ro_move_pathResponse :datatype-) "deepbuilder/ro_move_pathResponse")
 (setf (get deepbuilder::ro_move_pathResponse :definition-)
       "trajectory_msgs/JointTrajectory path
+bool wait
 
 ================================================================================
 MSG: trajectory_msgs/JointTrajectory
@@ -198,6 +211,6 @@ string message
 
 
 
-(provide :deepbuilder/ro_move_path "8c34125c1c77b9e671e5d9698ccd6432")
+(provide :deepbuilder/ro_move_path "2e66b98388464afecfb23731a1f9334b")
 
 

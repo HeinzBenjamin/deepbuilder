@@ -78,11 +78,22 @@ SET(LIB_TYPE STATIC)
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
+  ro_get_joint_states.srv
   ro_plan_path.srv
+  ro_plan_cartesian.srv
+  ro_print_path.srv
   ro_move_home.srv
   ro_move_path.srv
   ro_move_point.srv
   ro_update_state_mesh.srv
+  tc_read.srv
+  tc_write.srv
+  ex_change_motor_speed.srv
+  ex_reset_motor.srv
+  ex_start_motor.srv
+  ex_change_temp.srv
+  se_get_tags.srv
+  se_collect_tags.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -97,6 +108,7 @@ generate_messages(
   DEPENDENCIES
   my_msgs
   std_msgs
+  moveit_msgs
   rosbridge_msgs
   geometry_msgs
   shape_msgs
@@ -155,6 +167,7 @@ CATKIN_DEPENDS
   moveit_msgs
   pcl_ros
   shape_msgs
+  trajectory_msgs
 DEPENDS system_lib Boost
 )
 

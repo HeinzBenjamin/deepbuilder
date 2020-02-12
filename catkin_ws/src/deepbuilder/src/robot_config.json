@@ -1,0 +1,10 @@
+{
+    "eef_step": 0.001,
+    "jump_threshold": 0.0, 
+    "jogging_speed": 0.1, 
+    "print_speed": 0.002,
+    "print_override": 30.0,
+    "default_override": 0.0,
+    "print_temp": 225.0,
+    "default_temp": 30.0
+}

@@ -10,10 +10,11 @@ import genpy
 import std_msgs.msg
 
 class ro_move_pathRequest(genpy.Message):
-  _md5sum = "afc39d389d2fae8a4a9041b5a5f1c8aa"
+  _md5sum = "37e9e49841fe90e96af9e250c8875ce5"
   _type = "deepbuilder/ro_move_pathRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """trajectory_msgs/JointTrajectory path
+bool wait
 
 ================================================================================
 MSG: trajectory_msgs/JointTrajectory
@@ -50,8 +51,8 @@ float64[] accelerations
 float64[] effort
 duration time_from_start
 """
-  __slots__ = ['path']
-  _slot_types = ['trajectory_msgs/JointTrajectory']
+  __slots__ = ['path','wait']
+  _slot_types = ['trajectory_msgs/JointTrajectory','bool']
 
   def __init__(self, *args, **kwds):
     """
@@ -61,7 +62,7 @@ duration time_from_start
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       path
+       path,wait
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -72,8 +73,11 @@ duration time_from_start
       #message fields cannot be None, assign default values for those that are
       if self.path is None:
         self.path = trajectory_msgs.msg.JointTrajectory()
+      if self.wait is None:
+        self.wait = False
     else:
       self.path = trajectory_msgs.msg.JointTrajectory()
+      self.wait = False
 
   def _get_types(self):
     """
@@ -125,6 +129,7 @@ duration time_from_start
         _v1 = val1.time_from_start
         _x = _v1
         buff.write(_get_struct_2i().pack(_x.secs, _x.nsecs))
+      buff.write(_get_struct_B().pack(self.wait))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -205,6 +210,10 @@ duration time_from_start
         end += 8
         (_x.secs, _x.nsecs,) = _get_struct_2i().unpack(str[start:end])
         self.path.points.append(val1)
+      start = end
+      end += 1
+      (self.wait,) = _get_struct_B().unpack(str[start:end])
+      self.wait = bool(self.wait)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -255,6 +264,7 @@ duration time_from_start
         _v3 = val1.time_from_start
         _x = _v3
         buff.write(_get_struct_2i().pack(_x.secs, _x.nsecs))
+      buff.write(_get_struct_B().pack(self.wait))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -336,6 +346,10 @@ duration time_from_start
         end += 8
         (_x.secs, _x.nsecs,) = _get_struct_2i().unpack(str[start:end])
         self.path.points.append(val1)
+      start = end
+      end += 1
+      (self.wait,) = _get_struct_B().unpack(str[start:end])
+      self.wait = bool(self.wait)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -350,6 +364,12 @@ def _get_struct_3I():
     if _struct_3I is None:
         _struct_3I = struct.Struct("<3I")
     return _struct_3I
+_struct_B = None
+def _get_struct_B():
+    global _struct_B
+    if _struct_B is None:
+        _struct_B = struct.Struct("<B")
+    return _struct_B
 _struct_2i = None
 def _get_struct_2i():
     global _struct_2i
@@ -480,6 +500,6 @@ def _get_struct_I():
     return _struct_I
 class ro_move_path(object):
   _type          = 'deepbuilder/ro_move_path'
-  _md5sum = '8c34125c1c77b9e671e5d9698ccd6432'
+  _md5sum = '2e66b98388464afecfb23731a1f9334b'
   _request_class  = ro_move_pathRequest
   _response_class = ro_move_pathResponse

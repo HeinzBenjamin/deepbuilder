@@ -1,0 +1,4 @@
+---
+float32[] tag_poses #flat array of 7d poses
+int8[] types #0: box type 0, 1: box type 0, 2: box type 0, 3: standalone tag
+int8[] ids #idea of first tag associated with box or being the standalone tag

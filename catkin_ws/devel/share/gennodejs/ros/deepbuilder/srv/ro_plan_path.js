@@ -25,6 +25,7 @@ class ro_plan_pathRequest {
       this.goal_pose = null;
       this.state_pose = null;
       this.session = null;
+      this.speed = null;
     }
     else {
       if (initObj.hasOwnProperty('goal_pose')) {
@@ -45,6 +46,12 @@ class ro_plan_pathRequest {
       else {
         this.session = '';
       }
+      if (initObj.hasOwnProperty('speed')) {
+        this.speed = initObj.speed
+      }
+      else {
+        this.speed = 0.0;
+      }
     }
   }
 
@@ -56,6 +63,8 @@ class ro_plan_pathRequest {
     bufferOffset = _arraySerializer.float32(obj.state_pose, buffer, bufferOffset, null);
     // Serialize message field [session]
     bufferOffset = _serializer.string(obj.session, buffer, bufferOffset);
+    // Serialize message field [speed]
+    bufferOffset = _serializer.float32(obj.speed, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -69,6 +78,8 @@ class ro_plan_pathRequest {
     data.state_pose = _arrayDeserializer.float32(buffer, bufferOffset, null)
     // Deserialize message field [session]
     data.session = _deserializer.string(buffer, bufferOffset);
+    // Deserialize message field [speed]
+    data.speed = _deserializer.float32(buffer, bufferOffset);
     return data;
   }
 
@@ -77,7 +88,7 @@ class ro_plan_pathRequest {
     length += 4 * object.goal_pose.length;
     length += 4 * object.state_pose.length;
     length += object.session.length;
-    return length + 12;
+    return length + 16;
   }
 
   static datatype() {
@@ -87,7 +98,7 @@ class ro_plan_pathRequest {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '15a4ed9a20580007cf1de683108e0479';
+    return 'aa87f6dd8f0618d14c9e8d2e5bd2c91c';
   }
 
   static messageDefinition() {
@@ -96,6 +107,7 @@ class ro_plan_pathRequest {
     float32[] goal_pose
     float32[] state_pose
     string session
+    float32 speed
     
     `;
   }
@@ -125,6 +137,13 @@ class ro_plan_pathRequest {
     }
     else {
       resolved.session = ''
+    }
+
+    if (msg.speed !== undefined) {
+      resolved.speed = msg.speed;
+    }
+    else {
+      resolved.speed = 0.0
     }
 
     return resolved;
@@ -283,6 +302,6 @@ class ro_plan_pathResponse {
 module.exports = {
   Request: ro_plan_pathRequest,
   Response: ro_plan_pathResponse,
-  md5sum() { return '78c6500ddd5c10d7648d9ddb0962d4ee'; },
+  md5sum() { return '6bb18060add6f8092d505a812c13f49f'; },
   datatype() { return 'deepbuilder/ro_plan_path'; }
 };
