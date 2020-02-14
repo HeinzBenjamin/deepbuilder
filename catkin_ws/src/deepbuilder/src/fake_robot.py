@@ -19,7 +19,6 @@ def main():
     js.velocity = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     js.effort = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
-    robot_control.make_table_marker()
     rospy.Subscriber("/tf", TFMessage, robot_control.draw_environment)
 
     while not rospy.is_shutdown():

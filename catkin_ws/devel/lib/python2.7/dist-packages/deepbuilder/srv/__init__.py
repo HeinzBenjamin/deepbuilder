@@ -12,7 +12,9 @@ from ._ro_plan_cartesian import *
 from ._ro_plan_motion import *
 from ._ro_plan_path import *
 from ._ro_print_path import *
+from ._ro_update_compressed_mesh import *
 from ._ro_update_state_mesh import *
+from ._se_collect_state import *
 from ._se_collect_tags import *
 from ._se_get_tags import *
 from ._tc_read import *

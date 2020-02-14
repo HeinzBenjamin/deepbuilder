@@ -86,6 +86,7 @@ add_service_files(
   ro_move_path.srv
   ro_move_point.srv
   ro_update_state_mesh.srv
+  ro_update_compressed_mesh.srv
   tc_read.srv
   tc_write.srv
   ex_change_motor_speed.srv
@@ -93,7 +94,7 @@ add_service_files(
   ex_start_motor.srv
   ex_change_temp.srv
   se_get_tags.srv
-  se_collect_tags.srv
+  se_collect_state.srv
 )
 
 ## Generate actions in the 'action' folder

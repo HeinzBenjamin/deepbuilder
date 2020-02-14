@@ -16,8 +16,10 @@ move_group = {}
 arena = None
 state_mesh = Mesh()
 state_mesh_visualisation = None
+compressed_mesh_visualisation = None
 group_name = ''
 marker_pub_env = rospy.Publisher('/deepbuilder/robot/state_mesh', Marker,queue_size=1)
+marker_pub_comp = rospy.Publisher('/deepbuilder/robot/compressed_mesh', Marker,queue_size=1)
 marker_pub_path = rospy.Publisher('/deepbuilder/robot/print_path', MarkerArray, queue_size=1)
 srv_proxy_fk = rospy.ServiceProxy('/compute_fk', GetPositionFK)
 srv_proxy_ik = rospy.ServiceProxy('/compute_ik', GetPositionIK)
@@ -353,7 +355,7 @@ def plan_path(req):
             return res
 
     speed = robot_config['jogging_speed'] if req.speed == None else req.speed
-    traj = move_group.retime_trajectory(ref_state_in = robot.get_current_state(), traj_in = traj, velocity_scaling_factor = robot_config['jogging_speed'])
+    traj = move_group.retime_trajectory(ref_state_in = robot.get_current_state(), traj_in = traj, velocity_scaling_factor = speed)
     res.path = traj.joint_trajectory
     res.message = "SUCCESS"
     print str(res.collisions)
@@ -364,7 +366,6 @@ def plan_path(req):
 def update_state_mesh(req):
     global state_mesh
     global state_mesh_visualisation
-    global marker_id
     res = ro_update_state_meshResponse()
     try:
         state_mesh = Mesh() #mesh for collision checking and planning
@@ -421,9 +422,54 @@ def update_state_mesh(req):
     
     return res
     
+
+def update_compressed_mesh(req):
+    global compressed_mesh_visualisation
+    res = ro_update_compressed_meshResponse()
+    try:
+        compressed_mesh_visualisation = Marker() #only rviz visualisation mesh
+        compressed_mesh_visualisation.header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
+        compressed_mesh_visualisation.header.stamp = rospy.Time.now()
+        compressed_mesh_visualisation.ns = 'compressed_mesh-' + req.session
+        compressed_mesh_visualisation.id = 1
+        compressed_mesh_visualisation.type = Marker.TRIANGLE_LIST if len(req.vertices) > 0 else Marker.POINTS
+        compressed_mesh_visualisation.action = Marker.ADD
+        compressed_mesh_visualisation.pose.orientation.w = 1.0
+        compressed_mesh_visualisation.scale.x = 1.0
+        compressed_mesh_visualisation.scale.y = 1.0
+        compressed_mesh_visualisation.scale.z = 1.0
+
+        compressed_mesh_visualisation.color.r = 0.4
+        compressed_mesh_visualisation.color.g = 0.3
+        compressed_mesh_visualisation.color.b = 0.8
+        compressed_mesh_visualisation.color.a = 0.6 if len(req.vertices) > 0 else 0.0
+        compressed_mesh_visualisation.lifetime = rospy.Duration()
+
+        if len(req.vertices) == 0:
+            compressed_mesh_visualisation.points.append(Point())
+            res.message = "[path_planning] Compressed mesh succefully updated"
+        else:
+            for i in req.indices:
+                compressed_mesh_visualisation.points.append(Point(req.vertices[3 * i] * 0.001, req.vertices[3 * i + 1] * 0.001, req.vertices[3 * i + 2] * 0.001))
+
+            res.message = "[path_planning] Compressed mesh successfully updated"
+
+
+    except KeyboardInterrupt:
+        raise
+    
+    except:
+        res.message = "[path_planning ERROR] Compressed mesh could not be updated:\n" + str(sys.exc_info()[0]) + "\n" + str(sys.exc_info()[1])
+    
+    return res
+    
+
 def draw_state_mesh(data):
     if state_mesh_visualisation:
         marker_pub_env.publish(state_mesh_visualisation)
+    if compressed_mesh_visualisation:
+        marker_pub_comp.publish(compressed_mesh_visualisation)
+    rospy.sleep(rospy.Duration(0.05))
 
 def main():
     global robot
@@ -469,6 +515,7 @@ def main():
     srv_plan = rospy.Service('/deepbuilder/robot/plan_path',ro_plan_path, plan_path)
     srv_motion = rospy.Service('deepbuilder/robot/plan_cartesian', ro_plan_cartesian, plan_cartesian)
     srv_up_msh = rospy.Service('/deepbuilder/robot/update_state_mesh', ro_update_state_mesh, update_state_mesh)
+    srv_up_c_msh = rospy.Service('/deepbuilder/robot/update_compressed_mesh', ro_update_compressed_mesh, update_compressed_mesh)
 
     rospy.Subscriber("/tf", TFMessage, draw_state_mesh)
 

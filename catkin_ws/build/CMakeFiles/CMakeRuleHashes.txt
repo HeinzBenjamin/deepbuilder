@@ -13,7 +13,9 @@ c4f550b50c78a2f2929ce66401511680 /home/ros/deepbuilder/catkin_ws/devel/include/d
 372017c6d225961f3ceec2f24462daeb /home/ros/deepbuilder/catkin_ws/devel/include/deepbuilder/ro_plan_motion.h
 6cc95b251249c8957f4d6c9da167a4f9 /home/ros/deepbuilder/catkin_ws/devel/include/deepbuilder/ro_plan_path.h
 3242cb625a3a987fe34239940873cdc0 /home/ros/deepbuilder/catkin_ws/devel/include/deepbuilder/ro_print_path.h
+b9e52cd6f599955801fdd7cec0759397 /home/ros/deepbuilder/catkin_ws/devel/include/deepbuilder/ro_update_compressed_mesh.h
 809ec032e493d3150a60bac8b67a31ec /home/ros/deepbuilder/catkin_ws/devel/include/deepbuilder/ro_update_state_mesh.h
+63365571a8c0d6324cc652680f2d7b96 /home/ros/deepbuilder/catkin_ws/devel/include/deepbuilder/se_collect_state.h
 02986091bcf7a9c1bfab99e6e04f5293 /home/ros/deepbuilder/catkin_ws/devel/include/deepbuilder/se_collect_tags.h
 17ce289152bdad939ef3ce69b832627c /home/ros/deepbuilder/catkin_ws/devel/include/deepbuilder/se_get_tags.h
 763b205c7afb70d42d552b10ed12e800 /home/ros/deepbuilder/catkin_ws/devel/include/deepbuilder/tc_read.h
@@ -36,7 +38,9 @@ c846a438f08a60f831af200905872e6e /home/ros/deepbuilder/catkin_ws/devel/lib/pytho
 08cc11d4fe8bf3383ba1b66f7f960c5a /home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_plan_motion.py
 1b32616e5b1fdbf0c7d0c78081df4386 /home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_plan_path.py
 d9bfaf9e24aadbe5c8ab0bcffb4bda4d /home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_print_path.py
+981e26d8304c996a0223f657f069a6f1 /home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_update_compressed_mesh.py
 81fd09d96d6817f4645d7d322d39b772 /home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_ro_update_state_mesh.py
+136eb28695e64b412eea1ec60d7741b5 /home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_se_collect_state.py
 b165e1f69f7f9ec448681eced03f345c /home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_se_collect_tags.py
 ac525f43d432fc5dd97a837ff82ed824 /home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_se_get_tags.py
 06f8ebba9e900a03ac037b2841e935ae /home/ros/deepbuilder/catkin_ws/devel/lib/python2.7/dist-packages/deepbuilder/srv/_tc_read.py
@@ -59,7 +63,9 @@ b090f61f50b3ea234ea49bed00039f03 /home/ros/deepbuilder/catkin_ws/devel/share/com
 d2ef9242d7481eec84f0745f0e2436d7 /home/ros/deepbuilder/catkin_ws/devel/share/common-lisp/ros/deepbuilder/srv/ro_plan_motion.lisp
 36edac1389e387cd167ee5f7f31c6237 /home/ros/deepbuilder/catkin_ws/devel/share/common-lisp/ros/deepbuilder/srv/ro_plan_path.lisp
 a662b0c15dca0fae7a4bd547e578319f /home/ros/deepbuilder/catkin_ws/devel/share/common-lisp/ros/deepbuilder/srv/ro_print_path.lisp
+2982ab4eb7273291b7c5960e1cc8a2fc /home/ros/deepbuilder/catkin_ws/devel/share/common-lisp/ros/deepbuilder/srv/ro_update_compressed_mesh.lisp
 454904efbaba3c693d31045be8eefc71 /home/ros/deepbuilder/catkin_ws/devel/share/common-lisp/ros/deepbuilder/srv/ro_update_state_mesh.lisp
+88ca739c8d295f9fe6a7a11c01a0cf6f /home/ros/deepbuilder/catkin_ws/devel/share/common-lisp/ros/deepbuilder/srv/se_collect_state.lisp
 ba7843f1a4e0fcf5f64258e527a5ced9 /home/ros/deepbuilder/catkin_ws/devel/share/common-lisp/ros/deepbuilder/srv/se_collect_tags.lisp
 aaa9aeb401c96bcc452ffdf0c1a37d16 /home/ros/deepbuilder/catkin_ws/devel/share/common-lisp/ros/deepbuilder/srv/se_get_tags.lisp
 f440c0c05d38a9f999b1a736e300bf30 /home/ros/deepbuilder/catkin_ws/devel/share/common-lisp/ros/deepbuilder/srv/tc_read.lisp
@@ -81,7 +87,9 @@ dcc9480f9e9b7d0a405889ebe6fe06fb /home/ros/deepbuilder/catkin_ws/devel/share/gen
 35b22bd45c6076ae1718a054f3b2e671 /home/ros/deepbuilder/catkin_ws/devel/share/gennodejs/ros/deepbuilder/srv/ro_plan_motion.js
 8beaddb3bde9d085d34edcf17e79ce9f /home/ros/deepbuilder/catkin_ws/devel/share/gennodejs/ros/deepbuilder/srv/ro_plan_path.js
 090a06adcddec0e6a630ffe496b0073e /home/ros/deepbuilder/catkin_ws/devel/share/gennodejs/ros/deepbuilder/srv/ro_print_path.js
+e8dfbd181b933c483b87f46e54268a69 /home/ros/deepbuilder/catkin_ws/devel/share/gennodejs/ros/deepbuilder/srv/ro_update_compressed_mesh.js
 32851a655881bd2a8af083079c4d63c9 /home/ros/deepbuilder/catkin_ws/devel/share/gennodejs/ros/deepbuilder/srv/ro_update_state_mesh.js
+1b6c6102c53267473aa62a3f118e3417 /home/ros/deepbuilder/catkin_ws/devel/share/gennodejs/ros/deepbuilder/srv/se_collect_state.js
 1d996339a72a6a664fc87cc9362ab709 /home/ros/deepbuilder/catkin_ws/devel/share/gennodejs/ros/deepbuilder/srv/se_collect_tags.js
 c47f69c00ac52636750f1bcb51b0a2d1 /home/ros/deepbuilder/catkin_ws/devel/share/gennodejs/ros/deepbuilder/srv/se_get_tags.js
 69dab6f666c4f809940d7392aaddf623 /home/ros/deepbuilder/catkin_ws/devel/share/gennodejs/ros/deepbuilder/srv/tc_read.js
@@ -104,7 +112,9 @@ c511902ad1a1c8a95e0e11818eb005cb /home/ros/deepbuilder/catkin_ws/devel/share/ros
 824c7cbe2795678929fda57522f49f9c /home/ros/deepbuilder/catkin_ws/devel/share/roseus/ros/deepbuilder/srv/ro_plan_motion.l
 48adc103816aa4745e4e06ad29a68657 /home/ros/deepbuilder/catkin_ws/devel/share/roseus/ros/deepbuilder/srv/ro_plan_path.l
 d2e9d84632fc9e87010e46ba3f8951a4 /home/ros/deepbuilder/catkin_ws/devel/share/roseus/ros/deepbuilder/srv/ro_print_path.l
+f82dccf7e114f14c178d2c8f98a6b0c7 /home/ros/deepbuilder/catkin_ws/devel/share/roseus/ros/deepbuilder/srv/ro_update_compressed_mesh.l
 532a28880a6fa5eed5d79717f2d7dd14 /home/ros/deepbuilder/catkin_ws/devel/share/roseus/ros/deepbuilder/srv/ro_update_state_mesh.l
+0d91a63f2000b7280b06cb964f951f42 /home/ros/deepbuilder/catkin_ws/devel/share/roseus/ros/deepbuilder/srv/se_collect_state.l
 bce761b5b382d99b93437afae2c8358c /home/ros/deepbuilder/catkin_ws/devel/share/roseus/ros/deepbuilder/srv/se_collect_tags.l
 175490f57fd0b70c8d6b812fcec69f37 /home/ros/deepbuilder/catkin_ws/devel/share/roseus/ros/deepbuilder/srv/se_get_tags.l
 a809293fb125f56ff9af76eca714d996 /home/ros/deepbuilder/catkin_ws/devel/share/roseus/ros/deepbuilder/srv/tc_read.l
@@ -125,8 +135,9 @@ d12ffd479dcb012fa8790a7b9721f5f6 deepbuilder/CMakeFiles/_deepbuilder_generate_me
 943c8f338a3b103ef8c87851ed64f48d deepbuilder/CMakeFiles/_deepbuilder_generate_messages_check_deps_ro_plan_cartesian
 0f82ebc35fa4a5d3fc3ffde3df862a20 deepbuilder/CMakeFiles/_deepbuilder_generate_messages_check_deps_ro_plan_path
 be7993eff9828d540efd64681ed3a1bf deepbuilder/CMakeFiles/_deepbuilder_generate_messages_check_deps_ro_print_path
+19a65a31ca2fdd566c5358d6ac0a97b9 deepbuilder/CMakeFiles/_deepbuilder_generate_messages_check_deps_ro_update_compressed_mesh
 2483aeeab83af81f80eec4025f8a663a deepbuilder/CMakeFiles/_deepbuilder_generate_messages_check_deps_ro_update_state_mesh
-2fa82c764325ef2797c924e656c1a963 deepbuilder/CMakeFiles/_deepbuilder_generate_messages_check_deps_se_collect_tags
+0c506501439109c34251a17949007e9d deepbuilder/CMakeFiles/_deepbuilder_generate_messages_check_deps_se_collect_state
 9aa444fc571ef94504ab36812460c0ee deepbuilder/CMakeFiles/_deepbuilder_generate_messages_check_deps_se_get_tags
 2dbc88dec8ac46ac5ed3e9d267c9fe1d deepbuilder/CMakeFiles/_deepbuilder_generate_messages_check_deps_tc_read
 5c073344748f58ea3105c77b8b664ab6 deepbuilder/CMakeFiles/_deepbuilder_generate_messages_check_deps_tc_write

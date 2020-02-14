@@ -98,7 +98,8 @@ def move_point(req):
     res = ro_move_pointResponse()
     pp_req = ro_plan_pathRequest()
     pp_req.goal_pose = req.goal_pose
-    pp_req.session = "move_point"
+    pp_req.speed=req.speed
+    pp_req.session = "move_point"    
     pp_res = srv_proxy_path.call(pp_req)
     if pp_res.message != "SUCCESS":
         msg = "No path found: " + res.message
@@ -123,6 +124,17 @@ def move_path(req):
         if not DISABLE_USER_QUERY_MOVE:
             inp = raw_input("Move path on robot?[y,n]")
         if DISABLE_USER_QUERY_MOVE or inp == 'y':
+            joint_states = rospy.wait_for_message("joint_states", JointState).position
+            if not pp.state_equals(copy.deepcopy(joint_states), copy.deepcopy(req.path.points[0].positions), tolerance = 0.05):
+                inp = raw_input("move_path: first path point diverges a lot from current robot state.\npath[0]  : "+str(req.path.points[0].positions)+"\nstate now: "+str(joint_states)+"\nStill continue? [y/n]: ")
+                if inp != 'y':
+                    res.message = 'User interrupt'
+                    return res
+            if pp.state_equals(copy.deepcopy(joint_states), copy.deepcopy(req.path.points[-1].positions), tolerance = 0.01):
+                inp = raw_input("move_path: robot is already in in final position of path.\npath[0]  : "+str(req.path.points[-1].positions)+"\nstate now: "+str(joint_states)+"\nStill continue? [y/n]: ")
+                if inp != 'y':
+                    res.message = 'User interrupt'
+                    return res
             traj = FollowJointTrajectoryGoal()
             traj.trajectory = req.path
             client.send_goal(traj)

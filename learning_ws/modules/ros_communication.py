@@ -1,7 +1,7 @@
 import roslibpy, time, math, signal
 from contextlib import contextmanager
-#from . import settings
-import settings
+from . import settings
+#import settings
 
 #HOME_POSE = [1.1334346532821655,-1.7553976217852991,0.8690872192382812,-0.6843889395343226,-1.5728209654437464,-0.424158]
 
@@ -12,11 +12,11 @@ class Connection():
         self.session_name = session_name
         self.srv_status = roslibpy.Service(self.client, '/rosout/get_loggers', 'roscpp/GetLoggers')
         self.srv_path = roslibpy.Service(self.client, '/deepbuilder/robot/plan_path', '/deepbuilder/ro_plan_path')
-        self.srv_update_msh = roslibpy.Service(self.client, '/deepbuilder/robot/update_state_mesh', '/deepbuilder/ro_update_state_mesh')
+        self.srv_update_state_mesh = roslibpy.Service(self.client, '/deepbuilder/robot/update_state_mesh', '/deepbuilder/ro_update_state_mesh')
+        self.srv_update_compressed_mesh = roslibpy.Service(self.client, '/deepbuilder/robot/update_compressed_mesh', '/deepbuilder/ro_update_compressed_mesh')
         self.srv_get_tags = roslibpy.Service(self.client, '/deepbuilder/sensing/get_tags', '/deepbuilder/se_get_tags')
-
-        self.srv_get_sensor_vals = roslibpy.Service(self.client, '/deepbuilder/sensing/get_values', '/deepbuilder/se_get_values')
-        self.srv_get_joint_states = roslibpy.Service(self.client, '/deepbuilder/robot/get_robot_state', '/deepbuilder/ro_get_robot_state')
+        self.srv_collect_state = roslibpy.Service(self.client, '/deepbuilder/sensing/collect_state', '/deepbuilder/se_collect_state')
+        #self.srv_get_joint_states = roslibpy.Service(self.client, '/deepbuilder/robot/get_robot_state', '/deepbuilder/ro_get_robot_state')
         self.srv_move_path = roslibpy.Service(self.client, '/deepbuilder/robot/move_path', '/deepbuilder/ro_move_path')
         self.srv_print_path = roslibpy.Service(self.client, '/deepbuilder/robot/print_path', '/deepbuilder/ro_print_path')
 
@@ -26,7 +26,10 @@ class Connection():
         result = self.srv_status.call(request)
         print('Service response: {}'.format(result['loggers']))
 
-    
+    def scan_state(self, sensor_poses, trust_blindly = False):
+        sensor_poses['trust_blindly'] = trust_blindly
+        return self.safe_request('srv_collect_state', sensor_poses, _timeout=999999).data
+
     def get_tags(self):
         return self.safe_request('srv_get_tags', {}).data
 
@@ -79,15 +82,34 @@ class Connection():
         result = None
         if state_mesh != {}:
             state_mesh['session'] = self.session_name
-            srv_response = self.safe_request('srv_update_msh', state_mesh)
+            srv_response = self.safe_request('srv_update_state_mesh', state_mesh)
             print(srv_response['message'])
 
         result = self.safe_request('srv_path', value)
 
         return result.data
 
+    def update_state_mesh(self, state_mesh_vertices, state_mesh_indices):
+        state_mesh = {}
+        state_mesh['session'] = self.session_name
+        state_mesh['vertices'] = state_mesh_vertices
+        state_mesh['indices'] = state_mesh_indices
+        srv_response = self.safe_request('srv_update_state_mesh', state_mesh).data
+        print(srv_response['message'])
+
+    def update_compressed_mesh(self, comp_mesh_vertices, comp_mesh_indices):
+        comp_mesh = {}
+        comp_mesh['session'] = self.session_name
+        comp_mesh['vertices'] = comp_mesh_vertices
+        comp_mesh['indices'] = comp_mesh_indices
+        srv_response = self.safe_request('srv_update_compressed_mesh', comp_mesh).data
+        print(srv_response['message'])
+
     def reset_state_mesh(self):
-        return self.safe_request('srv_update_msh', {'session': self.session_name, 'vertices':[], 'indices':[]})
+        return self.safe_request('srv_update_state_mesh', {'session': self.session_name, 'vertices':[], 'indices':[]})
+
+    def reset_compressed_mesh(self):
+        return self.safe_request('srv_update_compressed_mesh', {'session': self.session_name, 'vertices':[], 'indices':[]})
 
     def reset_client(self):
         self.client.close()
@@ -96,20 +118,22 @@ class Connection():
         time.sleep(0.5)
         self.srv_status = roslibpy.Service(self.client, '/rosout/get_loggers', 'roscpp/GetLoggers')
         self.srv_path = roslibpy.Service(self.client, '/deepbuilder/robot/plan_path', '/deepbuilder/ro_plan_path')
-        self.srv_update_msh = roslibpy.Service(self.client, '/deepbuilder/robot/update_state_mesh', '/deepbuilder/ro_update_state_mesh')
-
-        self.srv_get_sensor_vals = roslibpy.Service(self.client, '/deepbuilder/sensing/get_values', '/deepbuilder/se_get_values')
-        self.srv_get_joint_states = roslibpy.Service(self.client, '/deepbuilder/robot/get_robot_state', '/deepbuilder/ro_get_robot_state')
+        self.srv_update_state_mesh = roslibpy.Service(self.client, '/deepbuilder/robot/update_state_mesh', '/deepbuilder/ro_update_state_mesh')
+        self.srv_update_compressed_mesh = roslibpy.Service(self.client, '/deepbuilder/robot/update_compressed_mesh', '/deepbuilder/ro_update_compressed_mesh')
+        self.srv_get_tags = roslibpy.Service(self.client, '/deepbuilder/sensing/get_tags', '/deepbuilder/se_get_tags')
+        self.srv_collect_state = roslibpy.Service(self.client, '/deepbuilder/sensing/collect_state', '/deepbuilder/se_collect_state')
+        #self.srv_get_joint_states = roslibpy.Service(self.client, '/deepbuilder/robot/get_robot_state', '/deepbuilder/ro_get_robot_state')
         self.srv_move_path = roslibpy.Service(self.client, '/deepbuilder/robot/move_path', '/deepbuilder/ro_move_path')
+        self.srv_print_path = roslibpy.Service(self.client, '/deepbuilder/robot/print_path', '/deepbuilder/ro_print_path')
 
-    def safe_request(self, proxy_name, value):
+    def safe_request(self, proxy_name, value, _timeout=-1):
         result = None
         
         while True:
             request = roslibpy.ServiceRequest(value)
             proxy = self.__getattribute__(proxy_name)
             try:
-                with timeout(settings.ROS_PATH_SRV_TIMEOUT):
+                with timeout(settings.ROS_PATH_SRV_TIMEOUT if _timeout == -1 else _timeout):
                     result = proxy.call(request)
             except Exception as e:
                 print("{}\nError when in ROS service request. Retrying... ".format(e))

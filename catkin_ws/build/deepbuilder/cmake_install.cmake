@@ -42,6 +42,7 @@ if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspeci
     "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_path.srv"
     "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_move_point.srv"
     "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_update_state_mesh.srv"
+    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ro_update_compressed_mesh.srv"
     "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/tc_read.srv"
     "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/tc_write.srv"
     "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ex_change_motor_speed.srv"
@@ -49,7 +50,7 @@ if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspeci
     "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ex_start_motor.srv"
     "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/ex_change_temp.srv"
     "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_get_tags.srv"
-    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_collect_tags.srv"
+    "/home/ros/deepbuilder/catkin_ws/src/deepbuilder/srv/se_collect_state.srv"
     )
 endif()
 

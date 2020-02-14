@@ -170,17 +170,17 @@ def experiment(variant):
 
 if __name__ == "__main__":
 
-    session_name = "200116-hs-long-test"
+    session_name = "200213-real-print"
 
     variant = dict(
         algorithm='HER-SAC',
         version='normal',
         reuse_replay_buffer='',
-        continue_training='/home/ros/deepbuilder/learning_ws/data/200116-hs-long-test/200116-hs-long-test_2020_02_07_00_13_35_0000--s-0/params.pkl',
+        continue_training='/home/ros/deepbuilder/learning_ws/data/200116-hs-long-test/200116-hs-long-test_2020_02_07_18_41_25_0000--s-0/params.pkl',
         env_kwargs=dict(
             session_name=session_name,            
-            rhino_pid=8564,
-            is_simulation=True,
+            rhino_pid=6160,
+            is_simulation=False,
             action_dim=7, 
             observation_dim=144,
             goal_dim=10,
@@ -188,7 +188,7 @@ if __name__ == "__main__":
             observation_noise_std=0.0002,
             max_steps_per_play=30,
             terminate_at_collision=False,
-            populate_simulation=0.7
+            populate_simulation=0.0 #IMPORTANT!!! CHANGE WHEN NOT SIMULATION
         ),
         algo_kwargs=dict(
             batch_size=256,

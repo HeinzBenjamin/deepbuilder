@@ -14,35 +14,29 @@
 
 (in-package "ROS")
 
-(if (not (find-package "TRAJECTORY_MSGS"))
-  (ros::roseus-add-msgs "trajectory_msgs"))
 
 
 
 
 (defclass deepbuilder::se_collect_tagsRequest
   :super ros::object
-  :slots (_path _pairs _pair_lengths ))
+  :slots (_poses _pairs _pair_lengths ))
 
 (defmethod deepbuilder::se_collect_tagsRequest
   (:init
    (&key
-    ((:path __path) (instance trajectory_msgs::JointTrajectory :init))
+    ((:poses __poses) (make-array 0 :initial-element 0.0 :element-type :float))
     ((:pairs __pairs) (make-array 0 :initial-element 0 :element-type :integer))
     ((:pair_lengths __pair_lengths) (make-array 0 :initial-element 0 :element-type :integer))
     )
    (send-super :init)
-   (setq _path __path)
+   (setq _poses __poses)
    (setq _pairs __pairs)
    (setq _pair_lengths __pair_lengths)
    self)
-  (:path
-   (&rest __path)
-   (if (keywordp (car __path))
-       (send* _path __path)
-     (progn
-       (if __path (setq _path (car __path)))
-       _path)))
+  (:poses
+   (&optional __poses)
+   (if __poses (setq _poses __poses)) _poses)
   (:pairs
    (&optional __pairs)
    (if __pairs (setq _pairs __pairs)) _pairs)
@@ -52,8 +46,8 @@
   (:serialization-length
    ()
    (+
-    ;; trajectory_msgs/JointTrajectory _path
-    (send _path :serialization-length)
+    ;; float32[] _poses
+    (* 4    (length _poses)) 4
     ;; int32[] _pairs
     (* 4    (length _pairs)) 4
     ;; int32[] _pair_lengths
@@ -63,8 +57,11 @@
    (&optional strm)
    (let ((s (if strm strm
               (make-string-output-stream (send self :serialization-length)))))
-     ;; trajectory_msgs/JointTrajectory _path
-       (send _path :serialize s)
+     ;; float32[] _poses
+     (write-long (length _poses) s)
+     (dotimes (i (length _poses))
+       (sys::poke (elt _poses i) (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
+       )
      ;; int32[] _pairs
      (write-long (length _pairs) s)
      (dotimes (i (length _pairs))
@@ -79,8 +76,13 @@
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
    (buf &optional (ptr- 0))
-   ;; trajectory_msgs/JointTrajectory _path
-     (send _path :deserialize buf ptr-) (incf ptr- (send _path :serialization-length))
+   ;; float32[] _poses
+   (let (n)
+     (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4)
+     (setq _poses (instantiate float-vector n))
+     (dotimes (i n)
+     (setf (elt _poses i) (sys::peek buf ptr- :float)) (incf ptr- 4)
+     ))
    ;; int32[] _pairs
    (let (n)
      (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4)
@@ -188,7 +190,7 @@
   :super ros::object
   :slots ())
 
-(setf (get deepbuilder::se_collect_tags :md5sum-) "6a3bb97297abf73607870ea61a5466bd")
+(setf (get deepbuilder::se_collect_tags :md5sum-) "83f15a0a65a3dcd57be2f47c0135c2de")
 (setf (get deepbuilder::se_collect_tags :datatype-) "deepbuilder/se_collect_tags")
 (setf (get deepbuilder::se_collect_tags :request) deepbuilder::se_collect_tagsRequest)
 (setf (get deepbuilder::se_collect_tags :response) deepbuilder::se_collect_tagsResponse)
@@ -196,94 +198,24 @@
 (defmethod deepbuilder::se_collect_tagsRequest
   (:response () (instance deepbuilder::se_collect_tagsResponse :init)))
 
-(setf (get deepbuilder::se_collect_tagsRequest :md5sum-) "6a3bb97297abf73607870ea61a5466bd")
+(setf (get deepbuilder::se_collect_tagsRequest :md5sum-) "83f15a0a65a3dcd57be2f47c0135c2de")
 (setf (get deepbuilder::se_collect_tagsRequest :datatype-) "deepbuilder/se_collect_tagsRequest")
 (setf (get deepbuilder::se_collect_tagsRequest :definition-)
-      "trajectory_msgs/JointTrajectory path
+      "float32[] poses
 int32[] pairs
 int32[] pair_lengths
-
-================================================================================
-MSG: trajectory_msgs/JointTrajectory
-Header header
-string[] joint_names
-JointTrajectoryPoint[] points
-================================================================================
-MSG: std_msgs/Header
-# Standard metadata for higher-level stamped data types.
-# This is generally used to communicate timestamped data 
-# in a particular coordinate frame.
-# 
-# sequence ID: consecutively increasing ID 
-uint32 seq
-#Two-integer timestamp that is expressed as:
-# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
-# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
-# time-handling sugar is provided by the client library
-time stamp
-#Frame this data is associated with
-# 0: no frame
-# 1: global frame
-string frame_id
-
-================================================================================
-MSG: trajectory_msgs/JointTrajectoryPoint
-# Each trajectory point specifies either positions[, velocities[, accelerations]]
-# or positions[, effort] for the trajectory to be executed.
-# All specified values are in the same order as the joint names in JointTrajectory.msg
-
-float64[] positions
-float64[] velocities
-float64[] accelerations
-float64[] effort
-duration time_from_start
 ---
 float32[] tag_poses
 int8[] types
 int8[] ids
 ")
 
-(setf (get deepbuilder::se_collect_tagsResponse :md5sum-) "6a3bb97297abf73607870ea61a5466bd")
+(setf (get deepbuilder::se_collect_tagsResponse :md5sum-) "83f15a0a65a3dcd57be2f47c0135c2de")
 (setf (get deepbuilder::se_collect_tagsResponse :datatype-) "deepbuilder/se_collect_tagsResponse")
 (setf (get deepbuilder::se_collect_tagsResponse :definition-)
-      "trajectory_msgs/JointTrajectory path
+      "float32[] poses
 int32[] pairs
 int32[] pair_lengths
-
-================================================================================
-MSG: trajectory_msgs/JointTrajectory
-Header header
-string[] joint_names
-JointTrajectoryPoint[] points
-================================================================================
-MSG: std_msgs/Header
-# Standard metadata for higher-level stamped data types.
-# This is generally used to communicate timestamped data 
-# in a particular coordinate frame.
-# 
-# sequence ID: consecutively increasing ID 
-uint32 seq
-#Two-integer timestamp that is expressed as:
-# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
-# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
-# time-handling sugar is provided by the client library
-time stamp
-#Frame this data is associated with
-# 0: no frame
-# 1: global frame
-string frame_id
-
-================================================================================
-MSG: trajectory_msgs/JointTrajectoryPoint
-# Each trajectory point specifies either positions[, velocities[, accelerations]]
-# or positions[, effort] for the trajectory to be executed.
-# All specified values are in the same order as the joint names in JointTrajectory.msg
-
-float64[] positions
-float64[] velocities
-float64[] accelerations
-float64[] effort
-duration time_from_start
 ---
 float32[] tag_poses
 int8[] types
@@ -292,6 +224,6 @@ int8[] ids
 
 
 
-(provide :deepbuilder/se_collect_tags "6a3bb97297abf73607870ea61a5466bd")
+(provide :deepbuilder/se_collect_tags "83f15a0a65a3dcd57be2f47c0135c2de")
 
 

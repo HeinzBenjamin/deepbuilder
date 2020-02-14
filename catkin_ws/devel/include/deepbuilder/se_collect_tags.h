@@ -40,7 +40,7 @@ template<>
 struct MD5Sum< ::deepbuilder::se_collect_tags > {
   static const char* value()
   {
-    return "6a3bb97297abf73607870ea61a5466bd";
+    return "83f15a0a65a3dcd57be2f47c0135c2de";
   }
 
   static const char* value(const ::deepbuilder::se_collect_tags&) { return value(); }

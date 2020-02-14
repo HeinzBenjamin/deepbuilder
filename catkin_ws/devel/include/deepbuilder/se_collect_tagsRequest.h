@@ -15,7 +15,6 @@
 #include <ros/builtin_message_traits.h>
 #include <ros/message_operations.h>
 
-#include <trajectory_msgs/JointTrajectory.h>
 
 namespace deepbuilder
 {
@@ -25,12 +24,12 @@ struct se_collect_tagsRequest_
   typedef se_collect_tagsRequest_<ContainerAllocator> Type;
 
   se_collect_tagsRequest_()
-    : path()
+    : poses()
     , pairs()
     , pair_lengths()  {
     }
   se_collect_tagsRequest_(const ContainerAllocator& _alloc)
-    : path(_alloc)
+    : poses(_alloc)
     , pairs(_alloc)
     , pair_lengths(_alloc)  {
   (void)_alloc;
@@ -38,8 +37,8 @@ struct se_collect_tagsRequest_
 
 
 
-   typedef  ::trajectory_msgs::JointTrajectory_<ContainerAllocator>  _path_type;
-  _path_type path;
+   typedef std::vector<float, typename ContainerAllocator::template rebind<float>::other >  _poses_type;
+  _poses_type poses;
 
    typedef std::vector<int32_t, typename ContainerAllocator::template rebind<int32_t>::other >  _pairs_type;
   _pairs_type pairs;
@@ -125,12 +124,12 @@ struct MD5Sum< ::deepbuilder::se_collect_tagsRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "7e2f19fd4fa10637e10872463c286957";
+    return "0a2d8bbcfc4f9ed8bd886393d1b75193";
   }
 
   static const char* value(const ::deepbuilder::se_collect_tagsRequest_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x7e2f19fd4fa10637ULL;
-  static const uint64_t static_value2 = 0xe10872463c286957ULL;
+  static const uint64_t static_value1 = 0x0a2d8bbcfc4f9ed8ULL;
+  static const uint64_t static_value2 = 0xbd886393d1b75193ULL;
 };
 
 template<class ContainerAllocator>
@@ -149,44 +148,9 @@ struct Definition< ::deepbuilder::se_collect_tagsRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "trajectory_msgs/JointTrajectory path\n\
+    return "float32[] poses\n\
 int32[] pairs\n\
 int32[] pair_lengths\n\
-\n\
-================================================================================\n\
-MSG: trajectory_msgs/JointTrajectory\n\
-Header header\n\
-string[] joint_names\n\
-JointTrajectoryPoint[] points\n\
-================================================================================\n\
-MSG: std_msgs/Header\n\
-# Standard metadata for higher-level stamped data types.\n\
-# This is generally used to communicate timestamped data \n\
-# in a particular coordinate frame.\n\
-# \n\
-# sequence ID: consecutively increasing ID \n\
-uint32 seq\n\
-#Two-integer timestamp that is expressed as:\n\
-# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')\n\
-# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')\n\
-# time-handling sugar is provided by the client library\n\
-time stamp\n\
-#Frame this data is associated with\n\
-# 0: no frame\n\
-# 1: global frame\n\
-string frame_id\n\
-\n\
-================================================================================\n\
-MSG: trajectory_msgs/JointTrajectoryPoint\n\
-# Each trajectory point specifies either positions[, velocities[, accelerations]]\n\
-# or positions[, effort] for the trajectory to be executed.\n\
-# All specified values are in the same order as the joint names in JointTrajectory.msg\n\
-\n\
-float64[] positions\n\
-float64[] velocities\n\
-float64[] accelerations\n\
-float64[] effort\n\
-duration time_from_start\n\
 ";
   }
 
@@ -205,7 +169,7 @@ namespace serialization
   {
     template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
     {
-      stream.next(m.path);
+      stream.next(m.poses);
       stream.next(m.pairs);
       stream.next(m.pair_lengths);
     }
@@ -226,9 +190,12 @@ struct Printer< ::deepbuilder::se_collect_tagsRequest_<ContainerAllocator> >
 {
   template<typename Stream> static void stream(Stream& s, const std::string& indent, const ::deepbuilder::se_collect_tagsRequest_<ContainerAllocator>& v)
   {
-    s << indent << "path: ";
-    s << std::endl;
-    Printer< ::trajectory_msgs::JointTrajectory_<ContainerAllocator> >::stream(s, indent + "  ", v.path);
+    s << indent << "poses[]" << std::endl;
+    for (size_t i = 0; i < v.poses.size(); ++i)
+    {
+      s << indent << "  poses[" << i << "]: ";
+      Printer<float>::stream(s, indent + "  ", v.poses[i]);
+    }
     s << indent << "pairs[]" << std::endl;
     for (size_t i = 0; i < v.pairs.size(); ++i)
     {

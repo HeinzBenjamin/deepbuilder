@@ -1,6 +1,7 @@
 import json
 
-HOME_POSE = [1.13344,-1.8112,1.2823,0.5129,1.6990,3.1416]
+HOME_POSE = [1.2228,-1.6317,1.1287,0.50297,1.2228,3.1416]
+
 JOINT_NAMES = ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']
 
 TWINCAT_ADDRESS = 'http://192.168.137.1:8528/twincat/'

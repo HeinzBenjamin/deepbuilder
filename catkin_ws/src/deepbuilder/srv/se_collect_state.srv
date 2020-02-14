@@ -1,4 +1,4 @@
-trajectory_msgs/JointTrajectory path #path that the robot follows while collecting tags
+float32[] poses #6d axis robot poses at which measurements are taken (flat array)
 int32[] pairs #define if multiple tag pairs identifiy the same block
 int32[] pair_lengths #lengths of said tag pairs
 ---

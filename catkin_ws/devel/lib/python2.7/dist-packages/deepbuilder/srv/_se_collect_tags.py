@@ -5,55 +5,17 @@ python3 = True if sys.hexversion > 0x03000000 else False
 import genpy
 import struct
 
-import trajectory_msgs.msg
-import genpy
-import std_msgs.msg
 
 class se_collect_tagsRequest(genpy.Message):
-  _md5sum = "7e2f19fd4fa10637e10872463c286957"
+  _md5sum = "0a2d8bbcfc4f9ed8bd886393d1b75193"
   _type = "deepbuilder/se_collect_tagsRequest"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """trajectory_msgs/JointTrajectory path
+  _full_text = """float32[] poses
 int32[] pairs
 int32[] pair_lengths
-
-================================================================================
-MSG: trajectory_msgs/JointTrajectory
-Header header
-string[] joint_names
-JointTrajectoryPoint[] points
-================================================================================
-MSG: std_msgs/Header
-# Standard metadata for higher-level stamped data types.
-# This is generally used to communicate timestamped data 
-# in a particular coordinate frame.
-# 
-# sequence ID: consecutively increasing ID 
-uint32 seq
-#Two-integer timestamp that is expressed as:
-# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
-# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
-# time-handling sugar is provided by the client library
-time stamp
-#Frame this data is associated with
-# 0: no frame
-# 1: global frame
-string frame_id
-
-================================================================================
-MSG: trajectory_msgs/JointTrajectoryPoint
-# Each trajectory point specifies either positions[, velocities[, accelerations]]
-# or positions[, effort] for the trajectory to be executed.
-# All specified values are in the same order as the joint names in JointTrajectory.msg
-
-float64[] positions
-float64[] velocities
-float64[] accelerations
-float64[] effort
-duration time_from_start
 """
-  __slots__ = ['path','pairs','pair_lengths']
-  _slot_types = ['trajectory_msgs/JointTrajectory','int32[]','int32[]']
+  __slots__ = ['poses','pairs','pair_lengths']
+  _slot_types = ['float32[]','int32[]','int32[]']
 
   def __init__(self, *args, **kwds):
     """
@@ -63,7 +25,7 @@ duration time_from_start
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       path,pairs,pair_lengths
+       poses,pairs,pair_lengths
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -72,14 +34,14 @@ duration time_from_start
     if args or kwds:
       super(se_collect_tagsRequest, self).__init__(*args, **kwds)
       #message fields cannot be None, assign default values for those that are
-      if self.path is None:
-        self.path = trajectory_msgs.msg.JointTrajectory()
+      if self.poses is None:
+        self.poses = []
       if self.pairs is None:
         self.pairs = []
       if self.pair_lengths is None:
         self.pair_lengths = []
     else:
-      self.path = trajectory_msgs.msg.JointTrajectory()
+      self.poses = []
       self.pairs = []
       self.pair_lengths = []
 
@@ -95,44 +57,10 @@ duration time_from_start
     :param buff: buffer, ``StringIO``
     """
     try:
-      _x = self
-      buff.write(_get_struct_3I().pack(_x.path.header.seq, _x.path.header.stamp.secs, _x.path.header.stamp.nsecs))
-      _x = self.path.header.frame_id
-      length = len(_x)
-      if python3 or type(_x) == unicode:
-        _x = _x.encode('utf-8')
-        length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
-      length = len(self.path.joint_names)
+      length = len(self.poses)
       buff.write(_struct_I.pack(length))
-      for val1 in self.path.joint_names:
-        length = len(val1)
-        if python3 or type(val1) == unicode:
-          val1 = val1.encode('utf-8')
-          length = len(val1)
-        buff.write(struct.pack('<I%ss'%length, length, val1))
-      length = len(self.path.points)
-      buff.write(_struct_I.pack(length))
-      for val1 in self.path.points:
-        length = len(val1.positions)
-        buff.write(_struct_I.pack(length))
-        pattern = '<%sd'%length
-        buff.write(struct.pack(pattern, *val1.positions))
-        length = len(val1.velocities)
-        buff.write(_struct_I.pack(length))
-        pattern = '<%sd'%length
-        buff.write(struct.pack(pattern, *val1.velocities))
-        length = len(val1.accelerations)
-        buff.write(_struct_I.pack(length))
-        pattern = '<%sd'%length
-        buff.write(struct.pack(pattern, *val1.accelerations))
-        length = len(val1.effort)
-        buff.write(_struct_I.pack(length))
-        pattern = '<%sd'%length
-        buff.write(struct.pack(pattern, *val1.effort))
-        _v1 = val1.time_from_start
-        _x = _v1
-        buff.write(_get_struct_2i().pack(_x.secs, _x.nsecs))
+      pattern = '<%sf'%length
+      buff.write(struct.pack(pattern, *self.poses))
       length = len(self.pairs)
       buff.write(_struct_I.pack(length))
       pattern = '<%si'%length
@@ -150,77 +78,14 @@ duration time_from_start
     :param str: byte array of serialized message, ``str``
     """
     try:
-      if self.path is None:
-        self.path = trajectory_msgs.msg.JointTrajectory()
       end = 0
-      _x = self
-      start = end
-      end += 12
-      (_x.path.header.seq, _x.path.header.stamp.secs, _x.path.header.stamp.nsecs,) = _get_struct_3I().unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%sf'%length
       start = end
-      end += length
-      if python3:
-        self.path.header.frame_id = str[start:end].decode('utf-8')
-      else:
-        self.path.header.frame_id = str[start:end]
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      self.path.joint_names = []
-      for i in range(0, length):
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        start = end
-        end += length
-        if python3:
-          val1 = str[start:end].decode('utf-8')
-        else:
-          val1 = str[start:end]
-        self.path.joint_names.append(val1)
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      self.path.points = []
-      for i in range(0, length):
-        val1 = trajectory_msgs.msg.JointTrajectoryPoint()
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        pattern = '<%sd'%length
-        start = end
-        end += struct.calcsize(pattern)
-        val1.positions = struct.unpack(pattern, str[start:end])
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        pattern = '<%sd'%length
-        start = end
-        end += struct.calcsize(pattern)
-        val1.velocities = struct.unpack(pattern, str[start:end])
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        pattern = '<%sd'%length
-        start = end
-        end += struct.calcsize(pattern)
-        val1.accelerations = struct.unpack(pattern, str[start:end])
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        pattern = '<%sd'%length
-        start = end
-        end += struct.calcsize(pattern)
-        val1.effort = struct.unpack(pattern, str[start:end])
-        _v2 = val1.time_from_start
-        _x = _v2
-        start = end
-        end += 8
-        (_x.secs, _x.nsecs,) = _get_struct_2i().unpack(str[start:end])
-        self.path.points.append(val1)
+      end += struct.calcsize(pattern)
+      self.poses = struct.unpack(pattern, str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -247,44 +112,10 @@ duration time_from_start
     :param numpy: numpy python module
     """
     try:
-      _x = self
-      buff.write(_get_struct_3I().pack(_x.path.header.seq, _x.path.header.stamp.secs, _x.path.header.stamp.nsecs))
-      _x = self.path.header.frame_id
-      length = len(_x)
-      if python3 or type(_x) == unicode:
-        _x = _x.encode('utf-8')
-        length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
-      length = len(self.path.joint_names)
+      length = len(self.poses)
       buff.write(_struct_I.pack(length))
-      for val1 in self.path.joint_names:
-        length = len(val1)
-        if python3 or type(val1) == unicode:
-          val1 = val1.encode('utf-8')
-          length = len(val1)
-        buff.write(struct.pack('<I%ss'%length, length, val1))
-      length = len(self.path.points)
-      buff.write(_struct_I.pack(length))
-      for val1 in self.path.points:
-        length = len(val1.positions)
-        buff.write(_struct_I.pack(length))
-        pattern = '<%sd'%length
-        buff.write(val1.positions.tostring())
-        length = len(val1.velocities)
-        buff.write(_struct_I.pack(length))
-        pattern = '<%sd'%length
-        buff.write(val1.velocities.tostring())
-        length = len(val1.accelerations)
-        buff.write(_struct_I.pack(length))
-        pattern = '<%sd'%length
-        buff.write(val1.accelerations.tostring())
-        length = len(val1.effort)
-        buff.write(_struct_I.pack(length))
-        pattern = '<%sd'%length
-        buff.write(val1.effort.tostring())
-        _v3 = val1.time_from_start
-        _x = _v3
-        buff.write(_get_struct_2i().pack(_x.secs, _x.nsecs))
+      pattern = '<%sf'%length
+      buff.write(self.poses.tostring())
       length = len(self.pairs)
       buff.write(_struct_I.pack(length))
       pattern = '<%si'%length
@@ -303,77 +134,14 @@ duration time_from_start
     :param numpy: numpy python module
     """
     try:
-      if self.path is None:
-        self.path = trajectory_msgs.msg.JointTrajectory()
       end = 0
-      _x = self
-      start = end
-      end += 12
-      (_x.path.header.seq, _x.path.header.stamp.secs, _x.path.header.stamp.nsecs,) = _get_struct_3I().unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%sf'%length
       start = end
-      end += length
-      if python3:
-        self.path.header.frame_id = str[start:end].decode('utf-8')
-      else:
-        self.path.header.frame_id = str[start:end]
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      self.path.joint_names = []
-      for i in range(0, length):
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        start = end
-        end += length
-        if python3:
-          val1 = str[start:end].decode('utf-8')
-        else:
-          val1 = str[start:end]
-        self.path.joint_names.append(val1)
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      self.path.points = []
-      for i in range(0, length):
-        val1 = trajectory_msgs.msg.JointTrajectoryPoint()
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        pattern = '<%sd'%length
-        start = end
-        end += struct.calcsize(pattern)
-        val1.positions = numpy.frombuffer(str[start:end], dtype=numpy.float64, count=length)
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        pattern = '<%sd'%length
-        start = end
-        end += struct.calcsize(pattern)
-        val1.velocities = numpy.frombuffer(str[start:end], dtype=numpy.float64, count=length)
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        pattern = '<%sd'%length
-        start = end
-        end += struct.calcsize(pattern)
-        val1.accelerations = numpy.frombuffer(str[start:end], dtype=numpy.float64, count=length)
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        pattern = '<%sd'%length
-        start = end
-        end += struct.calcsize(pattern)
-        val1.effort = numpy.frombuffer(str[start:end], dtype=numpy.float64, count=length)
-        _v4 = val1.time_from_start
-        _x = _v4
-        start = end
-        end += 8
-        (_x.secs, _x.nsecs,) = _get_struct_2i().unpack(str[start:end])
-        self.path.points.append(val1)
+      end += struct.calcsize(pattern)
+      self.poses = numpy.frombuffer(str[start:end], dtype=numpy.float32, count=length)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -396,18 +164,6 @@ _struct_I = genpy.struct_I
 def _get_struct_I():
     global _struct_I
     return _struct_I
-_struct_3I = None
-def _get_struct_3I():
-    global _struct_3I
-    if _struct_3I is None:
-        _struct_3I = struct.Struct("<3I")
-    return _struct_3I
-_struct_2i = None
-def _get_struct_2i():
-    global _struct_2i
-    if _struct_2i is None:
-        _struct_2i = struct.Struct("<2i")
-    return _struct_2i
 # This Python file uses the following encoding: utf-8
 """autogenerated by genpy from deepbuilder/se_collect_tagsResponse.msg. Do not edit."""
 import sys
@@ -576,6 +332,6 @@ def _get_struct_I():
     return _struct_I
 class se_collect_tags(object):
   _type          = 'deepbuilder/se_collect_tags'
-  _md5sum = '6a3bb97297abf73607870ea61a5466bd'
+  _md5sum = '83f15a0a65a3dcd57be2f47c0135c2de'
   _request_class  = se_collect_tagsRequest
   _response_class = se_collect_tagsResponse

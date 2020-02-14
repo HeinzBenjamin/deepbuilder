@@ -1,8 +1,8 @@
-import gym, torch, uuid, time, requests, json, datetime, random
+import gym, torch, uuid, time, requests, json, datetime, random, copy
 from termcolor import colored
 import numpy as np
 from gym import spaces
-'''
+
 from . import ros_communication as rc
 from . import settings
 from . import util
@@ -10,7 +10,7 @@ from . import util
 import ros_communication as rc
 import settings
 import util
-
+'''
 
 
 # important rlkit files:
@@ -106,9 +106,51 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         self.print_speed = 0.001
         self.nozzle_speed_factor = 0.1
         self.print_heat = 200
+        self.state_tags = None
+        self.previous_print_result = {}
 
         '''HIDDEN MEMBERS'''
         self.__ros_comm = None
+
+    '''
+    main functions
+    '''
+    def reset(self):
+        self.is_synced = False
+
+        self.ros_comm().reset_state_mesh()
+        self.ros_comm().reset_compressed_mesh()
+        self.send_state_mesh_to_ros = False
+        self.state_mesh = {}
+
+        if self.is_simulation:
+            sim_res = self.FH_Reset()
+            self.observation_dict['observation'] = sim_res["state_compressed"]
+            
+
+        else:
+            print("Retrieving sensor paths")
+            sensing_poses = self.get_sensor_poses(settings.HOME_SCANNING_POSE)
+
+            print("Collecting tag info")
+            self.state_tags = self.ros_scan_state(sensing_poses)
+
+            print("Sending new state tags to Rhino")
+            sim_res = self.update_state_tags(self.state_tags)
+            self.observation_dict['observation'] = sim_res["state_compressed"]
+
+
+        self.RhinoSimulation(settings.HOME_POSE)
+
+        self.observation_dict['observation'] += np.random.normal(loc=self.observation_noise_mean, scale=self.observation_noise_std, size=[self.observation_dim])
+        self.achieved_goal_dict = self.default_achieved_goal()
+        self.observation_dict['achieved_goal'] = self.goal_dict_to_tensor(self.achieved_goal_dict)
+
+        self.current_step = 0
+        self.done = False
+        self.current_step = 0
+        self.is_synced=True
+        return self.observation_dict
 
     def step(self, action):
         #guid generation
@@ -128,17 +170,22 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         self.print_db("[{}-{}] Path planning result: {}".format(self.session_name, self.action_id, path_planning_result['message']), color='white')
         info += " +++ path_planning: " + path_planning_result['message']
         self.fill_goal_dict_from_moveit_collisions(achieved_goal_dict, path_planning_result['collisions'])
-        
 
-        if path_planning_result['message'] == 'SUCCESS':
-            simulation_result = self.RhinoSimulation(action_array)
-            self.fill_goal_dict_from_gh_simulation(achieved_goal_dict, simulation_result)
-            info += " +++ is_printable: " + str(simulation_result['is_printable'])
-            self.print_db("[{}-{}] Simulation result: Is printable: {}".format(self.session_name, self.action_id, simulation_result['is_printable']), color='white')
-            self.observation_dict['observation'] = np.array(simulation_result['state_compressed'], dtype=np.float32)
-            self.send_state_mesh_to_ros = simulation_result['is_printable']
+        if path_planning_result['message'] == "SUCCESS":
+            print_result = {}
+            if self.is_simulation:
+                print_result = self.print_simulation(action)
+            else:
+                print_result = self.print_real(action)
+
+            self.fill_goal_dict_from_gh_simulation(achieved_goal_dict, print_result)
+            self.ros_comm().update_compressed_mesh(comp_mesh_vertices = print_result['compressed_mesh_vertices'], comp_mesh_indices = print_result['compressed_mesh_indices'])
+            info += " +++ printability ratio: " + str(print_result['printability_ratio'])
+            self.print_db("[{}-{}] Simulation result: Printability ratio: {}".format(self.session_name, self.action_id, print_result['printability_ratio']), color='white')
+            self.observation_dict['observation'] = np.array(print_result['state_compressed'], dtype=np.float32)
+            self.send_state_mesh_to_ros = print_result['printability_ratio'] > 0.0
             if self.send_state_mesh_to_ros:
-                self.state_mesh = dict(vertices = simulation_result['state_mesh_vertices'], indices=simulation_result['state_mesh_indices'])
+                self.state_mesh = dict(vertices = print_result['state_mesh_vertices'], indices=print_result['state_mesh_indices'])
 
         if (self.terminate_at_collision and path_planning_result['message'] != 'SUCCESS') or (self.current_step >= (self.max_steps_per_play - 1)):
             self.done = True
@@ -149,7 +196,6 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         self.observation_dict['observation'] += np.random.normal(loc=self.observation_noise_mean, scale=self.observation_noise_std, size=[self.observation_dim])
 
         self.reward = self.compute_reward(self.observation_dict['achieved_goal'], self.observation_dict['desired_goal'], '')
-
              
 
         self.current_step += 1
@@ -163,7 +209,50 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
 
         #rlkit requries us to return quote 'next_o, r, d, env_info' as simple lists and numbers
         return self.observation_dict, self.reward, self.done, info
-            
+
+    def print_simulation(self, action_array):
+        return self.RhinoSimulation(action_array)
+
+
+    def print_real(self, action):
+        print("Trying to get print path from Rhino")
+        #actually try to get a print path from rhino
+        print_plan = self.get_print_path(action)
+        print_result = copy.deepcopy(self.previous_print_result)
+        print_result['printability_ratio'] = print_plan['printability_ratio']
+        print_result['dist_to_state'] = print_plan['dist_to_state']
+
+        if print_plan["printability_ratio"] > 0.0:
+            _in = input("Got GH print path. [y/n] to continue printing or skip")
+            if _in == 'y':
+                try:
+                    self.print_db("Attempting robotic print", color='yellow')
+                    msg = env.ros_print_path_with_robot(action, print_plan)
+                    self.print_db(msg, color='yellow')
+
+                    self.print_db("Retrieving sensor paths", color='yellow')
+                    sensing_poses = self.get_sensor_poses(action[:6])
+
+                    self.print_db("Collecting tag info", color='yellow')
+                    state_tags = self.ros_scan_state(sensing_poses)
+
+                    self.print_db("Sending new state tags to Rhino", color='yellow')
+                    rhino_state_update = self.update_state_tags(state_tags)
+                    print_result['current_height'] = rhino_state_update['current_height']
+                    print_result['current_area'] = rhino_state_update['current_area']
+                    print_result['deformation'] = rhino_state_update['deformation']
+
+
+                except Exception as e:
+                    print(e)
+                    
+        self.previous_print_result = copy.deepcopy(print_result)
+
+        return print_result
+
+    '''
+    process step results
+    '''
     def default_achieved_goal(self):
         #most pessimistic case
         goal_dict = {}
@@ -172,7 +261,7 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         goal_dict['table_collision'] = -1
         goal_dict['state_collision'] = -1
         goal_dict['all_collision'] = -1
-        goal_dict['is_printable'] = -1
+        goal_dict['printability_ratio'] = -1
         goal_dict['dist_to_state'] = -1
         goal_dict['current_height'] = -1
         goal_dict['current_area'] = -1
@@ -186,7 +275,7 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         goal_dict['table_collision'] = 1
         goal_dict['state_collision'] = 1
         goal_dict['all_collision'] = 1
-        goal_dict['is_printable'] = 1
+        goal_dict['printability_ratio'] = 1
         goal_dict['dist_to_state'] = 0.9 # corresponds to a radius of 12.5cm around the state mesh. the goal is to get that near or closer
         goal_dict['current_height'] = -0.33333333 # corresponds to a height of 25cm
         goal_dict['current_area'] = -0.5 #corresponds to a quarter of the totally available area being covered (anchor area subtracted)
@@ -220,7 +309,7 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
 
     def fill_goal_dict_from_gh_simulation(self, goal_dict, sim_result):
         #if printable 1, else -1
-        goal_dict['is_printable'] = 1 if sim_result['is_printable'] else -1
+        goal_dict['printability_ratio'] = sim_result['printability_ratio'] * 2.0 - 1.0
 
         #remapping of 0.0 to 2500.0 into -1.0 to 1.0; sing flipped bc, the shorter the distance the better
         goal_dict['dist_to_state'] = (sim_result['dist_to_state_mesh'] / settings.DISTANCE_TCP_STATE_MAX) * -2.0 + 1.0
@@ -253,7 +342,7 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         tensor[2] = min(1.0, max( -1.0, goal_dict['table_collision']))
         tensor[3] = min(1.0, max( -1.0, goal_dict['state_collision']))
         tensor[4] = min(1.0, max( -1.0, goal_dict['all_collision']))
-        tensor[5] = min(1.0, max( -1.0, goal_dict['is_printable']))
+        tensor[5] = min(1.0, max( -1.0, goal_dict['printability_ratio']))
         tensor[6] = min(1.0, max( -1.0, goal_dict['dist_to_state']))
         tensor[7] = min(1.0, max( -1.0, goal_dict['current_height']))
         tensor[8] = min(1.0, max( -1.0, goal_dict['current_area']))
@@ -294,44 +383,11 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
 
         return reward
 
-    def reset(self):
-        self.is_synced = False
 
-        self.ros_comm().reset_state_mesh()
-        self.send_state_mesh_to_ros = False
-        self.state_mesh = {}
-
-        if self.is_simulation:
-            sim_res = self.FH_Reset()
-            self.observation_dict['observation'] = sim_res["state_compressed"]
-            self.RhinoSimulation(settings.HOME_POSE)
-
-        self.observation_dict['observation'] += np.random.normal(loc=self.observation_noise_mean, scale=self.observation_noise_std, size=[self.observation_dim])
-        self.achieved_goal_dict = self.default_achieved_goal()
-        self.observation_dict['achieved_goal'] = self.goal_dict_to_tensor(self.achieved_goal_dict)
-
-        self.current_step = 0
-        self.done = False
-        self.current_step = 0
-        self.is_synced=True
-        return self.observation_dict
-
-    def ros_comm(self):
-        if self.__ros_comm == None:
-            print("Connecting to ROS...")
-            self.__ros_comm = rc.Connection(self.session_name)
-            print("...Done!")
-        return self.__ros_comm
-
-
-    def RhinoSimulation(self, action):
-        p = {}
-        p["action"]=[]
-        for a in range(len(action)):
-            p["action"].append("A"+str(a)+"="+str(action[a]))
-
-        return self.SafeRequest('print_segment', p, settings.TIMEOUT_ACTION)
-
+    '''
+    RHINO REQUESTS
+    '''
+    #for simulation
     def FH_Reset(self):
         p = {}
         p["reset"]=True
@@ -354,27 +410,37 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         p={}
         p["run"]=run
         return self.SafeRequest('fh_run', p, settings.TIMEOUT_FH)
+        
 
-    #print_plan should be a dict containing three members: way_points_cartesian as a flat array of 7d way points, 'first_way_point_joint_states' and 'last_way_point_joint_states' (required for planning)
-    def print_path_with_robot(self, action, print_plan):
-        print_plan["action"] = action[0:6]
-        return self.ros_comm().print_path(print_plan)
-
-    def get_tags(self):
-        return self.ros_comm().get_tags()
-
-    def get_print_path(self, action, tags):
+    #for real
+    def get_print_path(self, action):
         p = {}
         p["action"] = []
         for a in range(len(action)):
+            p["action"].append("A"+str(a)+"="+str(action[a]))        
+
+        return self.SafeRequest('get_print_path', p, settings.TIMEOUT_ACTION)
+
+    def get_sensor_poses(self, action):
+        p = {}
+        p["action"] = []
+        for a in range(len(action)):
+            p["action"].append("A"+str(a)+"="+str(action[a]))        
+
+        return self.SafeRequest('get_sensor_path', p, settings.TIMEOUT_ACTION)
+
+    #sends tags recognized in ros through robotic real world scanning to rhino and gets the compression back
+    def update_state_tags(self, tags):
+        return self.SafeRequest('update_state', tags, settings.TIMEOUT_ACTION)
+
+    #for both simulation and real print
+    def RhinoSimulation(self, action):
+        p = {}
+        p["action"]=[]
+        for a in range(len(action)):
             p["action"].append("A"+str(a)+"="+str(action[a]))
 
-        p["tag_poses"] = tags['tag_poses']
-        p["tag_ids"] = tags['ids']
-        p["tag_types"] = tags['types']
-        
-
-        return self.SafeRequest('get_path', p, settings.TIMEOUT_ACTION)
+        return self.SafeRequest('print_segment', p, settings.TIMEOUT_ACTION)
 
     def SafeRequest(self, controller, _params, _timeout):
         _params["rhino_pid"]=self.rhino_pid
@@ -419,6 +485,31 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
                 print("Retrying... Wish me luck")
                 continue
 
+    '''
+    ROS REQUESTS
+    '''
+    def ros_comm(self):
+        if self.__ros_comm == None:
+            print("Connecting to ROS...")
+            self.__ros_comm = rc.Connection(self.session_name)
+            print("...Done!")
+        return self.__ros_comm
+
+    #print_plan should be a dict containing three members: way_points_cartesian as a flat array of 7d way points, 'first_way_point_joint_states' and 'last_way_point_joint_states' (required for planning)
+    def ros_print_path_with_robot(self, action, print_plan):
+        print_plan["action"] = action[0:6]
+        return self.ros_comm().print_path(print_plan)
+
+    def ros_scan_state(self, sensor_poses):
+        return self.ros_comm().scan_state(sensor_poses)
+
+    def ros_update_state_mesh(self, state_mesh_vertices, state_mesh_indices):
+        self.ros_comm().update_state_mesh(state_mesh_vertices, state_mesh_indices)
+
+    def ros_update_compressed_mesh(self, compressed_mesh_vertices, compressed_mesh_indices):
+        self.ros_comm().update_compressed_mesh(compressed_mesh_vertices, compressed_mesh_indices)
+
+
     def print_db(self, text, color, end="\n", attrs=[]):
         attributes = (['dark'] if self.phase == 'eval' else [])
         attributes.extend(attrs)
@@ -426,27 +517,14 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
 
 if __name__ == "__main__":
     env = NormalizedActions(DeepBuilderGoalEnv(session_name = "debug_sess", is_simulation = True))
-    env.env.rhino_pid = 9928
+    env.env.rhino_pid = 16580
+    num_steps = 20
     while True:
-        try:
+        env.env.reset()
+        for i in range(num_steps):
             _in = input("action: ")
             action = list(map(float, _in.split(',')))
-            tags = env.get_tags()
-            print_plan = env.get_print_path(action, tags)
-            _in = input("Got GH print path. [y/n] to continue printing or skip")
-            if _in == 'y':
-                try:
-                    msg = env.print_path_with_robot(action, print_plan)
-                    print(msg)
-                except Exception as e:
-                    print(e)
-            elif _in == 'n':
-                continue
-            else:
+            obs, rew, done, info = env.step(action)
+            if done:
                 break
-        except ValueError as err:
-            if err.args[0] == "GH_OUT":
-                print("GH was out")
-            else:
-                raise
     print("done bye")
