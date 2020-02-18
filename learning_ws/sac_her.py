@@ -170,17 +170,17 @@ def experiment(variant):
 
 if __name__ == "__main__":
 
-    session_name = "200213-real-print"
+    session_name = "200217-learning"
 
     variant = dict(
         algorithm='HER-SAC',
         version='normal',
         reuse_replay_buffer='',
-        continue_training='/home/ros/deepbuilder/learning_ws/data/200116-hs-long-test/200116-hs-long-test_2020_02_07_18_41_25_0000--s-0/params.pkl',
+        continue_training='',
         env_kwargs=dict(
             session_name=session_name,            
-            rhino_pid=6160,
-            is_simulation=False,
+            rhino_pid=3896,
+            is_simulation=True,
             action_dim=7, 
             observation_dim=144,
             goal_dim=10,
@@ -188,15 +188,15 @@ if __name__ == "__main__":
             observation_noise_std=0.0002,
             max_steps_per_play=30,
             terminate_at_collision=False,
-            populate_simulation=0.0 #IMPORTANT!!! CHANGE WHEN NOT SIMULATION
+            populate_simulation=0.5 #IMPORTANT!!! CHANGE WHEN NOT SIMULATION
         ),
         algo_kwargs=dict(
-            batch_size=256,
+            batch_size=128,
             num_epochs=99999,
-            num_eval_plays_per_epoch=1,
-            num_expl_plays_per_epoch=10,            
-            num_train_loops_per_epoch=300,
-            num_plays_before_training=0,            
+            num_eval_plays_per_epoch=2,
+            num_expl_plays_per_epoch=20,            
+            num_train_loops_per_epoch=600,
+            num_plays_before_training=333,            
         ),
         sac_trainer_kwargs=dict(
             discount=0.99,
@@ -219,5 +219,5 @@ if __name__ == "__main__":
             hidden_sizes=[400, 300],
         ),
     )
-    setup_logger(session_name, variant=variant, snapshot_mode="gap_and_last", snapshot_gap=20)
+    setup_logger(session_name, variant=variant, snapshot_mode="gap_and_last", snapshot_gap=10)
     experiment(variant)

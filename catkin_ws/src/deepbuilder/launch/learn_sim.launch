@@ -1,6 +1,6 @@
 <launch>
     <node name="rosbridge_server" pkg="rosbridge_server" type="rosbridge_websocket" />
-    <node name="deepbuilder_fake_robot" pkg="deepbuilder" type="fake_robot.py" output="screen" />
+    <node name="deepbuilder_fake_robot" pkg="deepbuilder" type="fake_robot.py" output="screen" respawn="true" />
     <!--node name="deepbuilder_robot_control" pkg="deepbuilder" type="robot_control.py" output="screen" /-->    
 
 <!-- Load the URDF, SRDF and other .yaml configuration files on the param server -->
@@ -18,6 +18,6 @@
     <arg name="debug" value="false"/>
   </include>
 
-  <node name="deepbuilder_path_planning" pkg="deepbuilder" type="path_planning.py" output="screen" />  
+  <node name="deepbuilder_path_planning" pkg="deepbuilder" type="path_planning.py" output="screen" respawn="true" respawn_delay="2" />  
   <node name="rviz" pkg="rviz" type="rviz" />
 </launch>

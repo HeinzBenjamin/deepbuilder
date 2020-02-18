@@ -243,20 +243,21 @@ def plan_path(req):
     global state_mesh
     global robot
 
+
     robot_config = settings.ROBOT_CONFIG()
     scene.remove_world_object() #clear scene, needs syncing later
     move_group.clear_pose_targets()
-    ii = move_group.get_joint_value_target()
 
     #if req.state_pose is different from current robot pose, apply it to planning
-    joint_state = robot.get_current_state().joint_state    
+    joint_state = robot.get_current_state().joint_state                
+
     if req.state_pose and len(req.state_pose) == 6 and not state_equals(joint_state.position, req.state_pose):
         joint_state.position = req.state_pose
 
     moveit_robot_state = RobotState()
     moveit_robot_state.joint_state = joint_state
     move_group.set_start_state(moveit_robot_state)
-    
+
     print "Planning path for session [" + req.session + "] from\n" + str(joint_state.position) + " to\n" + str(req.goal_pose)
     print "Detected restricting collisions mask\n[self_collision, wall_collision, table_collision, state_collision, full_scene]"
 
@@ -274,6 +275,7 @@ def plan_path(req):
         res.collisions[0] = True
         res.collisions[4] = True #collision in full scene
         print str(res.collisions)
+        time.sleep(0.2)
         return res
 
     #add walls to scene and replan
@@ -330,6 +332,7 @@ def plan_path(req):
     #if collisions were found in either of them, return 
     if res.collisions[4]:
         print str(res.collisions)
+        time.sleep(0.2)
         return res
 
     #if no previous collisions in seperated objects, add planes and boxes back to scene and retry
@@ -347,11 +350,12 @@ def plan_path(req):
 
     sync_scene(expected_scene_objects)
     traj = move_group.plan(req.goal_pose)
-    
+
     if len(traj.joint_trajectory.points) == 0:
             res.message += "combination collision, "
             res.collisions[4] = True #collision in full scene
             print str(res.collisions)
+            time.sleep(0.2)
             return res
 
     speed = robot_config['jogging_speed'] if req.speed == None else req.speed
@@ -359,6 +363,7 @@ def plan_path(req):
     res.path = traj.joint_trajectory
     res.message = "SUCCESS"
     print str(res.collisions)
+    time.sleep(0.2)
     return res
 
     ## END_SUB_TUTORIAL
@@ -520,7 +525,11 @@ def main():
     rospy.Subscriber("/tf", TFMessage, draw_state_mesh)
 
     print "You can start planning via ROS service requests now"
-    rospy.spin()
+
+    r = rospy.Rate(2)
+    while not rospy.is_shutdown():
+        r.sleep()
+    #rospy.spin()
 
     moveit_commander.roscpp_shutdown()
 

@@ -91,7 +91,7 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         self.observation_dict['desired_goal'] = self.goal_dict_to_tensor(self.default_desired_goal())
         self.observation_dict['achieved_goal'] = self.goal_dict_to_tensor(self.default_achieved_goal())
 
-        #just neede for some registration and book keeping. doesn't actually hold any value
+        #just needed for some registration and book keeping. doesn't actually hold any value
         self.action_space = spaces.Box(-np.pi,  np.pi, shape=(self.action_dim,), dtype=np.float32)
         self.observation = spaces.Box(-np.pi,  np.pi, shape=(self.observation_dim,), dtype=np.float32) #bounds solely based on observations and estimation! no garantuee
         self.desired_goal = spaces.Box(-1.0, 1.0, shape=(self.goal_dim,), dtype=np.float32) #-1: fail  1: success
@@ -101,6 +101,9 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         self.observation_space.spaces['observation'] = self.observation
         self.observation_space.spaces['desired_goal'] = self.desired_goal
         self.observation_space.spaces['achieved_goal'] = self.achieved_goal        
+
+        #info to print to screen
+        self.note = ""
 
         #stuff for printing
         self.print_speed = 0.001
@@ -150,11 +153,13 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         self.done = False
         self.current_step = 0
         self.is_synced=True
+        self.note = "Reset"
         return self.observation_dict
 
     def step(self, action):
         #guid generation
         self.is_synced = False
+        self.note = ""
         self.print_db("\n {}      Phase: {}      Play: {}      Step: {}".format(self.session_name, self.phase, self.current_play+1, self.current_step+1), color='red')
         #previous observation becomes current state 
 
@@ -167,7 +172,8 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         #moveit path planning
         mesh_to_send = {} if not self.send_state_mesh_to_ros else self.state_mesh
         path_planning_result = self.ros_comm().test_pose(action_array[:6].tolist(), state_mesh=mesh_to_send)
-        self.print_db("[{}-{}] Path planning result: {}".format(self.session_name, self.action_id, path_planning_result['message']), color='white')
+        #self.print_db("[{}-{}] Path planning result: {}".format(self.session_name, self.action_id, path_planning_result['message']), color='white')
+        self.note += "Path planning: " + path_planning_result['message'] + ", rewards: "
         info += " +++ path_planning: " + path_planning_result['message']
         self.fill_goal_dict_from_moveit_collisions(achieved_goal_dict, path_planning_result['collisions'])
 
@@ -181,7 +187,7 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
             self.fill_goal_dict_from_gh_simulation(achieved_goal_dict, print_result)
             self.ros_comm().update_compressed_mesh(comp_mesh_vertices = print_result['compressed_mesh_vertices'], comp_mesh_indices = print_result['compressed_mesh_indices'])
             info += " +++ printability ratio: " + str(print_result['printability_ratio'])
-            self.print_db("[{}-{}] Simulation result: Printability ratio: {}".format(self.session_name, self.action_id, print_result['printability_ratio']), color='white')
+            #self.print_db("[{}-{}] Simulation result: Printability ratio: {}".format(self.session_name, self.action_id, print_result['printability_ratio']), color='white')
             self.observation_dict['observation'] = np.array(print_result['state_compressed'], dtype=np.float32)
             self.send_state_mesh_to_ros = print_result['printability_ratio'] > 0.0
             if self.send_state_mesh_to_ros:
@@ -201,9 +207,12 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         self.current_step += 1
 
         self.is_synced = True
-        self.print_db("[{}-{}] Achieved Goal: {}".format(self.session_name, self.action_id, self.observation_dict['achieved_goal']), color='blue')
-        self.print_db("[{}-{}] Compressed state: {}, ...".format(self.session_name, self.action_id, self.observation_dict['observation'][0:3]), color='blue')
+        self.print_db("[{}-{}] Action: {}".format(self.session_name, self.action_id, action), color='blue')
+        #self.print_db("[{}-{}] Achieved Goal: {}".format(self.session_name, self.action_id, self.observation_dict['achieved_goal']), color='blue')
+        #self.print_db("[{}-{}] Compressed state: {}, ...".format(self.session_name, self.action_id, self.observation_dict['observation'][0:3]), color='blue')
+        self.print_db("[{}-{}] Note: {}".format(self.session_name, self.action_id, self.note), color='cyan')
         self.print_db("[{}-{}] Done: {}".format(self.session_name, self.action_id, self.done), color='blue', end="")
+        
         self.print_db("      Reward: {}".format(self.reward), color='blue', attrs=['bold'])
         
 
@@ -360,26 +369,31 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
                 or (achieved_goal[4] < 0.0) != (desired_goal[4] < 0.0)):
             return -1
         
-        reward = 0.01 #shouldn't be zero to be effective, shouldn't be meaningful positive either
+        reward = -0.01 #shouldn't be zero to be effective, shouldn't be meaningful positive either
         #printability
         if (achieved_goal[5] < 0.0) == (desired_goal[5] < 0.0):
             reward += 1.0
+            self.note += "printability "
 
         #distance to state
         if achieved_goal[6] >= desired_goal[6]:
             reward += 1.0
+            self.note += "dist to state "
 
         #current_height
         if achieved_goal[7] >= desired_goal[7]:
             reward += 2.0
+            self.note += "height "
 
         #current_area
         if achieved_goal[8] >= desired_goal[8]:
             reward += 2.0
+            self.note += "area "
 
         #deformation
-        if achieved_goal[9] >= desired_goal[9]:
+        if achieved_goal[9] >= desired_goal[9] and achieved_goal[5] > 0.0:
             reward += 1.0
+            self.note += "deformation "
 
         return reward
 

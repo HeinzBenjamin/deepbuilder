@@ -83,7 +83,7 @@ class Connection():
         if state_mesh != {}:
             state_mesh['session'] = self.session_name
             srv_response = self.safe_request('srv_update_state_mesh', state_mesh)
-            print(srv_response['message'])
+            #print(srv_response['message'])
 
         result = self.safe_request('srv_path', value)
 
@@ -95,7 +95,7 @@ class Connection():
         state_mesh['vertices'] = state_mesh_vertices
         state_mesh['indices'] = state_mesh_indices
         srv_response = self.safe_request('srv_update_state_mesh', state_mesh).data
-        print(srv_response['message'])
+        #print(srv_response['message'])
 
     def update_compressed_mesh(self, comp_mesh_vertices, comp_mesh_indices):
         comp_mesh = {}
@@ -103,7 +103,7 @@ class Connection():
         comp_mesh['vertices'] = comp_mesh_vertices
         comp_mesh['indices'] = comp_mesh_indices
         srv_response = self.safe_request('srv_update_compressed_mesh', comp_mesh).data
-        print(srv_response['message'])
+        #print(srv_response['message'])
 
     def reset_state_mesh(self):
         return self.safe_request('srv_update_state_mesh', {'session': self.session_name, 'vertices':[], 'indices':[]})
