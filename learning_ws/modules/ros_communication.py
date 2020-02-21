@@ -78,39 +78,37 @@ class Connection():
         value['goal_pose'] = goal_pose
         value['state_pose'] = state_pose
         value["speed"] = 1.0
-
-        result = None
-        if state_mesh != {}:
-            state_mesh['session'] = self.session_name
-            srv_response = self.safe_request('srv_update_state_mesh', state_mesh)
-            #print(srv_response['message'])
+        if state_mesh and 'vertices' in state_mesh:
+            value['state_mesh_vertices'] = state_mesh['vertices']
+            value['state_mesh_indices'] = state_mesh['indices']
 
         result = self.safe_request('srv_path', value)
-
         return result.data
 
+    #NOT THREAD SAFE!!!! ONLY CALL THIS IN SINGLE LEARNER SETUP
     def update_state_mesh(self, state_mesh_vertices, state_mesh_indices):
         state_mesh = {}
         state_mesh['session'] = self.session_name
         state_mesh['vertices'] = state_mesh_vertices
         state_mesh['indices'] = state_mesh_indices
-        srv_response = self.safe_request('srv_update_state_mesh', state_mesh).data
-        #print(srv_response['message'])
-
+        self.safe_request('srv_update_state_mesh', state_mesh).data
+    
+    #NOT THREAD SAFE!!!! ONLY CALL THIS IN SINGLE LEARNER SETUP
     def update_compressed_mesh(self, comp_mesh_vertices, comp_mesh_indices):
         comp_mesh = {}
         comp_mesh['session'] = self.session_name
         comp_mesh['vertices'] = comp_mesh_vertices
         comp_mesh['indices'] = comp_mesh_indices
-        srv_response = self.safe_request('srv_update_compressed_mesh', comp_mesh).data
-        #print(srv_response['message'])
-
+        self.safe_request('srv_update_compressed_mesh', comp_mesh).data
+    
+    #NOT THREAD SAFE!!!! ONLY CALL THIS IN SINGLE LEARNER SETUP
     def reset_state_mesh(self):
-        return self.safe_request('srv_update_state_mesh', {'session': self.session_name, 'vertices':[], 'indices':[]})
+        self.safe_request('srv_update_state_mesh', {'session': self.session_name, 'vertices':[], 'indices':[]})
 
+    #NOT THREAD SAFE!!!! ONLY CALL THIS IN SINGLE LEARNER SETUP
     def reset_compressed_mesh(self):
-        return self.safe_request('srv_update_compressed_mesh', {'session': self.session_name, 'vertices':[], 'indices':[]})
-
+        self.safe_request('srv_update_compressed_mesh', {'session': self.session_name, 'vertices':[], 'indices':[]})
+    
     def reset_client(self):
         self.client.close()
         time.sleep(0.5)
@@ -129,7 +127,7 @@ class Connection():
     def safe_request(self, proxy_name, value, _timeout=-1):
         result = None
         
-        while True:
+        while True:            
             request = roslibpy.ServiceRequest(value)
             proxy = self.__getattribute__(proxy_name)
             try:

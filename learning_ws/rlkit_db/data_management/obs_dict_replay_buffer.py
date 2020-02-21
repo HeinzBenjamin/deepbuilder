@@ -31,6 +31,7 @@ class ObsDictRelabelingBuffer(ReplayBuffer):
             observation_key='observation',
             desired_goal_key='desired_goal',
             achieved_goal_key='achieved_goal',
+            additional_info_key = 'additional_info'
     ):
         if internal_keys is None:
             internal_keys = []
@@ -53,10 +54,12 @@ class ObsDictRelabelingBuffer(ReplayBuffer):
             observation_key,
             desired_goal_key,
             achieved_goal_key,
+            additional_info_key
         ]
         self.observation_key = observation_key
         self.desired_goal_key = desired_goal_key
         self.achieved_goal_key = achieved_goal_key
+        self.additional_info_key = additional_info_key
         if isinstance(self.env.action_space, Discrete):
             self._action_dim = env.action_space.n
         else:
@@ -65,6 +68,7 @@ class ObsDictRelabelingBuffer(ReplayBuffer):
         self._actions = np.zeros((max_size, self._action_dim))
         # self._terminals[i] = a terminal was received at time i
         self._terminals = np.zeros((max_size, 1), dtype='uint8')
+        self._rewards = np.zeros((max_size, 1), dtype='float32')
         # self._obs[key][i] is the value of observation[key] at time i
         self._obs = {}
         self._next_obs = {}
@@ -134,6 +138,7 @@ class ObsDictRelabelingBuffer(ReplayBuffer):
             ]:
                 self._actions[buffer_slice] = actions[path_slice]
                 self._terminals[buffer_slice] = terminals[path_slice]
+                self._rewards[buffer_slice] = rewards[path_slice]
                 for key in self.ob_keys_to_save + self.internal_keys:
                     self._obs[key][buffer_slice] = obs[key][path_slice]
                     self._next_obs[key][buffer_slice] = next_obs[key][path_slice]
@@ -155,6 +160,7 @@ class ObsDictRelabelingBuffer(ReplayBuffer):
             slc = np.s_[self._top:self._top + path_len, :]
             self._actions[slc] = actions
             self._terminals[slc] = terminals
+            self._rewards[slc] = rewards
             for key in self.ob_keys_to_save + self.internal_keys:
                 self._obs[key][slc] = obs[key]
                 self._next_obs[key][slc] = next_obs[key]
@@ -168,7 +174,26 @@ class ObsDictRelabelingBuffer(ReplayBuffer):
     def _sample_indices(self, batch_size):
         return np.random.randint(0, self._size, batch_size)
 
+
     def random_batch(self, batch_size):
+        if self.env.is_goal_based():
+            return self.random_batch_goal_based(batch_size)
+        else:
+            return self.random_batch_shaped(batch_size)
+
+    def random_batch_shaped(self, batch_size):
+        indices = np.random.randint(0, self._size, batch_size)
+        batch = dict(
+            observations=self._obs[self.observation_key][indices],
+            actions=self._actions[indices],
+            rewards=self._rewards[indices],
+            terminals=self._terminals[indices],
+            next_observations=self._next_obs[self.observation_key][indices],
+        )
+        return batch
+
+
+    def random_batch_goal_based(self, batch_size):
         indices = self._sample_indices(batch_size)
         resampled_goals = self._next_obs[self.desired_goal_key][indices]
 

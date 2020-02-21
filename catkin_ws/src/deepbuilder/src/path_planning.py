@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import sys, rospy, moveit_commander, time, copy, math, json
+import sys, rospy, moveit_commander, time, copy, math, json, threading
 from moveit_msgs.msg import *
 from moveit_msgs.srv import *
 from shape_msgs.msg import *
@@ -10,11 +10,12 @@ from visualization_msgs.msg import Marker, MarkerArray
 from tf2_msgs.msg import TFMessage
 import settings
 
-robot = {}
-scene = {} # is continually filled with 
-move_group = {}
-arena = None
-state_mesh = Mesh()
+#robot = {}
+#scene = {} # is continually filled with 
+#move_group = {}
+#arena = None
+#state_mesh = Mesh()
+planning_context = None
 state_mesh_visualisation = None
 compressed_mesh_visualisation = None
 group_name = ''
@@ -23,6 +24,15 @@ marker_pub_comp = rospy.Publisher('/deepbuilder/robot/compressed_mesh', Marker,q
 marker_pub_path = rospy.Publisher('/deepbuilder/robot/print_path', MarkerArray, queue_size=1)
 srv_proxy_fk = rospy.ServiceProxy('/compute_fk', GetPositionFK)
 srv_proxy_ik = rospy.ServiceProxy('/compute_ik', GetPositionIK)
+
+class planning_context(object):
+    def __init__(self, _move_group, _scene, _arena, _state_mesh, _robot):
+        self.move_group = _move_group
+        self.scene = _scene
+        self.arena = _arena
+        self.state_mesh = _state_mesh
+        self.robot = _robot
+        self.lock = threading.Lock()
 
 class arena_objects():
     #planes must start with pln, they're just PoseStamped objects
@@ -115,7 +125,8 @@ def state_equals(state_a, state_b, tolerance = 0.001):
     return True
 
 def sync_scene(expected_collision_objects):
-    global scene
+    global planning_context
+    scene = planning_context.scene
     
     present_objects = scene.get_objects()
     synced = False
@@ -235,146 +246,168 @@ def plan_cartesian(req):
     return res
 
 
-
 def plan_path(req):
-    global move_group
-    global scene
-    global arena
-    global state_mesh
-    global robot
+    global planning_context
+    planning_context.lock.acquire()
+    try:
+        move_group = planning_context.move_group
+        scene = planning_context.scene
+        arena = planning_context.arena
+        state_mesh = planning_context.state_mesh
+        robot = planning_context.robot
 
 
-    robot_config = settings.ROBOT_CONFIG()
-    scene.remove_world_object() #clear scene, needs syncing later
-    move_group.clear_pose_targets()
+        robot_config = settings.ROBOT_CONFIG()
+        scene.remove_world_object() #clear scene, needs syncing later
+        move_group.clear_pose_targets()
 
-    #if req.state_pose is different from current robot pose, apply it to planning
-    joint_state = robot.get_current_state().joint_state                
+        #if req.state_pose is different from current robot pose, apply it to planning
+        joint_state = robot.get_current_state().joint_state                
 
-    if req.state_pose and len(req.state_pose) == 6 and not state_equals(joint_state.position, req.state_pose):
-        joint_state.position = req.state_pose
+        if req.state_pose and len(req.state_pose) == 6 and not state_equals(joint_state.position, req.state_pose):
+            joint_state.position = req.state_pose
 
-    moveit_robot_state = RobotState()
-    moveit_robot_state.joint_state = joint_state
-    move_group.set_start_state(moveit_robot_state)
+        moveit_robot_state = RobotState()
+        moveit_robot_state.joint_state = joint_state
+        move_group.set_start_state(moveit_robot_state)
 
-    print "Planning path for session [" + req.session + "] from\n" + str(joint_state.position) + " to\n" + str(req.goal_pose)
-    print "Detected restricting collisions mask\n[self_collision, wall_collision, table_collision, state_collision, full_scene]"
+        print "Planning path for session [" + req.session + "] from\n" + str(joint_state.position) + " to\n" + str(req.goal_pose)
+        print "Detected restricting collisions mask\n[self_collision, wall_collision, table_collision, state_collision, full_scene]"
 
-    #default response
-    res = ro_plan_pathResponse()
-    res.collisions = [False, False, False, False, False]
-    res.message = ''
-    res.path = None
+        #default response
+        res = ro_plan_pathResponse()
+        res.collisions = [False, False, False, False, False]
+        res.path = None
 
-    #attempting to plan on empty scene, if this fails, it's due to self collision
-    sync_scene('')
-    res.path = move_group.plan(req.goal_pose).joint_trajectory
-    if len(res.path.points) == 0:
-        res.message += "self collision"
-        res.collisions[0] = True
-        res.collisions[4] = True #collision in full scene
-        print str(res.collisions)
-        time.sleep(0.2)
-        return res
+        #attempting to plan on empty scene, if this fails, it's due to self collision
+        sync_scene('')
+        res.path = move_group.plan(req.goal_pose).joint_trajectory
+        if len(res.path.points) == 0:
+            res.message = "self collision"
+            res.collisions[0] = True
+            res.collisions[4] = True #collision in full scene
+            print str(res.collisions)
+            time.sleep(0.1)
+            return res
 
-    #add walls to scene and replan
-    expected_scene_objects = [] #needed for syncing
-    for name in dir(arena):
-        if name.startswith('pln'):
-            obj = getattr(arena, name)
-            obj.header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
-            scene.add_plane(name, obj)
-            expected_scene_objects.append(name)
-
-    sync_scene(expected_scene_objects)
-    res.path = move_group.plan(req.goal_pose).joint_trajectory
-    if len(res.path.points) == 0:
-        res.message += "wall collision, "
-        res.collisions[1] = True
-        res.collisions[4] = True #collision in full scene
-
-    #clear scene, add table and replan
-    scene.remove_world_object()
-    expected_scene_objects = []
-    for name in dir(arena):
-        if name.startswith('box'):
-            obj = getattr(arena, name)
-            obj["pose"].header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
-            scene.add_box(name, obj["pose"], obj["size"])
-            expected_scene_objects.append(name)
-
-    sync_scene(expected_scene_objects)
-    res.path = move_group.plan(req.goal_pose).joint_trajectory
-    if len(res.path.points) == 0:
-        res.message += "table collision, "
-        res.collisions[2] = True
-        res.collisions[4] = True #collision in full scene
-
-    # clear scene, add state mesh and replan
-    scene.remove_world_object()
-    expected_scene_objects = []
-    if state_mesh and len(state_mesh.vertices) > 0 and len(state_mesh.triangles) > 0:
-        mesh_pose = PoseStamped()
-        mesh_pose.header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
-        mesh_pose.header.stamp = rospy.Time.now()
-        mesh_pose.pose.orientation.w = 1.0
-        scene.add_mesh_custom('state_mesh', mesh_pose, state_mesh)     
-        expected_scene_objects.append('state_mesh')   
+        #add walls to scene and replan
+        expected_scene_objects = [] #needed for syncing
+        for name in dir(arena):
+            if name.startswith('pln'):
+                obj = getattr(arena, name)
+                obj.header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
+                scene.add_plane(name, obj)
+                expected_scene_objects.append(name)
 
         sync_scene(expected_scene_objects)
         res.path = move_group.plan(req.goal_pose).joint_trajectory
         if len(res.path.points) == 0:
-            res.message += "state collision, "
-            res.collisions[3] = True
+            res.message = "wall collision "
+            res.collisions[1] = True
             res.collisions[4] = True #collision in full scene
-
-    #if collisions were found in either of them, return 
-    if res.collisions[4]:
-        print str(res.collisions)
-        time.sleep(0.2)
-        return res
-
-    #if no previous collisions in seperated objects, add planes and boxes back to scene and retry
-    for name in dir(arena):
-        if name.startswith('pln'):
-            obj = getattr(arena, name)
-            obj.header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
-            scene.add_plane(name, obj)
-            expected_scene_objects.append(name)
-        elif name.startswith('box'):
-            obj = getattr(arena, name)
-            obj["pose"].header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
-            scene.add_box(name, obj["pose"], obj["size"])
-            expected_scene_objects.append(name)
-
-    sync_scene(expected_scene_objects)
-    traj = move_group.plan(req.goal_pose)
-
-    if len(traj.joint_trajectory.points) == 0:
-            res.message += "combination collision, "
-            res.collisions[4] = True #collision in full scene
-            print str(res.collisions)
-            time.sleep(0.2)
+            time.sleep(0.1)
             return res
 
-    speed = robot_config['jogging_speed'] if req.speed == None else req.speed
-    traj = move_group.retime_trajectory(ref_state_in = robot.get_current_state(), traj_in = traj, velocity_scaling_factor = speed)
-    res.path = traj.joint_trajectory
-    res.message = "SUCCESS"
-    print str(res.collisions)
-    time.sleep(0.2)
-    return res
+        #clear scene, add table and replan
+        scene.remove_world_object()
+        expected_scene_objects = []
+        for name in dir(arena):
+            if name.startswith('box'):
+                obj = getattr(arena, name)
+                obj["pose"].header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
+                scene.add_box(name, obj["pose"], obj["size"])
+                expected_scene_objects.append(name)
+
+        sync_scene(expected_scene_objects)
+        res.path = move_group.plan(req.goal_pose).joint_trajectory
+        if len(res.path.points) == 0:
+            res.message = "table collision "
+            res.collisions[2] = True
+            res.collisions[4] = True #collision in full scene
+            time.sleep(0.1)
+            return res
+
+        # clear scene, add state mesh and replan
+        scene.remove_world_object()
+        expected_scene_objects = []
+        if len(req.state_mesh_vertices) > 0 and len(req.state_mesh_indices) > 0:
+            mesh_pose = PoseStamped()
+            mesh_pose.header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
+            mesh_pose.header.stamp = rospy.Time.now()
+            mesh_pose.pose.orientation.w = 1.0
+            mesh = build_collision_mesh(req.state_mesh_vertices, req.state_mesh_indices)
+            scene.add_mesh_custom('state_mesh', mesh_pose, mesh)     
+            expected_scene_objects.append('state_mesh')   
+
+            sync_scene(expected_scene_objects)
+            res.path = move_group.plan(req.goal_pose).joint_trajectory
+            if len(res.path.points) == 0:
+                res.message = "state collision "
+                res.collisions[3] = True
+                res.collisions[4] = True #collision in full scene
+                time.sleep(0.1)
+                return res
+
+        #if no previous collisions in seperated objects, add planes and boxes back to scene and retry
+        for name in dir(arena):
+            if name.startswith('pln'):
+                obj = getattr(arena, name)
+                obj.header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
+                scene.add_plane(name, obj)
+                expected_scene_objects.append(name)
+            elif name.startswith('box'):
+                obj = getattr(arena, name)
+                obj["pose"].header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
+                scene.add_box(name, obj["pose"], obj["size"])
+                expected_scene_objects.append(name)
+
+        sync_scene(expected_scene_objects)
+        traj = move_group.plan(req.goal_pose)
+
+        if len(traj.joint_trajectory.points) == 0:
+                res.message = "combination collision "
+                res.collisions[4] = True #collision in full scene
+                print str(res.collisions)
+                time.sleep(0.1)
+                return res
+
+        speed = robot_config['jogging_speed'] if req.speed == None else req.speed
+        traj = move_group.retime_trajectory(ref_state_in = robot.get_current_state(), traj_in = traj, velocity_scaling_factor = speed)
+        res.path = traj.joint_trajectory
+        res.message = "SUCCESS"
+        print str(res.collisions)
+        time.sleep(0.1)
+        return res
+
+    finally:
+        planning_context.lock.release()
 
     ## END_SUB_TUTORIAL
 
+def build_collision_mesh(mesh_vertices, mesh_indices):
+    mesh = Mesh()
+    for i in range(len(mesh_vertices)/3):
+        p = Point()
+        p.x = mesh_vertices[i*3]*0.001 #bc mm vs m
+        p.y = mesh_vertices[i*3+1]*0.001
+        p.z = mesh_vertices[i*3+2]*0.001
+        mesh.vertices.append(p)
+
+    for i in range(len(mesh_indices)/3):
+        f = MeshTriangle()         
+        f.vertex_indices[0] = mesh_indices[i*3]
+        f.vertex_indices[1] = mesh_indices[i*3+1]
+        f.vertex_indices[2] = mesh_indices[i*3+2]
+        mesh.triangles.append(f)
+    return mesh
+
+#only for visualisation
 def update_state_mesh(req):
-    global state_mesh
     global state_mesh_visualisation
     res = ro_update_state_meshResponse()
     try:
         state_mesh = Mesh() #mesh for collision checking and planning
-        
+
         state_mesh_visualisation = Marker() #only rviz visualisation mesh
         state_mesh_visualisation.header.frame_id = settings.BASE_FRAME_ID_KINEMATICS
         state_mesh_visualisation.header.stamp = rospy.Time.now()
@@ -397,37 +430,21 @@ def update_state_mesh(req):
             state_mesh_visualisation.points.append(Point())
             res.message = "[path_planning] State mesh succefully reset"
         else:
-            for i in range(len(req.vertices)/3):
-                p = Point()
-                p.x = req.vertices[i*3]*0.001 #bc mm vs m
-                p.y = req.vertices[i*3+1]*0.001
-                p.z = req.vertices[i*3+2]*0.001
-                state_mesh.vertices.append(p)
-
-            for i in range(len(req.indices)/3):
-                f = MeshTriangle()         
-                f.vertex_indices[0] = req.indices[i*3]
-                f.vertex_indices[1] = req.indices[i*3+1]
-                f.vertex_indices[2] = req.indices[i*3+2]
-                state_mesh.triangles.append(f)
-
-                state_mesh_visualisation.points.append(state_mesh.vertices[f.vertex_indices[0]])
-                state_mesh_visualisation.points.append(state_mesh.vertices[f.vertex_indices[1]])
-                state_mesh_visualisation.points.append(state_mesh.vertices[f.vertex_indices[2]])
+            for i in req.indices:
+                state_mesh_visualisation.points.append(Point(req.vertices[3 * i] * 0.001, req.vertices[3 * i + 1] * 0.001, req.vertices[3 * i + 2] * 0.001))
 
             res.message = "[path_planning] State mesh successfully updated"
-
-
 
     except KeyboardInterrupt:
         raise
     
     except:
         res.message = "[path_planning ERROR] State mesh could not be updated:\n" + str(sys.exc_info()[0]) + "\n" + str(sys.exc_info()[1])
-    
+
     return res
     
-
+    
+#only for visualisation
 def update_compressed_mesh(req):
     global compressed_mesh_visualisation
     res = ro_update_compressed_meshResponse()
@@ -470,19 +487,18 @@ def update_compressed_mesh(req):
     
 
 def draw_state_mesh(data):
+    global state_mesh_visualisation
+    global compression_mesh_visualisation
+
     if state_mesh_visualisation:
         marker_pub_env.publish(state_mesh_visualisation)
     if compressed_mesh_visualisation:
         marker_pub_comp.publish(compressed_mesh_visualisation)
-    rospy.sleep(rospy.Duration(0.05))
+    rospy.sleep(rospy.Duration(0.1))
 
 def main():
-    global robot
-    global scene
-    global arena
-    global state
-    global move_group
     global group_name
+    global planning_context
     
     arena = arena_objects()
 
@@ -524,12 +540,14 @@ def main():
 
     rospy.Subscriber("/tf", TFMessage, draw_state_mesh)
 
+
+    planning_context = planning_context(move_group,scene,arena,None,robot)
+
     print "You can start planning via ROS service requests now"
 
-    r = rospy.Rate(2)
+    r = rospy.Rate(5)
     while not rospy.is_shutdown():
         r.sleep()
-    #rospy.spin()
 
     moveit_commander.roscpp_shutdown()
 

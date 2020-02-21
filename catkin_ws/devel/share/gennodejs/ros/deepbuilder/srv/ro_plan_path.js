@@ -26,6 +26,8 @@ class ro_plan_pathRequest {
       this.state_pose = null;
       this.session = null;
       this.speed = null;
+      this.state_mesh_vertices = null;
+      this.state_mesh_indices = null;
     }
     else {
       if (initObj.hasOwnProperty('goal_pose')) {
@@ -52,6 +54,18 @@ class ro_plan_pathRequest {
       else {
         this.speed = 0.0;
       }
+      if (initObj.hasOwnProperty('state_mesh_vertices')) {
+        this.state_mesh_vertices = initObj.state_mesh_vertices
+      }
+      else {
+        this.state_mesh_vertices = [];
+      }
+      if (initObj.hasOwnProperty('state_mesh_indices')) {
+        this.state_mesh_indices = initObj.state_mesh_indices
+      }
+      else {
+        this.state_mesh_indices = [];
+      }
     }
   }
 
@@ -65,6 +79,10 @@ class ro_plan_pathRequest {
     bufferOffset = _serializer.string(obj.session, buffer, bufferOffset);
     // Serialize message field [speed]
     bufferOffset = _serializer.float32(obj.speed, buffer, bufferOffset);
+    // Serialize message field [state_mesh_vertices]
+    bufferOffset = _arraySerializer.float32(obj.state_mesh_vertices, buffer, bufferOffset, null);
+    // Serialize message field [state_mesh_indices]
+    bufferOffset = _arraySerializer.int32(obj.state_mesh_indices, buffer, bufferOffset, null);
     return bufferOffset;
   }
 
@@ -80,6 +98,10 @@ class ro_plan_pathRequest {
     data.session = _deserializer.string(buffer, bufferOffset);
     // Deserialize message field [speed]
     data.speed = _deserializer.float32(buffer, bufferOffset);
+    // Deserialize message field [state_mesh_vertices]
+    data.state_mesh_vertices = _arrayDeserializer.float32(buffer, bufferOffset, null)
+    // Deserialize message field [state_mesh_indices]
+    data.state_mesh_indices = _arrayDeserializer.int32(buffer, bufferOffset, null)
     return data;
   }
 
@@ -88,7 +110,9 @@ class ro_plan_pathRequest {
     length += 4 * object.goal_pose.length;
     length += 4 * object.state_pose.length;
     length += object.session.length;
-    return length + 16;
+    length += 4 * object.state_mesh_vertices.length;
+    length += 4 * object.state_mesh_indices.length;
+    return length + 24;
   }
 
   static datatype() {
@@ -98,7 +122,7 @@ class ro_plan_pathRequest {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'aa87f6dd8f0618d14c9e8d2e5bd2c91c';
+    return '0215280a600c325b1ce7ede7a8b5184a';
   }
 
   static messageDefinition() {
@@ -108,6 +132,8 @@ class ro_plan_pathRequest {
     float32[] state_pose
     string session
     float32 speed
+    float32[] state_mesh_vertices
+    int32[] state_mesh_indices
     
     `;
   }
@@ -144,6 +170,20 @@ class ro_plan_pathRequest {
     }
     else {
       resolved.speed = 0.0
+    }
+
+    if (msg.state_mesh_vertices !== undefined) {
+      resolved.state_mesh_vertices = msg.state_mesh_vertices;
+    }
+    else {
+      resolved.state_mesh_vertices = []
+    }
+
+    if (msg.state_mesh_indices !== undefined) {
+      resolved.state_mesh_indices = msg.state_mesh_indices;
+    }
+    else {
+      resolved.state_mesh_indices = []
     }
 
     return resolved;
@@ -302,6 +342,6 @@ class ro_plan_pathResponse {
 module.exports = {
   Request: ro_plan_pathRequest,
   Response: ro_plan_pathResponse,
-  md5sum() { return '6bb18060add6f8092d505a812c13f49f'; },
+  md5sum() { return 'fb31e34e96d7f256acd78a1b40ce121a'; },
   datatype() { return 'deepbuilder/ro_plan_path'; }
 };

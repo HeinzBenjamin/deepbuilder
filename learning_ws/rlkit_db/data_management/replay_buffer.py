@@ -92,17 +92,20 @@ class ReplayBuffer(object, metaclass=abc.ABCMeta):
             next_obs = dict(
                 observation=self._next_obs['observation'][:self._top],
                 desired_goal=self._next_obs['desired_goal'][:self._top],
-                achieved_goal=self._next_obs['achieved_goal'][:self._top]
+                achieved_goal=self._next_obs['achieved_goal'][:self._top],
+                additional_info=self._next_obs['additional_info'][:self._top]
             ),
             observation = dict(
                 observation=self._obs['observation'][:self._top],
                 desired_goal=self._obs['desired_goal'][:self._top],
-                achieved_goal=self._obs['achieved_goal'][:self._top]
+                achieved_goal=self._obs['achieved_goal'][:self._top],
+                additional_info=self._obs['additional_info'][:self._top]
             ),
             #rewards = self._rewards,
             size=self._size,
             terminals = self._terminals[:self._top],
-            top = self._top,
+            rewards = self._rewards[:self._top],
+            top = self._top,            
             idx_to_future_obs_idx = self._idx_to_future_obs_idx[:self._top]
         )
         return d

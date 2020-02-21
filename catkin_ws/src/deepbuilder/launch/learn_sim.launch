@@ -18,6 +18,6 @@
     <arg name="debug" value="false"/>
   </include>
 
-  <node name="deepbuilder_path_planning" pkg="deepbuilder" type="path_planning.py" output="screen" respawn="true" respawn_delay="2" />  
+  <node name="deepbuilder_path_planning" pkg="deepbuilder" type="path_planning.py" output="screen" respawn="true" respawn_delay="1" />  
   <node name="rviz" pkg="rviz" type="rviz" />
 </launch>

@@ -7,16 +7,18 @@ import struct
 
 
 class ro_plan_pathRequest(genpy.Message):
-  _md5sum = "aa87f6dd8f0618d14c9e8d2e5bd2c91c"
+  _md5sum = "0215280a600c325b1ce7ede7a8b5184a"
   _type = "deepbuilder/ro_plan_pathRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """float32[] goal_pose
 float32[] state_pose
 string session
 float32 speed
+float32[] state_mesh_vertices
+int32[] state_mesh_indices
 """
-  __slots__ = ['goal_pose','state_pose','session','speed']
-  _slot_types = ['float32[]','float32[]','string','float32']
+  __slots__ = ['goal_pose','state_pose','session','speed','state_mesh_vertices','state_mesh_indices']
+  _slot_types = ['float32[]','float32[]','string','float32','float32[]','int32[]']
 
   def __init__(self, *args, **kwds):
     """
@@ -26,7 +28,7 @@ float32 speed
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       goal_pose,state_pose,session,speed
+       goal_pose,state_pose,session,speed,state_mesh_vertices,state_mesh_indices
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -43,11 +45,17 @@ float32 speed
         self.session = ''
       if self.speed is None:
         self.speed = 0.
+      if self.state_mesh_vertices is None:
+        self.state_mesh_vertices = []
+      if self.state_mesh_indices is None:
+        self.state_mesh_indices = []
     else:
       self.goal_pose = []
       self.state_pose = []
       self.session = ''
       self.speed = 0.
+      self.state_mesh_vertices = []
+      self.state_mesh_indices = []
 
   def _get_types(self):
     """
@@ -76,6 +84,14 @@ float32 speed
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       buff.write(_get_struct_f().pack(self.speed))
+      length = len(self.state_mesh_vertices)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%sf'%length
+      buff.write(struct.pack(pattern, *self.state_mesh_vertices))
+      length = len(self.state_mesh_indices)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%si'%length
+      buff.write(struct.pack(pattern, *self.state_mesh_indices))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -112,6 +128,20 @@ float32 speed
       start = end
       end += 4
       (self.speed,) = _get_struct_f().unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%sf'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.state_mesh_vertices = struct.unpack(pattern, str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%si'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.state_mesh_indices = struct.unpack(pattern, str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -139,6 +169,14 @@ float32 speed
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       buff.write(_get_struct_f().pack(self.speed))
+      length = len(self.state_mesh_vertices)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%sf'%length
+      buff.write(self.state_mesh_vertices.tostring())
+      length = len(self.state_mesh_indices)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%si'%length
+      buff.write(self.state_mesh_indices.tostring())
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -176,6 +214,20 @@ float32 speed
       start = end
       end += 4
       (self.speed,) = _get_struct_f().unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%sf'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.state_mesh_vertices = numpy.frombuffer(str[start:end], dtype=numpy.float32, count=length)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%si'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.state_mesh_indices = numpy.frombuffer(str[start:end], dtype=numpy.int32, count=length)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -613,6 +665,6 @@ def _get_struct_2i():
     return _struct_2i
 class ro_plan_path(object):
   _type          = 'deepbuilder/ro_plan_path'
-  _md5sum = '6bb18060add6f8092d505a812c13f49f'
+  _md5sum = 'fb31e34e96d7f256acd78a1b40ce121a'
   _request_class  = ro_plan_pathRequest
   _response_class = ro_plan_pathResponse

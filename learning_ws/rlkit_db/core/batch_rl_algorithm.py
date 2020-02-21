@@ -41,8 +41,7 @@ class BatchRLAlgorithm(BaseRLAlgorithm, metaclass=abc.ABCMeta):
         
 
     def _train(self):
-        # DEEPBUILDER STUFF
-        
+        # DEEPBUILDER STUFF        
         #just collect stuff before training starts
         self.environment.env.phase = 'init'
         if self.num_plays_before_training > 0:

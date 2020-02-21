@@ -27,13 +27,17 @@ struct ro_plan_pathRequest_
     : goal_pose()
     , state_pose()
     , session()
-    , speed(0.0)  {
+    , speed(0.0)
+    , state_mesh_vertices()
+    , state_mesh_indices()  {
     }
   ro_plan_pathRequest_(const ContainerAllocator& _alloc)
     : goal_pose(_alloc)
     , state_pose(_alloc)
     , session(_alloc)
-    , speed(0.0)  {
+    , speed(0.0)
+    , state_mesh_vertices(_alloc)
+    , state_mesh_indices(_alloc)  {
   (void)_alloc;
     }
 
@@ -50,6 +54,12 @@ struct ro_plan_pathRequest_
 
    typedef float _speed_type;
   _speed_type speed;
+
+   typedef std::vector<float, typename ContainerAllocator::template rebind<float>::other >  _state_mesh_vertices_type;
+  _state_mesh_vertices_type state_mesh_vertices;
+
+   typedef std::vector<int32_t, typename ContainerAllocator::template rebind<int32_t>::other >  _state_mesh_indices_type;
+  _state_mesh_indices_type state_mesh_indices;
 
 
 
@@ -129,12 +139,12 @@ struct MD5Sum< ::deepbuilder::ro_plan_pathRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "aa87f6dd8f0618d14c9e8d2e5bd2c91c";
+    return "0215280a600c325b1ce7ede7a8b5184a";
   }
 
   static const char* value(const ::deepbuilder::ro_plan_pathRequest_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xaa87f6dd8f0618d1ULL;
-  static const uint64_t static_value2 = 0x4c9e8d2e5bd2c91cULL;
+  static const uint64_t static_value1 = 0x0215280a600c325bULL;
+  static const uint64_t static_value2 = 0x1ce7ede7a8b5184aULL;
 };
 
 template<class ContainerAllocator>
@@ -157,6 +167,8 @@ struct Definition< ::deepbuilder::ro_plan_pathRequest_<ContainerAllocator> >
 float32[] state_pose\n\
 string session\n\
 float32 speed\n\
+float32[] state_mesh_vertices\n\
+int32[] state_mesh_indices\n\
 ";
   }
 
@@ -179,6 +191,8 @@ namespace serialization
       stream.next(m.state_pose);
       stream.next(m.session);
       stream.next(m.speed);
+      stream.next(m.state_mesh_vertices);
+      stream.next(m.state_mesh_indices);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -213,6 +227,18 @@ struct Printer< ::deepbuilder::ro_plan_pathRequest_<ContainerAllocator> >
     Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.session);
     s << indent << "speed: ";
     Printer<float>::stream(s, indent + "  ", v.speed);
+    s << indent << "state_mesh_vertices[]" << std::endl;
+    for (size_t i = 0; i < v.state_mesh_vertices.size(); ++i)
+    {
+      s << indent << "  state_mesh_vertices[" << i << "]: ";
+      Printer<float>::stream(s, indent + "  ", v.state_mesh_vertices[i]);
+    }
+    s << indent << "state_mesh_indices[]" << std::endl;
+    for (size_t i = 0; i < v.state_mesh_indices.size(); ++i)
+    {
+      s << indent << "  state_mesh_indices[" << i << "]: ";
+      Printer<int32_t>::stream(s, indent + "  ", v.state_mesh_indices[i]);
+    }
   }
 };
 

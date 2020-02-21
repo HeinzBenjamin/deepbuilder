@@ -1,232 +1,288 @@
-import rlkit.torch.pytorch_util as ptu
-from rlkit.data_management.env_replay_buffer import EnvReplayBuffer
-from rlkit.envs.wrappers import NormalizedBoxEnv
-from rlkit.launchers.launcher_util import setup_logger
-from rlkit.samplers.data_collector import MdpPathCollector
-from rlkit.torch.sac.policies import TanhGaussianPolicy, MakeDeterministic
-from rlkit.torch.sac.sac import SACTrainer
-from rlkit.torch.networks import FlattenMlp
-from rlkit.torch.torch_rl_algorithm import TorchBatchRLAlgorithm
+import gym, torch, os
+import numpy as np
+from termcolor import colored
+import rlkit_db.torch.pytorch_util as ptu
+from rlkit_db.data_management.obs_dict_replay_buffer import ObsDictRelabelingBuffer
+from rlkit_db.launchers.launcher_util import setup_logger
+from rlkit_db.samplers.data_collector import GoalConditionedPathCollector
+from rlkit_db.torch.networks import FlattenMlp
+from rlkit_db.torch.sac.policies import MakeDeterministic, TanhGaussianPolicy
+from rlkit_db.torch.sac.sac import SACTrainer
+from rlkit_db.torch.torch_rl_algorithm import TorchBatchRLAlgorithm
+from modules import environment_goal as env
 
-from modules import environment as env
-from modules import networks as n
-from modules import stuff
-from modules import documentation as doc
-from modules.settings import *
-import json, os, torch, copy
+def reshape_rewards(environment, prev_data, buf_name):
+    print("Reshaping rewards...")
+    n = prev_data[buf_name+"/top"]
+    add_inf = prev_data[buf_name+'/observation']['additional_info']
+    rewards = np.zeros(shape=[n,1], dtype=np.float32)
+    for i in range(n):
+        inf = add_inf[i].tolist()
+        path_planning_results = {}
+        col = round(inf[0],1)
+        path_planning_results['collisions'] = [col <= 0.0, col == 0.2, col == 0.4, col == 0.6, col <= 0.8]
+        print_results = {}
+        print_results['dist_to_state_mesh'] = inf[1]
+        print_results['printability_ratio'] = inf[2]
+        print_results['tilt_angle'] = inf[3]
+        print_results['current_height'] = inf[4]
+        print_results['current_area'] = inf[5]
+        rewards[i] = environment.shape_reward(path_planning_results, print_results)
+    print('...done')
+    return rewards
 
+def experiment(variant, args):
+    environment = env.NormalizedActions(env.DeepBuilderShapedEnv(**variant['env_kwargs']))
 
-def experiment(args, variant):
-    #eval_env = gym.make('FetchReach-v1')
-    #expl_env = gym.make('FetchReach-v1')    
+    observation_key = 'observation'
+    desired_goal_key = 'desired_goal'
+    achieved_goal_key = desired_goal_key.replace("desired", "achieved")
+    additional_info_key = 'additional_info'
 
-    core_env = env.DeepBuilderEnv(args.session_name, args.act_dim, args.box_dim, args.max_num_boxes, args.height_field_dim)
-    eval_env = stuff.NormalizedActions(core_env)
-    expl_env = stuff.NormalizedActions(core_env)
-    obs_dim = expl_env.observation_space.low.size
-    action_dim = eval_env.action_space.low.size
+    replay_buffer_expl = ObsDictRelabelingBuffer(
+        env=environment,
+        observation_key=observation_key,
+        desired_goal_key=desired_goal_key,
+        achieved_goal_key=achieved_goal_key,
+        additional_info_key=additional_info_key,
+        **variant['replay_buffer_kwargs']
+    )
 
-    resumed = args.resume == 1
+    replay_buffer_eval = ObsDictRelabelingBuffer(
+        env=environment,
+        observation_key=observation_key,
+        desired_goal_key=desired_goal_key,
+        achieved_goal_key=achieved_goal_key,
+        additional_info_key=additional_info_key,
+        **variant['replay_buffer_kwargs']
+    )
 
-    if resumed:
-        variant, params = doc.load_rklit_file(args.session_name)
-        variant['algorithm_kwargs']['min_num_steps_before_training']=0
+    
+    prev_datas = []
+    load_buffer = False
+    load_networks = False
 
-    M = variant['layer_size']
+    if  variant['continue_training'] != '':
+        print("Loading previous training parameters and replay buffer")
+        prev_datas.append(torch.load(variant['continue_training']))
+        load_buffer = True
+        load_networks = True
+
+    elif len(variant['reuse_replay_buffers']) > 0:
+        for b in variant['reuse_replay_buffers']:
+            print("Loading previous replay buffer")
+            prev_datas.append(torch.load(b))
+        load_buffer = True
+
+    
+    if len(prev_datas) > 0 and load_buffer:
+        expl_offset = 0
+        eval_offset = 0
+        for prev_data in prev_datas:
+            #exploration data
+            n = prev_data['replay_buffer_expl/top']
+
+            if n > 0:
+                replay_buffer_expl._top = n + expl_offset
+                replay_buffer_expl._size = n + expl_offset
+                replay_buffer_expl._actions[expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/actions']
+                replay_buffer_expl._terminals[expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/terminals']
+                replay_buffer_expl._rewards[expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/rewards'] if not args.reshape_rewards else reshape_rewards(environment.env, prev_data, 'replay_buffer_expl')
+                replay_buffer_expl._idx_to_future_obs_idx[expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/idx_to_future_obs_idx']
+
+                replay_buffer_expl._obs['achieved_goal'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/observation']['achieved_goal']
+                replay_buffer_expl._obs['desired_goal'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/observation']['desired_goal']
+                replay_buffer_expl._obs['observation'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/observation']['observation']
+                replay_buffer_expl._obs['additional_info'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/observation']['additional_info']
+
+                replay_buffer_expl._next_obs['achieved_goal'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/next_obs']['achieved_goal']
+                replay_buffer_expl._next_obs['desired_goal'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/next_obs']['desired_goal']
+                replay_buffer_expl._next_obs['observation'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/next_obs']['observation']
+                replay_buffer_expl._next_obs['additional_info'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/next_obs']['additional_info']
+                expl_offset += n
+
+                print("Loaded shared exploration replay buffer of size: {}".format(replay_buffer_expl._size))
+                print("Last expl buffer item:\n   action: {}\n   desired goal: {}\n   achieved goal: {}\n   observation: {}".format(replay_buffer_expl._actions[replay_buffer_expl._size-1], replay_buffer_expl._obs['achieved_goal'][replay_buffer_expl._size-1], replay_buffer_expl._obs['desired_goal'][replay_buffer_expl._size-1], replay_buffer_expl._obs['observation'][replay_buffer_expl._size-1]))
+            
+            else:
+                print(colored("Loaded exploration replay buffer was empty! No data attached!", color='red'))
+            
+
+            #evaluation data
+            n = prev_data['replay_buffer_eval/top']
+            if n > 0:
+                replay_buffer_eval._top = n + eval_offset
+                replay_buffer_eval._size = n + eval_offset
+                replay_buffer_eval._actions[eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/actions']
+                replay_buffer_eval._terminals[eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/terminals']
+                replay_buffer_expl._rewards[eval_offset:n + eval_offset] = prev_data['replay_buffer_expl/rewards'] if not args.reshape_rewards else reshape_rewards(env, prev_data)
+                replay_buffer_eval._idx_to_future_obs_idx[eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/idx_to_future_obs_idx']
+
+                replay_buffer_eval._obs['achieved_goal'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/observation']['achieved_goal']
+                replay_buffer_eval._obs['desired_goal'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/observation']['desired_goal']
+                replay_buffer_eval._obs['observation'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/observation']['observation']
+                replay_buffer_eval._obs['additional_info'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/observation']['additional_info']
+
+                replay_buffer_eval._next_obs['achieved_goal'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/next_obs']['achieved_goal']
+                replay_buffer_eval._next_obs['desired_goal'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/next_obs']['desired_goal']
+                replay_buffer_eval._next_obs['observation'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/next_obs']['observation']
+                replay_buffer_eval._next_obs['additional_info'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/next_obs']['additional_info']
+                eval_offset += n
+
+                print("Loaded shared evaluation replay buffer of size: {}".format(replay_buffer_eval._size))
+                print("Last eval buffer item:\n   action: {}\n   desired goal: {}\n   achieved goal: {}\n   observation: {}".format(replay_buffer_eval._actions[replay_buffer_eval._size-1], replay_buffer_eval._obs['achieved_goal'][replay_buffer_eval._size-1], replay_buffer_eval._obs['desired_goal'][replay_buffer_eval._size-1], replay_buffer_eval._obs['observation'][replay_buffer_eval._size-1]))
+
+            else:
+                print(colored("Loaded evaluation replay buffer was empty! No data attached!", color='red'))
+    
+
+    obs_dim = environment.observation_space.spaces['observation'].low.size
+    action_dim = environment.action_space.low.size
 
     qf1 = FlattenMlp(
         input_size=obs_dim + action_dim,
         output_size=1,
-        hidden_sizes=[M, M],
-    ) if not resumed else params['trainer/qf1']
+        **variant['qf_kwargs']
+    ) if not load_networks else prev_data['trainer/qf1']
 
     qf2 = FlattenMlp(
         input_size=obs_dim + action_dim,
         output_size=1,
-        hidden_sizes=[M, M],
-    ) if not resumed else params['trainer/qf2']
+        **variant['qf_kwargs']
+    ) if not load_networks else prev_data['trainer/qf2']
 
     target_qf1 = FlattenMlp(
         input_size=obs_dim + action_dim,
         output_size=1,
-        hidden_sizes=[M, M],
-    ) if not resumed else params['trainer/target_qf1']
+        **variant['qf_kwargs']
+    ) if not load_networks else prev_data['trainer/target_qf1']
 
     target_qf2 = FlattenMlp(
         input_size=obs_dim + action_dim,
         output_size=1,
-        hidden_sizes=[M, M],
-    ) if not resumed else params['trainer/target_qf2']
+        **variant['qf_kwargs']
+    ) if not load_networks else prev_data['trainer/target_qf2']
 
     policy = TanhGaussianPolicy(
         obs_dim=obs_dim,
         action_dim=action_dim,
-        hidden_sizes=[M, M],
-    ) if not resumed else params['trainer/policy']
+        **variant['policy_kwargs']
+    ) if not load_networks else prev_data['trainer/policy']
 
-    eval_policy = MakeDeterministic(policy) if not resumed else params['evaluation/policy']
-    
-    eval_path_collector = MdpPathCollector(
-        eval_env,
-        eval_policy,
-    )
-
-    expl_path_collector = MdpPathCollector(
-        expl_env,
-        policy,
-    )
-
-    replay_buffer_expl = EnvReplayBuffer(
-        variant['replay_buffer_size'],
-        expl_env,
-    )
-
-    replay_buffer_eval = EnvReplayBuffer(
-        int(variant['replay_buffer_size'] * (float(args.num_plays_eval) / float(args.num_plays_expl))),
-        eval_env,
-    )
-
-    if resumed:
-        replay_buffer_expl._actions = params['replay_buffer_expl/actions']
-        replay_buffer_expl._env_infos = params['replay_buffer_expl/env_infos']
-        replay_buffer_expl._next_obs = params['replay_buffer_expl/next_obs']
-        replay_buffer_expl._observations = params['replay_buffer_expl/observations']
-        replay_buffer_expl._rewards = params['replay_buffer_expl/rewards']
-        replay_buffer_expl._size = params['replay_buffer_expl/size']
-        replay_buffer_expl._terminals = params['replay_buffer_expl/terminals']
-        replay_buffer_expl._top = params['replay_buffer_expl/top']
-
-        replay_buffer_eval._actions = params['replay_buffer_eval/actions']
-        replay_buffer_eval._env_infos = params['replay_buffer_eval/env_infos']
-        replay_buffer_eval._next_obs = params['replay_buffer_eval/next_obs']
-        replay_buffer_eval._observations = params['replay_buffer_eval/observations']
-        replay_buffer_eval._rewards = params['replay_buffer_eval/rewards']
-        replay_buffer_eval._size = params['replay_buffer_eval/size']
-        replay_buffer_eval._terminals = params['replay_buffer_eval/terminals']
-        replay_buffer_eval._top = params['replay_buffer_eval/top']
-
-    elif args.replay_add_sess_name != '':
-        _, other_params = doc.load_rklit_file(args.replay_add_sess_name)
-        num_samples = int(args.replay_add_num_samples)
-        replay_buffer_expl._size = 0
-        replay_buffer_expl._top = 0
-        print("Loading "+str(num_samples)+" batch samples from session " + args.replay_add_sess_name)
-        zeroes = []
-        offset = 0
-        for i in range(num_samples):
-            act = other_params['replay_buffer_expl/actions'][i]
-            obs = other_params['replay_buffer_expl/observations'][i]
-            if act.min() == 0.0 and act.max() == 0.0 and obs.min() == 0.0 and obs.max() == 0.0:
-                zeroes.append(i)
-                continue
-
-            replay_buffer_expl._actions[offset] = copy.deepcopy(act.tolist())
-            replay_buffer_expl._next_obs[offset] = copy.deepcopy(other_params['replay_buffer_expl/next_obs'][i].tolist())
-            replay_buffer_expl._observations[offset] = copy.deepcopy(obs.tolist())
-            replay_buffer_expl._rewards[offset] = copy.deepcopy(other_params['replay_buffer_expl/rewards'][i].tolist())
-            replay_buffer_expl._terminals[offset] = copy.deepcopy(other_params['replay_buffer_expl/terminals'][i].tolist())
-            replay_buffer_expl._size += 1
-            replay_buffer_expl._top += 1
-            offset += 1
-
-        print("Detected and ignored "+str(len(zeroes))+" zero samples in replay buffer. Total num samples loaded into replay buffer: " + str(replay_buffer_expl._size))
-        other_params = {}
-
+    eval_policy = MakeDeterministic(policy)
     trainer = SACTrainer(
-        env=eval_env,
+        env=environment,
         policy=policy,
         qf1=qf1,
         qf2=qf2,
         target_qf1=target_qf1,
         target_qf2=target_qf2,
-        **variant['trainer_kwargs'],
-        starting_train_steps = 0 if not resumed else (params['replay_buffer_expl/top']*variant['algorithm_kwargs']['num_trains_per_train_loop']),
+        **variant['sac_trainer_kwargs']
     )
 
+    eval_path_collector = GoalConditionedPathCollector(
+        environment,
+        eval_policy,
+        observation_key=observation_key,
+        desired_goal_key=desired_goal_key,
+    )
+    expl_path_collector = GoalConditionedPathCollector(
+        environment,
+        policy,
+        observation_key=observation_key,
+        desired_goal_key=desired_goal_key,
+    )
     algorithm = TorchBatchRLAlgorithm(
         trainer=trainer,
-        exploration_env=expl_env,
-        evaluation_env=eval_env,
+        environment=environment,
         exploration_data_collector=expl_path_collector,
         evaluation_data_collector=eval_path_collector,
-        replay_buffer_eval=replay_buffer_eval,
         replay_buffer_expl=replay_buffer_expl,
-        **variant['algorithm_kwargs']
+        replay_buffer_eval=replay_buffer_eval,
+        **variant['algo_kwargs']
     )
 
+    #ptu.set_gpu_mode(True)
     algorithm.to(ptu.device)
+    print("Everything set up. Starting to train")
     algorithm.train()
 
 
 
-
 if __name__ == "__main__":
-    #deepbuilder args
+
     import argparse
     parser = argparse.ArgumentParser()
     #args relevant for env setup
-    parser.add_argument('--session_name',type=str)
-    parser.add_argument('--use_robot',type=bool, default=False)
-    parser.add_argument('--docu_nets', type=bool, default=False)
-    parser.add_argument('--docu_data', type=bool, default=True)
-    parser.add_argument('--docu_pics', type=bool, default=False)
-    parser.add_argument('--save_agent_every', type=int, default=50) #intermediate save copies are made every (num_plays_expl + num_plays_eval) * save_agent_every
-    parser.add_argument('--resume', type=int, default=0)
-    parser.add_argument('--rnd_plays', type=int, default=0)
-    parser.add_argument('--height_field_dim', type=int, default=12)
-
-    parser.add_argument('--act_dim',type=int,default=6)    
-    parser.add_argument('--box_dim',type=int,default=7)
-    parser.add_argument('--hid_dim',type=int,default=256)
-    parser.add_argument('--max_num_boxes',type=int,default=20)   
-
-    #args relevant for agent setup and learning hyper params
-    parser.add_argument('--replay_buffer_size',type=int,default=500000) #applies to replay_buffer_expl; replay_buffer_eval is scaled according to their relation of num_plays
-    parser.add_argument('--value_lr',type=float,default=3e-4)
-    parser.add_argument('--soft_q_lr',type=float,default=3e-4)
-    parser.add_argument('--policy_lr',type=float,default=3e-4)
-
-    #training-specific args
-    parser.add_argument('--num_epochs',type=int,default=50000)
-    parser.add_argument('--num_plays_eval',type=int,default=1)
-    parser.add_argument('--num_plays_expl',type=int,default=10) #params.pkl is saved every (num_plays_expl + num_plays_eval) plays
-    parser.add_argument('--num_trains_per_train_loop',type=int,default=200)
-    parser.add_argument('--batch_size',type=int,default=256)
-
-    parser.add_argument('--replay_add_sess_name', type=str, default='replay-buffer-222k')
-    parser.add_argument('--replay_add_num_samples', type=str, default=222747)
+    parser.add_argument('--session_name',type=str, default = '200221-train-sac')
+    parser.add_argument('--continue_session',type=bool, default = False)
+    parser.add_argument('--reuse_replay_buffers',type=str, default = '/home/ros/deepbuilder/learning_ws/data/200221-collect-sac/200221-collect-sac_2020_02_21_14_01_12_0000--s-0/params.pkl,/home/ros/deepbuilder/learning_ws/data/200221-collect-sac-her/200221-collect-sac-her_2020_02_21_14_01_25_0000--s-0/params.pkl')
+    parser.add_argument('--rhino_pid',type=int, default = 7232)
+    parser.add_argument('--reshape_rewards',type=bool, default = True)
+    parser.add_argument('--epoch_length', type=int, default=20)
+    parser.add_argument('--trains_per_epoch', type=int, default=400)
 
     args=parser.parse_args()
 
+    continue_training = ''
+    if args.continue_session:
+        sess_folder = '/home/ros/deepbuilder/learning_ws/data/' + args.session_name
+        dirs = os.listdir(sess_folder)
+        for d in reversed(dirs):
+            file_path = sess_folder + "/" + d + "/params.pkl"
+            if os.path.isfile(file_path):
+                continue_training = file_path
+                break
 
-    # noinspection PyTypeChecker
+    reuse_replay_buffers = []
+    if args.reuse_replay_buffers != '':
+        reuse_replay_buffers = args.reuse_replay_buffers.split(',')
+
+
     variant = dict(
-        algorithm="SAC",
-        version="normal",
-        layer_size=args.hid_dim,
-        replay_buffer_size=args.replay_buffer_size,
-        algorithm_kwargs=dict(
-            num_epochs=args.num_epochs,
-            min_num_steps_before_training=args.rnd_plays * (1+args.max_num_boxes),
-            num_eval_steps_per_epoch=args.num_plays_eval * (1+args.max_num_boxes),
-            num_trains_per_train_loop=args.num_trains_per_train_loop,
-            num_expl_steps_per_train_loop=args.num_plays_expl * (1+args.max_num_boxes),
-            max_path_length=args.max_num_boxes+1,
-            batch_size=args.batch_size,
+        algorithm='SAC',
+        version='normal',
+        reuse_replay_buffers=reuse_replay_buffers,
+        continue_training=continue_training,
+        env_kwargs=dict(
+            session_name=args.session_name,            
+            rhino_pid=args.rhino_pid,
+            is_simulation=True,
+            action_dim=7, 
+            observation_dim=144,
+            goal_dim=3,
+            observation_noise_mean=0.0,
+            observation_noise_std=0.0002,
+            max_steps_per_play=30,
+            terminate_at_collision=False,
+            populate_simulation=0.5 #IMPORTANT!!! CHANGE WHEN NOT SIMULATION
         ),
-        trainer_kwargs=dict(
+        algo_kwargs=dict(
+            batch_size=128,
+            num_epochs=99999,
+            num_eval_plays_per_epoch=0,
+            num_expl_plays_per_epoch=args.epoch_length,            
+            num_train_loops_per_epoch=args.trains_per_epoch,
+            num_plays_before_training=0,            
+        ),
+        sac_trainer_kwargs=dict(
             discount=0.99,
             soft_target_tau=5e-3,
             target_update_period=1,
-            policy_lr=args.policy_lr,
-            qf_lr=args.soft_q_lr,
-            reward_scale=1.0,
+            policy_lr=3E-4,
+            qf_lr=3E-4,
+            reward_scale=1,
             use_automatic_entropy_tuning=True,
         ),
+        replay_buffer_kwargs=dict(
+            max_size=int(1E6)
+        ),
+        qf_kwargs=dict(
+            hidden_sizes=[432, 360, 360],
+        ),
+        policy_kwargs=dict(
+            hidden_sizes=[432, 360, 360],
+        ),
     )
-    
-    setup_logger(args.session_name, variant=variant, snapshot_mode="gap_and_last", snapshot_gap=args.save_agent_every)
-
-    
-    ptu.set_gpu_mode(True)  # optionally set the GPU (default=False)
-    experiment(args, variant)
+    setup_logger(args.session_name, variant=variant, snapshot_mode="gap_and_last", snapshot_gap=10)
+    experiment(variant, args)

@@ -35,29 +35,35 @@ class NormalizedActions(gym.ActionWrapper):
 
         return action
 
-class DeepBuilderGoalEnv(gym.GoalEnv):
+
+        
+
+
+
+class DeepBuilderEnv():
     def __init__(
         self, 
         session_name, 
         is_simulation, 
-        rhino_pid=-1, 
-        action_dim=7, 
-        observation_dim=144,
-        goal_dim=10,
-        observation_noise_mean=0.0,
-        observation_noise_std=0.0008,
-        terminate_at_collision=False,
-        max_steps_per_play=30,
-        populate_simulation=True
+        rhino_pid, 
+        action_dim, 
+        observation_dim,
+        goal_dim,
+        additional_info_dim,
+        observation_noise_mean,
+        observation_noise_std,
+        terminate_at_collision,
+        max_steps_per_play,
+        populate_simulation
         ):
 
-        super(DeepBuilderGoalEnv, self).__init__()      
+        #super(DeepBuilderGoalEnv, self).__init__()      
+
+        np.set_printoptions(precision = 5, suppress=True)
 
         #things relevant for connections
         self.session_name = session_name
         self.is_simulation = is_simulation
-        np.set_printoptions(precision = 5, suppress=True)
-
 
         self.action_id = '00000000'
         self.rhino_pid = rhino_pid
@@ -69,17 +75,17 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         self.current_step = 0
         self.current_play = 0
         self.state_mesh = {}
-        self.send_state_mesh_to_ros = False
         self.populate_simulation = populate_simulation
-        
+        self.print_result = {}        
 
         #basic config
         self.action_dim = action_dim         #six axes plus one box rotation in tcp frame (for now)
         self.observation_dim = observation_dim  #bc #yolo
         self.goal_dim = goal_dim
+        self.additional_info_dim = additional_info_dim
         self.observation_noise_mean = observation_noise_mean
         self.observation_noise_std = observation_noise_std
-        self.reward_range = (-1.0, 7.01)
+        self.reward_range = (0.0, 1.0)
 
         #holds actual values
         self.action_array = np.zeros(self.action_dim, dtype=np.float32)
@@ -88,7 +94,7 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
 
         self.observation_dict = {}
         self.observation_dict['observation'] = []
-        self.observation_dict['desired_goal'] = self.goal_dict_to_tensor(self.default_desired_goal())
+        self.observation_dict['desired_goal'] = self.goal_dict_to_tensor(self.random_desired_goal())
         self.observation_dict['achieved_goal'] = self.goal_dict_to_tensor(self.default_achieved_goal())
 
         #just needed for some registration and book keeping. doesn't actually hold any value
@@ -96,11 +102,13 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         self.observation = spaces.Box(-np.pi,  np.pi, shape=(self.observation_dim,), dtype=np.float32) #bounds solely based on observations and estimation! no garantuee
         self.desired_goal = spaces.Box(-1.0, 1.0, shape=(self.goal_dim,), dtype=np.float32) #-1: fail  1: success
         self.achieved_goal = spaces.Box(-1.0, 1.0, shape=(self.goal_dim,), dtype=np.float32) #-1: fail  1: success
+        self.additional_info = spaces.Box(-999999.9, 999999.9, shape=(self.additional_info_dim,), dtype=np.float32)
 
         self.observation_space = spaces.Dict()
         self.observation_space.spaces['observation'] = self.observation
         self.observation_space.spaces['desired_goal'] = self.desired_goal
-        self.observation_space.spaces['achieved_goal'] = self.achieved_goal        
+        self.observation_space.spaces['achieved_goal'] = self.achieved_goal    
+        self.observation_space.spaces['additional_info'] = self.additional_info     
 
         #info to print to screen
         self.note = ""
@@ -112,8 +120,15 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         self.state_tags = None
         self.previous_print_result = {}
 
+        self.previous_height = 0.0
+        self.previous_area = 0.0
+        self.previous_tcp_displacement = 0.0
+
+
         '''HIDDEN MEMBERS'''
         self.__ros_comm = None
+
+        self.achieved_goal_dict = self.default_achieved_goal()
 
     '''
     main functions
@@ -121,14 +136,16 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
     def reset(self):
         self.is_synced = False
 
-        self.ros_comm().reset_state_mesh()
-        self.ros_comm().reset_compressed_mesh()
-        self.send_state_mesh_to_ros = False
+        #self.ros_comm().reset_state_mesh()
+        #self.ros_comm().reset_compressed_mesh()
         self.state_mesh = {}
+        self.achieved_goal_dict = self.default_achieved_goal()
+        self.RhinoSimulation(settings.HOME_POSE)
 
-        if self.is_simulation:
-            sim_res = self.FH_Reset()
-            self.observation_dict['observation'] = sim_res["state_compressed"]
+        if self.is_simulation:            
+            self.print_result = self.FH_Reset()            
+            self.observation_dict['observation'] = self.print_result["state_compressed"]
+            self.fill_goal_dict_from_gh_simulation(self.achieved_goal_dict, self.print_result)
             
 
         else:
@@ -141,14 +158,26 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
             print("Sending new state tags to Rhino")
             sim_res = self.update_state_tags(self.state_tags)
             self.observation_dict['observation'] = sim_res["state_compressed"]
+            self.achieved_goal_dict = {} #TO DO
+            self.print_result = {} #TO DO
+            
 
+        self.state_mesh['indices'] = self.print_result['state_mesh_indices']
+        self.state_mesh['vertices'] = self.print_result['state_mesh_vertices']
+        self.previous_height = self.print_result['current_height']
+        self.previous_area = self.print_result['current_area']
+        self.previous_tcp_displacement = self.print_result['current_tcp_displacement']
 
-        self.RhinoSimulation(settings.HOME_POSE)
+        col_res = {}
+        col_res['message'] = "SUCCESS"
+        col_res['collisions'] = [False,False,False,False,False] #we'll assume no collisions in reset state
 
-        self.observation_dict['observation'] += np.random.normal(loc=self.observation_noise_mean, scale=self.observation_noise_std, size=[self.observation_dim])
-        self.achieved_goal_dict = self.default_achieved_goal()
+        self.observation_dict['observation'] += np.random.normal(loc=self.observation_noise_mean, scale=self.observation_noise_std, size=[self.observation_dim])        
+        self.observation_dict['desired_goal'] = self.goal_dict_to_tensor(self.random_desired_goal())
         self.observation_dict['achieved_goal'] = self.goal_dict_to_tensor(self.achieved_goal_dict)
+        self.observation_dict['additional_info'] = self.assemble_additional_info(col_res, self.print_result)
 
+        
         self.current_step = 0
         self.done = False
         self.current_step = 0
@@ -164,60 +193,73 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         #previous observation becomes current state 
 
         self.action_id = str(uuid.uuid4().hex)[:8]
-        info = "{}--{}--{}--{}".format(self.session_name, self.action_id, self.current_play, self.current_step)
 
         action_array = action.copy()
-        achieved_goal_dict = self.default_achieved_goal()
 
         #moveit path planning
-        mesh_to_send = {} if not self.send_state_mesh_to_ros else self.state_mesh
-        path_planning_result = self.ros_comm().test_pose(action_array[:6].tolist(), state_mesh=mesh_to_send)
-        #self.print_db("[{}-{}] Path planning result: {}".format(self.session_name, self.action_id, path_planning_result['message']), color='white')
-        self.note += "Path planning: " + path_planning_result['message'] + ", rewards: "
-        info += " +++ path_planning: " + path_planning_result['message']
-        self.fill_goal_dict_from_moveit_collisions(achieved_goal_dict, path_planning_result['collisions'])
+        path_planning_result = self.ros_comm().test_pose(action_array[:6].tolist(), state_mesh=self.state_mesh)
+        self.note += "Path " + path_planning_result['message']
+        #self.fill_goal_dict_from_moveit_collisions(achieved_goal_dict, path_planning_result['collisions'])
 
-        if path_planning_result['message'] == "SUCCESS":
-            print_result = {}
+
+        if path_planning_result['message'] == "SUCCESS":            
             if self.is_simulation:
-                print_result = self.print_simulation(action)
+                self.print_result = self.print_simulation(action)
             else:
-                print_result = self.print_real(action)
+                self.print_result = self.print_real(action)
 
-            self.fill_goal_dict_from_gh_simulation(achieved_goal_dict, print_result)
-            self.ros_comm().update_compressed_mesh(comp_mesh_vertices = print_result['compressed_mesh_vertices'], comp_mesh_indices = print_result['compressed_mesh_indices'])
-            info += " +++ printability ratio: " + str(print_result['printability_ratio'])
-            #self.print_db("[{}-{}] Simulation result: Printability ratio: {}".format(self.session_name, self.action_id, print_result['printability_ratio']), color='white')
-            self.observation_dict['observation'] = np.array(print_result['state_compressed'], dtype=np.float32)
-            self.send_state_mesh_to_ros = print_result['printability_ratio'] > 0.0
-            if self.send_state_mesh_to_ros:
-                self.state_mesh = dict(vertices = print_result['state_mesh_vertices'], indices=print_result['state_mesh_indices'])
+            self.fill_goal_dict_from_gh_simulation(self.achieved_goal_dict, self.print_result)
+            self.ros_comm().update_compressed_mesh(comp_mesh_vertices = self.print_result['compressed_mesh_vertices'], comp_mesh_indices = self.print_result['compressed_mesh_indices'])
+            self.ros_comm().update_state_mesh(self.print_result['state_mesh_vertices'], self.print_result['state_mesh_indices'])
+            self.observation_dict['observation'] = np.array(self.print_result['state_compressed'], dtype=np.float32)
+
+        else:
+            self.print_result['printability_ratio'] = 0.0
+            self.print_result['tilt_angle'] = 3.141
+            self.print_result['action_tcp']['position']['x'] = 0.0 #if I decide to include tcp pose in learning, this will have to be properly computed
+            self.print_result['action_tcp']['position']['y'] = 0.0
+            self.print_result['action_tcp']['position']['z'] = 0.0
+            self.print_result['action_tcp']['orientation']['x'] = 0.0
+            self.print_result['action_tcp']['orientation']['y'] = 0.0
+            self.print_result['action_tcp']['orientation']['z'] = 0.0
+            self.print_result['action_tcp']['orientation']['w'] = 0.0
+            self.print_result['dist_to_state_mesh'] = settings.DISTANCE_TCP_STATE_MAX
 
         if (self.terminate_at_collision and path_planning_result['message'] != 'SUCCESS') or (self.current_step >= (self.max_steps_per_play - 1)):
             self.done = True
             self.current_play += 1
 
-         
-        self.observation_dict['achieved_goal'] = self.goal_dict_to_tensor(achieved_goal_dict)
+        self.state_mesh['indices'] = self.print_result['state_mesh_indices']
+        self.state_mesh['vertices'] = self.print_result['state_mesh_vertices']
+        self.observation_dict['achieved_goal'] = self.goal_dict_to_tensor(self.achieved_goal_dict)
+        self.observation_dict['additional_info'] = self.assemble_additional_info(path_planning_result, self.print_result)
         self.observation_dict['observation'] += np.random.normal(loc=self.observation_noise_mean, scale=self.observation_noise_std, size=[self.observation_dim])
 
-        self.reward = self.compute_reward(self.observation_dict['achieved_goal'], self.observation_dict['desired_goal'], '')
-             
 
+        if self.is_goal_based():
+            self.reward = self.compute_reward(self.observation_dict['achieved_goal'], self.observation_dict['desired_goal'], '')
+        else:
+            self.reward = self.shape_reward(path_planning_result, self.print_result)
+
+        self.note += " ({:.1f})".format(self.observation_dict['additional_info'][0])
+        self.note += " - dist {:.2f} | printab {:.2f} | height {:.2f} | area {:.2f} | displ {:.2f}".format(self.observation_dict['additional_info'][1], self.observation_dict['additional_info'][2], self.observation_dict['additional_info'][4], self.observation_dict['additional_info'][5], self.observation_dict['additional_info'][6])
+
+
+        self.previous_height = self.print_result['current_height']
+        self.previous_area = self.print_result['current_area']
+        self.previous_tcp_displacement = self.print_result['current_tcp_displacement']
         self.current_step += 1
 
         self.is_synced = True
-        self.print_db("[{}-{}] Action: {}".format(self.session_name, self.action_id, action), color='blue')
-        #self.print_db("[{}-{}] Achieved Goal: {}".format(self.session_name, self.action_id, self.observation_dict['achieved_goal']), color='blue')
-        #self.print_db("[{}-{}] Compressed state: {}, ...".format(self.session_name, self.action_id, self.observation_dict['observation'][0:3]), color='blue')
-        self.print_db("[{}-{}] Note: {}".format(self.session_name, self.action_id, self.note), color='cyan')
-        self.print_db("[{}-{}] Done: {}".format(self.session_name, self.action_id, self.done), color='blue', end="")
-        
-        self.print_db("      Reward: {}".format(self.reward), color='blue', attrs=['bold'])
-        
+        self.print_db("[{}-{}] Goal (D): {}".format(self.session_name, self.action_id, self.observation_dict['desired_goal']), color='blue')
+        self.print_db("[{}-{}] Goal (A): {}".format(self.session_name, self.action_id, self.observation_dict['achieved_goal']), color='blue')        
+        self.print_db("[{}-{}]     Done: {}".format(self.session_name, self.action_id, self.done), color='blue', end="")        
+        self.print_db("   Reward: {}".format(self.reward), color='blue', attrs=['bold'])
+        self.print_db("[{}-{}]     Note: {}".format(self.session_name, self.action_id, self.note), color='cyan')
+
 
         #rlkit requries us to return quote 'next_o, r, d, env_info' as simple lists and numbers
-        return self.observation_dict, self.reward, self.done, info
+        return self.observation_dict, self.reward, self.done, ''
 
     def print_simulation(self, action_array):
         return self.RhinoSimulation(action_array)
@@ -265,138 +307,147 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
     def default_achieved_goal(self):
         #most pessimistic case
         goal_dict = {}
-        goal_dict['self_collision'] = -1
-        goal_dict['wall_collision'] = -1
-        goal_dict['table_collision'] = -1
-        goal_dict['state_collision'] = -1
-        goal_dict['all_collision'] = -1
-        goal_dict['printability_ratio'] = -1
-        goal_dict['dist_to_state'] = -1
         goal_dict['current_height'] = -1
         goal_dict['current_area'] = -1
-        goal_dict['deformation'] = -1
+        goal_dict['current_deformation'] = -1
         return goal_dict
 
-    def default_desired_goal(self):
+    def random_desired_goal(self):
+        #best case
         goal_dict = {}
-        goal_dict['self_collision'] = 1
-        goal_dict['wall_collision'] = 1
-        goal_dict['table_collision'] = 1
-        goal_dict['state_collision'] = 1
-        goal_dict['all_collision'] = 1
-        goal_dict['printability_ratio'] = 1
-        goal_dict['dist_to_state'] = 0.9 # corresponds to a radius of 12.5cm around the state mesh. the goal is to get that near or closer
-        goal_dict['current_height'] = -0.33333333 # corresponds to a height of 25cm
-        goal_dict['current_area'] = -0.5 #corresponds to a quarter of the totally available area being covered (anchor area subtracted)
-        goal_dict['deformation'] = 0.95 # corresponds to a average displacement of 2cm for the recorded tcps. the goal is to get that or less
+        goal_dict['current_height'] = random.uniform(-0.5, -0.2) # something between 18.75cm and 30.0cm
+        goal_dict['current_area'] = random.uniform(-0.8, -0.6) # something between a tenth and a fifth of the working area covered
+        goal_dict['current_deformation'] = random.uniform(0.5, 0.75) #something between 2.5cm and 1.25cm average tcp displacement 
         return goal_dict
 
     def fill_goal_dict_from_moveit_collisions(self, goal_dict, collisions):
+        # REDO!!!
         #success case
         if not collisions[4]:
-            goal_dict['self_collision'] = 1
-            goal_dict['wall_collision'] = 1
-            goal_dict['table_collision'] = 1
-            goal_dict['state_collision'] = 1
-            goal_dict['all_collision'] = 1
+            goal_dict['collision'] = 1.0
             return
         
-        #fill according to collisions
-        goal_dict['self_collision'] = 1 if not collisions[0] else -1
-        goal_dict['wall_collision'] = 1 if not collisions[1] else -1
-        goal_dict['table_collision'] = 1 if not collisions[2] else -1
-        goal_dict['state_collision'] = 1 if not collisions[3] else -1
-        goal_dict['all_collision'] = 1 if not collisions[4] else -1
+        #self collision
+        if collisions[0]:
+            goal_dict['collision'] = -1.0
+            return
 
-        #if all individually are successful but the combination of all fails, goal achievement can be nuanced
-        #this doesn't effect reward structure though
-        if collisions[4] and not collisions[0] and not collisions[1] and not collisions[2] and not collisions [3]:
-            goal_dict['self_collision'] = -0.5 
-            goal_dict['wall_collision'] = -0.5
-            goal_dict['table_collision'] = -0.5
-            goal_dict['state_collision'] = -0.5
+        #wall collision
+        if collisions[1]:
+            goal_dict['collision'] = -0.3333333
+            return
+
+        #table collision
+        if collisions[2]:
+            goal_dict['collision'] = 0.3333333
+            return
+
+        #state collision
+        if collisions[3]:
+            goal_dict['collision'] = 0.66666666
+            return
+
+        #combined collision
+        if collisions[4]:
+            goal_dict['collision'] = 0.9
+            return
 
     def fill_goal_dict_from_gh_simulation(self, goal_dict, sim_result):
-        #if printable 1, else -1
-        goal_dict['printability_ratio'] = sim_result['printability_ratio'] * 2.0 - 1.0
-
-        #remapping of 0.0 to 2500.0 into -1.0 to 1.0; sing flipped bc, the shorter the distance the better
-        goal_dict['dist_to_state'] = (sim_result['dist_to_state_mesh'] / settings.DISTANCE_TCP_STATE_MAX) * -2.0 + 1.0
-
         #remapping from 0.0 to 750.0 into -1.0 to 1.0
         goal_dict['current_height'] = (sim_result['current_height'] / settings.OBSERVATION_CUBE_LENGTH) * 2.0 - 1.0
 
         #remapping from 0.0 to MAX_AREA into -1.0 to 1.0
         goal_dict['current_area'] = (sim_result['current_area'] / settings.MAX_AREA) * 2.0 - 1.0
 
+        #remapping from 0.0 to MAX_DEFORMATION to -1.0 to 1.0
+        goal_dict['current_deformation'] = (sim_result['current_tcp_displacement'] / settings.MAX_DEFORMATION) * -2.0 + 1.0
+
         #deformation is mean cartesian tcp displacement scaled by observation_cube_length
         #by default deformation is 1.0 (meaning NO deformation), bc. that results in smooth transition from 'no tcps present' to 
         #'slightly deformed tcps present' as it's the case when new tcps with high anchor amount are introduced
         #this encourages the agent to maintain deformation=1.0 rather than figuring out that there's a step between 0 present tcps and some tcps
-        #mapping from 0.0 to 750.0 into -1.0 to 1.0; averaged; sings flipped bc the less deformation the better
-        deformation = 0.0
-        if len(sim_result['current_tcp_displacements']) == 0:
-            deformation = 1.0
-        else:
-            for d in sim_result['current_tcp_displacements']:
-                deformation += ((d / settings.OBSERVATION_CUBE_LENGTH) * -2.0 + 1) / len(sim_result['current_tcp_displacements'])
-        goal_dict['deformation'] = deformation
 
         return goal_dict
 
     def goal_dict_to_tensor(self, goal_dict):
         tensor = np.zeros(shape=(self.goal_dim,), dtype=np.float32)
-        tensor[0] = min(1.0, max( -1.0, goal_dict['self_collision']))
-        tensor[1] = min(1.0, max( -1.0, goal_dict['wall_collision']))
-        tensor[2] = min(1.0, max( -1.0, goal_dict['table_collision']))
-        tensor[3] = min(1.0, max( -1.0, goal_dict['state_collision']))
-        tensor[4] = min(1.0, max( -1.0, goal_dict['all_collision']))
-        tensor[5] = min(1.0, max( -1.0, goal_dict['printability_ratio']))
-        tensor[6] = min(1.0, max( -1.0, goal_dict['dist_to_state']))
-        tensor[7] = min(1.0, max( -1.0, goal_dict['current_height']))
-        tensor[8] = min(1.0, max( -1.0, goal_dict['current_area']))
-        tensor[9] = min(1.0, max( -1.0, goal_dict['deformation']))
+        tensor[0] = min(1.0, max( -1.0, goal_dict['current_height']))
+        tensor[1] = min(1.0, max( -1.0, goal_dict['current_area']))
+        tensor[2] = min(1.0, max( -1.0, goal_dict['current_deformation']))
         return tensor
 
+    def assemble_additional_info(self, path_planning_result, print_result):
+        info = np.zeros(shape=(self.additional_info_dim,), dtype=np.float32)
+        col = path_planning_result['collisions']
+        info[0] = 0.0 if col[0] else (0.2 if col[1] else (0.4 if col[2] else (0.6 if col[3] else (0.8 if col[4] else 1.0))))
+
+        info[1] = print_result['dist_to_state_mesh']
+        info[2] = print_result['printability_ratio']
+        info[3] = print_result['tilt_angle']
+        info[4] = print_result['current_height']
+        info[5] = print_result['current_area']
+        info[6] = print_result['current_tcp_displacement']
+        info[7] = print_result['action_tcp']['position']['x']
+        info[8] = print_result['action_tcp']['position']['y']
+        info[9] = print_result['action_tcp']['position']['z']
+        info[10] = print_result['action_tcp']['orientation']['x']
+        info[11] = print_result['action_tcp']['orientation']['y']
+        info[12] = print_result['action_tcp']['orientation']['z']
+        info[13] = print_result['action_tcp']['orientation']['w']
+        info[14] = print_result['compression_loss']
+        info[15] = print_result['highest_point']['x']
+        info[16] = print_result['highest_point']['y']
+        info[17] = print_result['highest_point']['z']
+
+        return info
+
     def compute_reward(self, achieved_goal, desired_goal, info):
-        # we use a smaller-0 discriminator, so virtual goals of continuous values can be evaluated too
-        # solver should hopefully be able to figure out step at zero in solution landscape
-        # any collision results in negative reward
-        if ((achieved_goal[0] < 0.0) != (desired_goal[0] < 0.0)
-                or (achieved_goal[1] < 0.0) != (desired_goal[1] < 0.0)
-                or (achieved_goal[2] < 0.0) != (desired_goal[2] < 0.0)
-                or (achieved_goal[3] < 0.0) != (desired_goal[3] < 0.0)
-                or (achieved_goal[4] < 0.0) != (desired_goal[4] < 0.0)):
-            return -1
-        
-        reward = -0.01 #shouldn't be zero to be effective, shouldn't be meaningful positive either
+        if achieved_goal[0] >= desired_goal[0] and achieved_goal[2] >= desired_goal[2]:
+            return 1.0
+        if achieved_goal[1] >= desired_goal[1] and achieved_goal[2] >= desired_goal[2]:
+            return 1.0
+
+        return 0.0
+
+    def shape_reward(self, path_planning_result, print_result):
+        #collision
+        col = path_planning_result['collisions']
+        self.reward = 0.0 if col[0] else (0.04 if col[1] else (0.08 if col[2] else (0.12 if col[3] else (0.16 if col[4] else 0.2))))
+        if self.reward < 0.2:
+            return self.reward
+
+        #distance to state mesh
+        dist_ratio = (1.0 - min(1.0, (max(0.0, (print_result['dist_to_state_mesh'] - 100.0)) / (settings.DISTANCE_TCP_STATE_MAX - 200.0)))) * 0.3
+        tilt_ratio = max(0.7854, min(1.5708, print_result['tilt_angle'])) - 0.7854
+        tilt_ratio_0to1 = 1.0 - (tilt_ratio / (1.5708 - 0.7854))
+        self.reward += dist_ratio * tilt_ratio_0to1
+
+
         #printability
-        if (achieved_goal[5] < 0.0) == (desired_goal[5] < 0.0):
-            reward += 1.0
-            self.note += "printability "
+        printab = print_result['printability_ratio'] * 0.2
+        if printab == 0.0:
+            return self.reward
 
-        #distance to state
-        if achieved_goal[6] >= desired_goal[6]:
-            reward += 1.0
-            self.note += "dist to state "
+        #TO DO if printab > 0.0 and print_result['current_tcp']['position']['z'] > 
+        self.reward += printab
+        
 
-        #current_height
-        if achieved_goal[7] >= desired_goal[7]:
-            reward += 2.0
-            self.note += "height "
+        #area growth or height growth
+        height_growth_0to1 = min(1.0, (max(0.0, print_result['current_height'] - self.previous_height) / 90.0))
+        area_growth_0to1 = min(1.0, (max(0.0, print_result['current_area'] - self.previous_area) / (90.0 * 90.0)))        
+        #TO DO displ_1to0 = min(-2.0, max(2.0, print_result['current_tcp_displacement'] - self.previous_tcp_displacement)) / 4.0
+        performance_ratio = min(1.0, (height_growth_0to1 + area_growth_0to1)) * 0.3
 
-        #current_area
-        if achieved_goal[8] >= desired_goal[8]:
-            reward += 2.0
-            self.note += "area "
+        self.reward += performance_ratio
 
-        #deformation
-        if achieved_goal[9] >= desired_goal[9] and achieved_goal[5] > 0.0:
-            reward += 1.0
-            self.note += "deformation "
+        return self.reward
 
-        return reward
 
+    def is_goal_based(self):
+        if "DeepBuilderGoalEnv" in str(self.__class__):
+            return True
+        elif "DeepBuilderShapedEnv" in str(self.__class__):
+            return False
 
     '''
     RHINO REQUESTS
@@ -410,13 +461,13 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
         time.sleep(settings.TIME_RESET_BTN)
         p["reset"]=False
         pop = self.current_play % 10 < self.populate_simulation * 10
-        p["populate_sim"]= 0 if not pop else random.randint(0, 99999)
+        p["populate_sim"]= 0 if not pop else random.randint(0, 99999999)
         
         simulation_result = self.SafeRequest('fh_reset', p, settings.TIMEOUT_FH)
 
         if pop and int(self.rhino_pid) > 0:
             self.state_mesh = dict(vertices = simulation_result['state_mesh_vertices'], indices=simulation_result['state_mesh_indices'])
-            self.ros_comm().test_pose(settings.HOME_POSE, state_mesh=self.state_mesh)
+            #self.ros_comm().test_pose(settings.HOME_POSE, state_mesh=self.state_mesh)
 
         return simulation_result
 
@@ -517,17 +568,83 @@ class DeepBuilderGoalEnv(gym.GoalEnv):
     def ros_scan_state(self, sensor_poses):
         return self.ros_comm().scan_state(sensor_poses)
 
-    def ros_update_state_mesh(self, state_mesh_vertices, state_mesh_indices):
-        self.ros_comm().update_state_mesh(state_mesh_vertices, state_mesh_indices)
-
-    def ros_update_compressed_mesh(self, compressed_mesh_vertices, compressed_mesh_indices):
-        self.ros_comm().update_compressed_mesh(compressed_mesh_vertices, compressed_mesh_indices)
-
-
     def print_db(self, text, color, end="\n", attrs=[]):
         attributes = (['dark'] if self.phase == 'eval' else [])
         attributes.extend(attrs)
         print(colored(text, color=color, attrs=attributes), end=end)
+
+
+class DeepBuilderGoalEnv(DeepBuilderEnv, gym.GoalEnv):
+    def __init__(
+        self, 
+        session_name, 
+        is_simulation, 
+        rhino_pid=-1, 
+        action_dim=7, 
+        observation_dim=144,
+        goal_dim=3,
+        additional_info_dim = 18,
+        observation_noise_mean=0.0,
+        observation_noise_std=0.0008,
+        terminate_at_collision=False,
+        max_steps_per_play=30,
+        populate_simulation=0.5
+        ):
+
+            DeepBuilderEnv.__init__(
+            self, 
+            session_name, 
+            is_simulation, 
+            rhino_pid, 
+            action_dim, 
+            observation_dim,
+            goal_dim,
+            additional_info_dim,
+            observation_noise_mean,
+            observation_noise_std,
+            terminate_at_collision,
+            max_steps_per_play,
+            populate_simulation
+            )
+
+            gym.GoalEnv.__init__(self)
+            
+
+class DeepBuilderShapedEnv(DeepBuilderEnv, gym.Env):
+    def __init__(
+        self, 
+        session_name, 
+        is_simulation, 
+        rhino_pid=-1, 
+        action_dim=7, 
+        observation_dim=144,
+        goal_dim=3,
+        additional_info_dim = 18,
+        observation_noise_mean=0.0,
+        observation_noise_std=0.0008,
+        terminate_at_collision=False,
+        max_steps_per_play=30,
+        populate_simulation=0.5
+        ):
+
+            DeepBuilderEnv.__init__(
+            self, 
+            session_name, 
+            is_simulation, 
+            rhino_pid, 
+            action_dim, 
+            observation_dim,
+            goal_dim,
+            additional_info_dim,
+            observation_noise_mean,
+            observation_noise_std,
+            terminate_at_collision,
+            max_steps_per_play,
+            populate_simulation
+            )
+
+            gym.Env.__init__(self)
+
 
 if __name__ == "__main__":
     env = NormalizedActions(DeepBuilderGoalEnv(session_name = "debug_sess", is_simulation = True))

@@ -2,6 +2,8 @@ float32[] goal_pose
 float32[] state_pose #optional
 string session
 float32 speed
+float32[] state_mesh_vertices #optional
+int32[] state_mesh_indices #optional
 ---
 trajectory_msgs/JointTrajectory path
 #collisions[0]: self_collision  -  collisions[1]: wall_collision  -  collisions[2]: table_collision  -  collisions[3]: state_collision  -  collisions[4]: full_scene

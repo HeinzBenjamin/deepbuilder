@@ -22,7 +22,7 @@
 
 (defclass deepbuilder::ro_plan_pathRequest
   :super ros::object
-  :slots (_goal_pose _state_pose _session _speed ))
+  :slots (_goal_pose _state_pose _session _speed _state_mesh_vertices _state_mesh_indices ))
 
 (defmethod deepbuilder::ro_plan_pathRequest
   (:init
@@ -31,12 +31,16 @@
     ((:state_pose __state_pose) (make-array 0 :initial-element 0.0 :element-type :float))
     ((:session __session) "")
     ((:speed __speed) 0.0)
+    ((:state_mesh_vertices __state_mesh_vertices) (make-array 0 :initial-element 0.0 :element-type :float))
+    ((:state_mesh_indices __state_mesh_indices) (make-array 0 :initial-element 0 :element-type :integer))
     )
    (send-super :init)
    (setq _goal_pose __goal_pose)
    (setq _state_pose __state_pose)
    (setq _session (string __session))
    (setq _speed (float __speed))
+   (setq _state_mesh_vertices __state_mesh_vertices)
+   (setq _state_mesh_indices __state_mesh_indices)
    self)
   (:goal_pose
    (&optional __goal_pose)
@@ -50,6 +54,12 @@
   (:speed
    (&optional __speed)
    (if __speed (setq _speed __speed)) _speed)
+  (:state_mesh_vertices
+   (&optional __state_mesh_vertices)
+   (if __state_mesh_vertices (setq _state_mesh_vertices __state_mesh_vertices)) _state_mesh_vertices)
+  (:state_mesh_indices
+   (&optional __state_mesh_indices)
+   (if __state_mesh_indices (setq _state_mesh_indices __state_mesh_indices)) _state_mesh_indices)
   (:serialization-length
    ()
    (+
@@ -61,6 +71,10 @@
     4 (length _session)
     ;; float32 _speed
     4
+    ;; float32[] _state_mesh_vertices
+    (* 4    (length _state_mesh_vertices)) 4
+    ;; int32[] _state_mesh_indices
+    (* 4    (length _state_mesh_indices)) 4
     ))
   (:serialize
    (&optional strm)
@@ -80,6 +94,16 @@
        (write-long (length _session) s) (princ _session s)
      ;; float32 _speed
        (sys::poke _speed (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
+     ;; float32[] _state_mesh_vertices
+     (write-long (length _state_mesh_vertices) s)
+     (dotimes (i (length _state_mesh_vertices))
+       (sys::poke (elt _state_mesh_vertices i) (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
+       )
+     ;; int32[] _state_mesh_indices
+     (write-long (length _state_mesh_indices) s)
+     (dotimes (i (length _state_mesh_indices))
+       (write-long (elt _state_mesh_indices i) s)
+       )
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
@@ -102,6 +126,20 @@
      (let (n) (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4) (setq _session (subseq buf ptr- (+ ptr- n))) (incf ptr- n))
    ;; float32 _speed
      (setq _speed (sys::peek buf ptr- :float)) (incf ptr- 4)
+   ;; float32[] _state_mesh_vertices
+   (let (n)
+     (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4)
+     (setq _state_mesh_vertices (instantiate float-vector n))
+     (dotimes (i n)
+     (setf (elt _state_mesh_vertices i) (sys::peek buf ptr- :float)) (incf ptr- 4)
+     ))
+   ;; int32[] _state_mesh_indices
+   (let (n)
+     (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4)
+     (setq _state_mesh_indices (instantiate integer-vector n))
+     (dotimes (i n)
+     (setf (elt _state_mesh_indices i) (sys::peek buf ptr- :integer)) (incf ptr- 4)
+     ))
    ;;
    self)
   )
@@ -181,7 +219,7 @@
   :super ros::object
   :slots ())
 
-(setf (get deepbuilder::ro_plan_path :md5sum-) "6bb18060add6f8092d505a812c13f49f")
+(setf (get deepbuilder::ro_plan_path :md5sum-) "fb31e34e96d7f256acd78a1b40ce121a")
 (setf (get deepbuilder::ro_plan_path :datatype-) "deepbuilder/ro_plan_path")
 (setf (get deepbuilder::ro_plan_path :request) deepbuilder::ro_plan_pathRequest)
 (setf (get deepbuilder::ro_plan_path :response) deepbuilder::ro_plan_pathResponse)
@@ -189,13 +227,15 @@
 (defmethod deepbuilder::ro_plan_pathRequest
   (:response () (instance deepbuilder::ro_plan_pathResponse :init)))
 
-(setf (get deepbuilder::ro_plan_pathRequest :md5sum-) "6bb18060add6f8092d505a812c13f49f")
+(setf (get deepbuilder::ro_plan_pathRequest :md5sum-) "fb31e34e96d7f256acd78a1b40ce121a")
 (setf (get deepbuilder::ro_plan_pathRequest :datatype-) "deepbuilder/ro_plan_pathRequest")
 (setf (get deepbuilder::ro_plan_pathRequest :definition-)
       "float32[] goal_pose
 float32[] state_pose
 string session
 float32 speed
+float32[] state_mesh_vertices
+int32[] state_mesh_indices
 ---
 trajectory_msgs/JointTrajectory path
 
@@ -238,13 +278,15 @@ float64[] effort
 duration time_from_start
 ")
 
-(setf (get deepbuilder::ro_plan_pathResponse :md5sum-) "6bb18060add6f8092d505a812c13f49f")
+(setf (get deepbuilder::ro_plan_pathResponse :md5sum-) "fb31e34e96d7f256acd78a1b40ce121a")
 (setf (get deepbuilder::ro_plan_pathResponse :datatype-) "deepbuilder/ro_plan_pathResponse")
 (setf (get deepbuilder::ro_plan_pathResponse :definition-)
       "float32[] goal_pose
 float32[] state_pose
 string session
 float32 speed
+float32[] state_mesh_vertices
+int32[] state_mesh_indices
 ---
 trajectory_msgs/JointTrajectory path
 
@@ -289,6 +331,6 @@ duration time_from_start
 
 
 
-(provide :deepbuilder/ro_plan_path "6bb18060add6f8092d505a812c13f49f")
+(provide :deepbuilder/ro_plan_path "fb31e34e96d7f256acd78a1b40ce121a")
 
 

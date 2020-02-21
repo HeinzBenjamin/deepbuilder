@@ -1,4 +1,4 @@
-import gym, torch
+import gym, torch, os
 from termcolor import colored
 import rlkit_db.torch.pytorch_util as ptu
 from rlkit_db.data_management.obs_dict_replay_buffer import ObsDictRelabelingBuffer
@@ -16,13 +16,15 @@ def experiment(variant):
 
     observation_key = 'observation'
     desired_goal_key = 'desired_goal'
-
     achieved_goal_key = desired_goal_key.replace("desired", "achieved")
+    additional_info_key = 'additional_info'
+
     replay_buffer_expl = ObsDictRelabelingBuffer(
         env=environment,
         observation_key=observation_key,
         desired_goal_key=desired_goal_key,
         achieved_goal_key=achieved_goal_key,
+        additional_info_key=additional_info_key,
         **variant['replay_buffer_kwargs']
     )
     replay_buffer_eval = ObsDictRelabelingBuffer(
@@ -30,71 +32,87 @@ def experiment(variant):
         observation_key=observation_key,
         desired_goal_key=desired_goal_key,
         achieved_goal_key=achieved_goal_key,
+        additional_info_key=additional_info_key,
         **variant['replay_buffer_kwargs']
     )
 
     
-    prev_data = None
+    prev_datas = []
     load_buffer = False
     load_networks = False
 
     if  variant['continue_training'] != '':
         print("Loading previous training parameters and replay buffer")
-        prev_data = torch.load(variant['continue_training'])
+        prev_datas.append(torch.load(variant['continue_training']))
         load_buffer = True
         load_networks = True
 
-    elif variant['reuse_replay_buffer'] != '':
-        print("Loading previous replay buffer")
-        prev_data = torch.load(variant['reuse_replay_buffer'])
+    elif len(variant['reuse_replay_buffers']) > 0:
+        for b in variant['reuse_replay_buffers']:
+            print("Loading previous replay buffer")
+            prev_datas.append(torch.load(b))
         load_buffer = True
 
-    if prev_data != None and load_buffer:
-        #exploration data
-        n = prev_data['replay_buffer_expl/top']
+    
+    if len(prev_datas) > 0 and load_buffer:
+        expl_offset = 0
+        eval_offset = 0
+        for prev_data in prev_datas:
+            #exploration data
+            n = prev_data['replay_buffer_expl/top']
 
-        if n > 0:
-            replay_buffer_expl._top = n
-            replay_buffer_expl._size = n
-            replay_buffer_expl._actions[:n] = prev_data['replay_buffer_expl/actions']
-            replay_buffer_expl._terminals[:n] = prev_data['replay_buffer_expl/terminals']
-            replay_buffer_expl._idx_to_future_obs_idx[:n] = prev_data['replay_buffer_expl/idx_to_future_obs_idx']
+            if n > 0:
+                replay_buffer_expl._top = n + expl_offset
+                replay_buffer_expl._size = n + expl_offset
+                replay_buffer_expl._actions[expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/actions']
+                replay_buffer_expl._terminals[expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/terminals']
+                replay_buffer_expl._rewards[expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/rewards']
+                replay_buffer_expl._idx_to_future_obs_idx[expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/idx_to_future_obs_idx']
 
-            replay_buffer_expl._obs['achieved_goal'][:n] = prev_data['replay_buffer_expl/observation']['achieved_goal']
-            replay_buffer_expl._obs['desired_goal'][:n] = prev_data['replay_buffer_expl/observation']['desired_goal']
-            replay_buffer_expl._obs['observation'][:n] = prev_data['replay_buffer_expl/observation']['observation']
+                replay_buffer_expl._obs['achieved_goal'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/observation']['achieved_goal']
+                replay_buffer_expl._obs['desired_goal'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/observation']['desired_goal']
+                replay_buffer_expl._obs['observation'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/observation']['observation']
+                replay_buffer_expl._obs['additional_info'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/observation']['additional_info']
 
-            replay_buffer_expl._next_obs['achieved_goal'][:n] = prev_data['replay_buffer_expl/next_obs']['achieved_goal']
-            replay_buffer_expl._next_obs['desired_goal'][:n] = prev_data['replay_buffer_expl/next_obs']['desired_goal']
-            replay_buffer_expl._next_obs['observation'][:n] = prev_data['replay_buffer_expl/next_obs']['observation']
+                replay_buffer_expl._next_obs['achieved_goal'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/next_obs']['achieved_goal']
+                replay_buffer_expl._next_obs['desired_goal'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/next_obs']['desired_goal']
+                replay_buffer_expl._next_obs['observation'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/next_obs']['observation']
+                replay_buffer_expl._next_obs['additional_info'][expl_offset:n + expl_offset] = prev_data['replay_buffer_expl/next_obs']['additional_info']
+                expl_offset += n
 
-            print("Loaded shared exploration replay buffer of size: {}".format(replay_buffer_expl._size))
-            print("Last expl buffer item:\n   action: {}\n   desired goal: {}\n   achieved goal: {}\n   observation: {}".format(replay_buffer_expl._actions[replay_buffer_expl._size-1], replay_buffer_expl._obs['achieved_goal'][replay_buffer_expl._size-1], replay_buffer_expl._obs['desired_goal'][replay_buffer_expl._size-1], replay_buffer_expl._obs['observation'][replay_buffer_expl._size-1]))
-        else:
-            print(colored("Loaded exploration replay buffer was empty! No data attached!", color='red'))
+                print("Loaded shared exploration replay buffer of size: {}".format(replay_buffer_expl._size))
+                print("Last expl buffer item:\n   action: {}\n   desired goal: {}\n   achieved goal: {}\n   observation: {}".format(replay_buffer_expl._actions[replay_buffer_expl._size-1], replay_buffer_expl._obs['achieved_goal'][replay_buffer_expl._size-1], replay_buffer_expl._obs['desired_goal'][replay_buffer_expl._size-1], replay_buffer_expl._obs['observation'][replay_buffer_expl._size-1]))
+            
+            else:
+                print(colored("Loaded exploration replay buffer was empty! No data attached!", color='red'))
+            
 
-        #evaluation data
-        n = prev_data['replay_buffer_eval/top']
-        if n > 0:
-            replay_buffer_eval._top = n
-            replay_buffer_eval._size = n
-            replay_buffer_eval._actions[:n] = prev_data['replay_buffer_eval/actions']
-            replay_buffer_eval._terminals[:n] = prev_data['replay_buffer_eval/terminals']
-            replay_buffer_eval._idx_to_future_obs_idx[:n] = prev_data['replay_buffer_eval/idx_to_future_obs_idx']
+            #evaluation data
+            n = prev_data['replay_buffer_eval/top']
+            if n > 0:
+                replay_buffer_eval._top = n + eval_offset
+                replay_buffer_eval._size = n + eval_offset
+                replay_buffer_eval._actions[eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/actions']
+                replay_buffer_eval._terminals[eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/terminals']
+                replay_buffer_expl._rewards[eval_offset:n + eval_offset] = prev_data['replay_buffer_expl/rewards']
+                replay_buffer_eval._idx_to_future_obs_idx[eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/idx_to_future_obs_idx']
 
-            replay_buffer_eval._obs['achieved_goal'][:n] = prev_data['replay_buffer_eval/observation']['achieved_goal']
-            replay_buffer_eval._obs['desired_goal'][:n] = prev_data['replay_buffer_eval/observation']['desired_goal']
-            replay_buffer_eval._obs['observation'][:n] = prev_data['replay_buffer_eval/observation']['observation']
+                replay_buffer_eval._obs['achieved_goal'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/observation']['achieved_goal']
+                replay_buffer_eval._obs['desired_goal'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/observation']['desired_goal']
+                replay_buffer_eval._obs['observation'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/observation']['observation']
+                replay_buffer_eval._obs['additional_info'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/observation']['additional_info']
 
-            replay_buffer_eval._next_obs['achieved_goal'][:n] = prev_data['replay_buffer_eval/next_obs']['achieved_goal']
-            replay_buffer_eval._next_obs['desired_goal'][:n] = prev_data['replay_buffer_eval/next_obs']['desired_goal']
-            replay_buffer_eval._next_obs['observation'][:n] = prev_data['replay_buffer_eval/next_obs']['observation']
+                replay_buffer_eval._next_obs['achieved_goal'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/next_obs']['achieved_goal']
+                replay_buffer_eval._next_obs['desired_goal'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/next_obs']['desired_goal']
+                replay_buffer_eval._next_obs['observation'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/next_obs']['observation']
+                replay_buffer_eval._next_obs['additional_info'][eval_offset:n + eval_offset] = prev_data['replay_buffer_eval/next_obs']['additional_info']
+                eval_offset += n
 
-            print("Loaded shared evaluation replay buffer of size: {}".format(replay_buffer_eval._size))
-            print("Last eval buffer item:\n   action: {}\n   desired goal: {}\n   achieved goal: {}\n   observation: {}".format(replay_buffer_eval._actions[replay_buffer_eval._size-1], replay_buffer_eval._obs['achieved_goal'][replay_buffer_eval._size-1], replay_buffer_eval._obs['desired_goal'][replay_buffer_eval._size-1], replay_buffer_eval._obs['observation'][replay_buffer_eval._size-1]))
+                print("Loaded shared evaluation replay buffer of size: {}".format(replay_buffer_eval._size))
+                print("Last eval buffer item:\n   action: {}\n   desired goal: {}\n   achieved goal: {}\n   observation: {}".format(replay_buffer_eval._actions[replay_buffer_eval._size-1], replay_buffer_eval._obs['achieved_goal'][replay_buffer_eval._size-1], replay_buffer_eval._obs['desired_goal'][replay_buffer_eval._size-1], replay_buffer_eval._obs['observation'][replay_buffer_eval._size-1]))
 
-        else:
-            print(colored("Loaded evaluation replay buffer was empty! No data attached!", color='red'))
+            else:
+                print(colored("Loaded evaluation replay buffer was empty! No data attached!", color='red'))
 
 
     obs_dim = environment.observation_space.spaces['observation'].low.size
@@ -162,6 +180,8 @@ def experiment(variant):
         replay_buffer_eval=replay_buffer_eval,
         **variant['algo_kwargs']
     )
+
+    #ptu.set_gpu_mode(True)
     algorithm.to(ptu.device)
     print("Everything set up. Starting to train")
     algorithm.train()
@@ -170,33 +190,58 @@ def experiment(variant):
 
 if __name__ == "__main__":
 
-    session_name = "200217-learning"
+    import argparse
+    parser = argparse.ArgumentParser()
+    #args relevant for env setup
+    parser.add_argument('--session_name',type=str, default = '200221-train-sac-her')
+    parser.add_argument('--continue_session',type=bool, default = False)
+    parser.add_argument('--reuse_replay_buffers',type=str, default = '/home/ros/deepbuilder/learning_ws/data/200221-collect-sac/200221-collect-sac_2020_02_21_14_01_12_0000--s-0/params.pkl,/home/ros/deepbuilder/learning_ws/data/200221-collect-sac-her/200221-collect-sac-her_2020_02_21_14_01_25_0000--s-0/params.pkl')
+    parser.add_argument('--rhino_pid',type=int, default = 16756)
+    parser.add_argument('--epoch_length', type=int, default=20)
+    parser.add_argument('--trains_per_epoch', type=int, default=400)
+    
+
+    args=parser.parse_args()
+
+    continue_training = ''
+    if args.continue_session:
+        sess_folder = '/home/ros/deepbuilder/learning_ws/data/' + args.session_name
+        dirs = os.listdir(sess_folder)
+        for d in reversed(dirs):
+            file_path = sess_folder + "/" + d + "/params.pkl"
+            if os.path.isfile(file_path):
+                continue_training = file_path
+                break
+
+    reuse_replay_buffers = []
+    if args.reuse_replay_buffers != '':
+        reuse_replay_buffers = args.reuse_replay_buffers.split(',')
 
     variant = dict(
         algorithm='HER-SAC',
         version='normal',
-        reuse_replay_buffer='',
-        continue_training='',
+        reuse_replay_buffers=reuse_replay_buffers,
+        continue_training=continue_training,
         env_kwargs=dict(
-            session_name=session_name,            
-            rhino_pid=3896,
+            session_name=args.session_name,            
+            rhino_pid=args.rhino_pid,
             is_simulation=True,
             action_dim=7, 
             observation_dim=144,
-            goal_dim=10,
+            goal_dim=3,
             observation_noise_mean=0.0,
             observation_noise_std=0.0002,
             max_steps_per_play=30,
             terminate_at_collision=False,
-            populate_simulation=0.5 #IMPORTANT!!! CHANGE WHEN NOT SIMULATION
+            populate_simulation=0.5, #IMPORTANT!!! CHANGE WHEN NOT SIMULATION
         ),
         algo_kwargs=dict(
             batch_size=128,
             num_epochs=99999,
-            num_eval_plays_per_epoch=2,
-            num_expl_plays_per_epoch=20,            
-            num_train_loops_per_epoch=600,
-            num_plays_before_training=333,            
+            num_eval_plays_per_epoch=0,
+            num_expl_plays_per_epoch=args.epoch_length,            
+            num_train_loops_per_epoch=args.trains_per_epoch,
+            num_plays_before_training=0,            
         ),
         sac_trainer_kwargs=dict(
             discount=0.99,
@@ -213,11 +258,11 @@ if __name__ == "__main__":
             fraction_goals_env_goals=0,
         ),
         qf_kwargs=dict(
-            hidden_sizes=[400, 300],
+            hidden_sizes=[432, 360, 360],
         ),
         policy_kwargs=dict(
-            hidden_sizes=[400, 300],
+            hidden_sizes=[432, 360, 360],
         ),
     )
-    setup_logger(session_name, variant=variant, snapshot_mode="gap_and_last", snapshot_gap=10)
+    setup_logger(args.session_name, variant=variant, snapshot_mode="gap_and_last", snapshot_gap=10)
     experiment(variant)

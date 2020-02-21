@@ -30,25 +30,18 @@ class MdpPathCollector(PathCollector):
     def collect_new_paths(
             self,
             num_steps,
-            discard_incomplete_paths,
+            discard_incomplete_paths=False,
     ):
         paths = []
-        num_steps_collected = 0
-        try:
-            self._env.reset()
-        except ValueError as err:
-                if err.args[0] == "GH_OUT":
-                    print("Starting GH")
-                else:
-                    raise
+        num_plays_collected = 0
                 
-        while num_steps_collected < num_steps:
+        while num_plays_collected < num_steps:
             try:
                 path = rollout(
                     self._env,
                     self._policy,
                 )
-                num_steps_collected += len(path['actions'])
+                num_plays_collected += 1
             except ValueError as err:
                 if err.args[0] == "GH_OUT":
                     print("Lost connection to GH, will need to play this episode again")
@@ -59,7 +52,7 @@ class MdpPathCollector(PathCollector):
             paths.append(path)
 
         self._num_paths_total += len(paths)
-        self._num_steps_total += num_steps_collected
+        self._num_steps_total += num_plays_collected * self._env.max_steps_per_play
         self._epoch_paths.extend(paths)
         return paths
 

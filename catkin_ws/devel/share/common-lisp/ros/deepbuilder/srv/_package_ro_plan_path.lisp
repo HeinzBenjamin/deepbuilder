@@ -7,6 +7,10 @@
           SESSION
           SPEED-VAL
           SPEED
+          STATE_MESH_VERTICES-VAL
+          STATE_MESH_VERTICES
+          STATE_MESH_INDICES-VAL
+          STATE_MESH_INDICES
           PATH-VAL
           PATH
           COLLISIONS-VAL
