@@ -198,7 +198,7 @@ if __name__ == "__main__":
     parser.add_argument('--reuse_replay_buffers',type=str, default = '/home/ros/deepbuilder/learning_ws/data/200221-collect-sac/200221-collect-sac_2020_02_21_14_01_12_0000--s-0/params.pkl,/home/ros/deepbuilder/learning_ws/data/200221-collect-sac-her/200221-collect-sac-her_2020_02_21_14_01_25_0000--s-0/params.pkl')
     parser.add_argument('--rhino_pid',type=int, default = 16756)
     parser.add_argument('--epoch_length', type=int, default=20)
-    parser.add_argument('--trains_per_epoch', type=int, default=400)
+    parser.add_argument('--trains_per_epoch', type=int, default=666)
     
 
     args=parser.parse_args()

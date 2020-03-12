@@ -220,7 +220,7 @@ if __name__ == "__main__":
     parser.add_argument('--rhino_pid',type=int, default = 7232)
     parser.add_argument('--reshape_rewards',type=bool, default = True)
     parser.add_argument('--epoch_length', type=int, default=20)
-    parser.add_argument('--trains_per_epoch', type=int, default=400)
+    parser.add_argument('--trains_per_epoch', type=int, default=666)
 
     args=parser.parse_args()
 

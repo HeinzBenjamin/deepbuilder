@@ -7,49 +7,8 @@ from scipy.signal import savgol_filter
 from mpl_toolkits.axes_grid1 import host_subplot
 import mpl_toolkits.axisartist as AA
 
-'''
-def interpolate(start_val, next_val, num_steps, current_step):
-    return start_val + (next_val - start_val) * (float(current_step) / float(num_steps))
-
-def load_rlkit_progress(session_name, plays_per_epoch):
-    sub_folders = []
-    for name in os.listdir('/home/ros/deepbuilder/learning_ws/rlkit/data/'+session_name):
-        if os.path.isdir('/home/ros/deepbuilder/learning_ws/rlkit/data/'+session_name+"/"+name):
-            sub_folders.append('/home/ros/deepbuilder/learning_ws/rlkit/data/'+session_name+"/"+name)
-
-    if len(sub_folders) == 0:
-        print("No snapshot found to resum")
-        return None, None
-
-    i = 0
-    for s in sub_folders:
-        print("["+str(i)+"]: " + s)
-        i += 1
-
-    i = input("Chose version from folder names above [int]: ")
-    directory = sub_folders[int(i)]
-    file_path = directory + "/progress.csv"
-    print("Loading from path " + directory)
-
-    data = {}
-    data['rewards']=[]
-    data['']=[]
-    with open(file_path) as csvfile:
-        rd = csv.DictReader(csvfile, delimiter=',')
-        for row in rd:
-            for i in args.plays_per_epoch:
-                data['rewards'].append(interpolate(float(row['evaluation/Return Mean'])))
-
-
-    return data
-'''
-
-
 def partition_list(l, n):
     return [l[i:i+n] for i in range(0, len(l), n)]
-    #for i in range(0, len(l), n):
-    #    yield(l[i:i + n])
-
     
 
 def smooth(y, window,deg):
@@ -61,64 +20,19 @@ def smooth(y, window,deg):
     return savgol_filter(y,window, deg)
 
 #def rlkit_plot(args, data, directory):
-    
-
-def sac_plot(args, data, directory, num_plays):
-    plt.clf()
-    qvalloss1=[None]*num_plays
-    qvalloss2=[None]*num_plays
-    value_loss=[None]*num_plays
-    policy_loss=[None]*num_plays
-
-    for i in data['q_value_loss1']:
-        qvalloss1[int(i)]=data['q_value_loss1'][i]
-
-    for i in data['q_value_loss2']:
-        qvalloss2[int(i)]=data['q_value_loss2'][i]
-
-    for i in data['policy_loss']:
-        policy_loss[int(i)]=data['policy_loss'][i]
-
-    for i in data['value_loss']:
-        value_loss[int(i)]=data['value_loss'][i]
-    #q value losses
-    plt.plot(range(num_plays), qvalloss1, linewidth=0.15, alpha = 0.4)
-    plt.plot(range(num_plays), qvalloss2, linewidth=0.15, alpha=0.4)
-
-    plt.plot(range(num_plays), smooth(qvalloss1, args.smoothing), label='q value loss 1', linewidth=0.4)
-    plt.plot(range(num_plays), smooth(qvalloss2, args.smoothing), label='q value loss 2', linewidth=0.4)
-    
-    plt.xlabel('plays')
-    plt.legend()
-    plt.title('Q-value losses')
-    plt.savefig(directory+'/q_val_loss.png', dpi=300, figsize=(19.20,10.80))
-    if args.show == 'True':
-        plt.show()
-    plt.clf()
-    plt.plot(range(num_plays), value_loss, linewidth=0.15, alpha=0.4)  
-    plt.plot(range(num_plays), policy_loss, linewidth=0.15, alpha=0.4)
-
-    plt.plot(range(num_plays), smooth(value_loss, args.smoothing), label='value loss', linewidth=0.4)
-    plt.plot(range(num_plays), smooth(policy_loss, args.smoothing), label='policy loss', linewidth=0.4)
-    
-    plt.xlabel('plays')
-    plt.legend()
-    plt.title('Value/policy losses')
-    plt.savefig(directory+'/val_pol_loss.png', dpi=300, figsize=(19.20,10.80))
-    if args.show == 'True':
-        plt.show()
-    plt.clf()
 
 
 def main(args):
     data={}
-    if args.mode == 'sac':
-        directory = ('./doc/'+args.session_name+'/data/') if args.session_name != '' else './'
-        filepath = directory+'data.dat'
-        with open(filepath, 'r') as f:
-            data = json.load(f)
+    files = args.file_names.split(',')
+    n = 0
+    for f in files:
+        with open(f, newline='') as f:
+            reader = csv.reader(f, delimiter=' ', quotechar='|')
+            for row in reader:
+                data[n] = ', '.join(row)
 
-    elif args.mode.startswith('rlkit'):
+    if args.mode.startswith('rlkit'):
         directory = ('./rlkit/data/'+args.session_name) if args.session_name != '' else './'
         data['rewards'] = {}
         data['tower_heights'] = {}
@@ -148,30 +62,6 @@ def main(args):
             collisions.append(sum(c[i]))
             towers.append(max(t[i]))
 
-    elif args.mode == 'csv':
-        keywords = ['exploration/Returns Mean', 'exploration/Returns Std']
-        for kw in keywords:
-            data[kw] = []
-            
-        directory = './data/'+args.session_name
-        r, _, _ = os.walk(directory)
-        folders = r[1]
-        folders.sort()
-        for f in folders:
-            with open('./data/'+args.session_name+'/'+f+'/progress.csv', newline='') as csvfile:
-                reader = csv.reader(csvfile, delimiter=',', quotechar='|')
-                is_first = True
-                kw_ids = []
-                for row in reader:
-                    if is_first:
-                        for kw in keywords:
-                            kw_ids.append(row.index(kw))
-                    else:
-                        i = 0
-                        for kw_id in kw_ids:
-                            data[keywords[i]].append(row[kw_id])
-                            i += 1
-                    is_first = False
 
     num_plays = len(data['rewards'])
     returns = [None]*num_plays
@@ -257,14 +147,10 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     #args relevant for env setup
-    parser.add_argument('--session_name',type=str, default='200221-train-sac')
-    parser.add_argument('--mode', type=str,default='csv')
+    parser.add_argument('--file_names',type=str, default='/home/ros/deepbuilder/learning_ws/data/200221-train-sac/200221-train-sac_2020_02_21_22_12_31_0000--s-0/progress.csv')
+    parser.add_argument('--parameters',type=str, default='rewards')
     parser.add_argument('--show',type=str,default='True')
     parser.add_argument('--smooth_window',type=int,default=201)
     parser.add_argument('--smooth_deg',type=int,default=1)
-    parser.add_argument('--plays_per_epoch',type=int,default=50)
-    parser.add_argument('--start_offset',type=int,default=21000)
-    parser.add_argument('--end_offset',type=int,default=0)
-    parser.add_argument('--title',type=str,default='')
     args=parser.parse_args()
     main(args)
