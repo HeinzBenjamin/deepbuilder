@@ -1,5 +1,5 @@
-This allows meshes to be passed as collision objects to a moveit planning scene, which are directly defined by lists of vertices and faces.
-The original version inly supports passing meshes by file names, which must be stored on the hard drive.
+This allows meshes to be passed as collision objects to a moveit planning scene as Mesh() objects.
+The original version only supports passing meshes by file names, which must be stored on the hard drive.
 
 To use the patch simply replace the original file
 
@@ -9,7 +9,7 @@ with the new one in this very directory.
 
 To make use of this function check the file in this deepbuilder catkin_ws for reference:
 
-	deepbuilder/catkin_ws/src/deepbuilder/src/path_planning.py
+	deepbuilder/catkin_ws/src/deepbuilder/src/path_planning.py # the function plan_path contains the relevant code
 
 
 It's something like:
