@@ -14,7 +14,7 @@ def change_temp(req):
     tw.var_names = ["GVL.fMiniNozzleSP"]
     tw.types = ["lreal"]
     tw.values = [req.value]
-    print colored("Setting nozzle target temperature to " + str(tw.values), 'yellow')
+    print colored("[TwinCAT-Http] Setting nozzle temperature to " + str(tw.values), 'yellow')
     tw_res = tc.twincat_write(tw)
 
     if not req.wait:
@@ -100,6 +100,7 @@ def change_motor_speed(req):
     tw.types = ["real"]
     tw.values = [req.value]
 
+    print colored("[TwinCAT-Http] Setting extrusion speed to " + str(tw.values), 'yellow')
     tw_res = tc.twincat_write(tw)
 
     time.sleep(0.2)

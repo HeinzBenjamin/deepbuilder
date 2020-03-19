@@ -22,6 +22,17 @@ srv_proxy_path = rospy.ServiceProxy('/deepbuilder/robot/plan_path', ro_plan_path
 srv_move_path = rospy.ServiceProxy('/deepbuilder/robot/move_path', ro_move_path)
 srv_move_home = rospy.ServiceProxy('/deepbuilder/robot/move_home', ro_move_home)
 
+def are_quaternions_close(q1, q2):
+    dot = q1[0] * q2[0] + q1[1] * q2[1] + q1[2] * q2[2] + q1[3] * q2[3]
+    return dot >= 0.0
+
+def inverse_quaternion(q):
+    return [-q[0], -q[1], -q[2], -q[3]]
+
+def normalize_quaternion(q):
+    lengthD = 1.0 / (q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3])
+    return [q[0] / lengthD, q[1] / lengthD, q[2] / lengthD, q[3] / lengthD]
+
 def update_tags(tags):
     global current_tags
     global current_ids
@@ -55,7 +66,16 @@ def update_tags(tags):
         m.action = Marker.ADD
         m.pose = ppp.pose
 
-        if m.id < 58:
+        if m.id < 4:
+            m.scale.x = 0.036
+            m.scale.y = 0.036
+            m.scale.z = 0.001
+            m.color.r=0.0
+            m.color.g=0.6
+            m.color.b=0.4
+            m.color.a=0.6
+
+        elif m.id < 58:
             m.scale.x = 0.09
             m.scale.y = 0.09
             m.scale.z = 0.045
@@ -83,7 +103,7 @@ def update_tags(tags):
         tmp_tags.append(ppp.pose.orientation.w)
 
         tmp_ids.append(m.id)
-        tmp_types.append(0 if m.id < 30 else (1 if m.id < 44 else (2 if m.id < 58 else 3)))
+        tmp_types.append(3 if m.id < 4 else (0 if m.id < 30 else (1 if m.id < 44 else (2 if m.id < 58 else 3))))
     
     if len(tmp_tags) == 0:
         return
@@ -153,15 +173,19 @@ def collect_state(req):
     by_block_average = {}
     for i in by_block:
         by_block_average[i] = [0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+        ref_quaternion = normalize_quaternion([by_block[i][0][3], by_block[i][0][4], by_block[i][0][5], by_block[i][0][6]])
         ratio = 1.0 / len(by_block[i])
         for ii in range(len(by_block[i])):
+            new_quaternion = normalize_quaternion([by_block[i][ii][3], by_block[i][ii][4], by_block[i][ii][5], by_block[i][ii][6]])
+            if not are_quaternions_close(ref_quaternion, new_quaternion):
+                new_quaternion = inverse_quaternion(new_quaternion)
             by_block_average[i][0] += by_block[i][ii][0] * ratio
             by_block_average[i][1] += by_block[i][ii][1] * ratio
             by_block_average[i][2] += by_block[i][ii][2] * ratio
-            by_block_average[i][3] += by_block[i][ii][3] * ratio
-            by_block_average[i][4] += by_block[i][ii][4] * ratio
-            by_block_average[i][5] += by_block[i][ii][5] * ratio
-            by_block_average[i][6] += by_block[i][ii][6] * ratio
+            by_block_average[i][3] += new_quaternion[0] * ratio
+            by_block_average[i][4] += new_quaternion[1] * ratio
+            by_block_average[i][5] += new_quaternion[2] * ratio
+            by_block_average[i][6] += new_quaternion[3] * ratio
         
 
     #in case groups are defined
@@ -185,15 +209,20 @@ def collect_state(req):
                 ratio = 1.0 / sum(range(len(g)+1))
                 rank = len(g)
                 weighted_average = [0,0,0,0,0,0,0]
+                ref_quaternion = normalize_quaternion([by_block_average[g[0]][3], by_block_average[g[0]][4], by_block_average[g[0]][5], by_block_average[g[0]][6]])
                 index = 0
                 for i in g:
                     weighted_average[0] += by_block_average[i][0] * rank
                     weighted_average[1] += by_block_average[i][1] * rank
                     weighted_average[2] += by_block_average[i][2] * rank
-                    weighted_average[3] += by_block_average[i][3] * rank
-                    weighted_average[4] += by_block_average[i][4] * rank
-                    weighted_average[5] += by_block_average[i][5] * rank
-                    weighted_average[6] += by_block_average[i][6] * rank
+
+                    new_quaternion = normalize_quaternion([by_block_average[i][3], by_block_average[i][4], by_block_average[i][5], by_block_average[i][6]])
+                    if not are_quaternions_close(ref_quaternion, new_quaternion):
+                        new_quaternion = inverse_quaternion(new_quaternion)
+                    weighted_average[3] += new_quaternion[0] * rank
+                    weighted_average[4] += new_quaternion[1] * rank
+                    weighted_average[5] += new_quaternion[2] * rank
+                    weighted_average[6] += new_quaternion[3] * rank
                     rank -= 1
                     if index > 0:
                         del by_block_average[i]
@@ -209,7 +238,7 @@ def collect_state(req):
 
     for i in by_block_average:
         res.tag_poses.extend(by_block_average[i])
-        res.types.append(0 if i < 30 else (1 if i < 44 else (2 if i < 58 else 3)))
+        res.types.append(3 if i < 4 else (0 if i < 30 else (1 if i < 44 else (2 if i < 58 else 3))))
         res.ids.append(i)
 
 

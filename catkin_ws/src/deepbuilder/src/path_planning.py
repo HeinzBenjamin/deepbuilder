@@ -73,11 +73,11 @@ class arena_objects():
         #table box
         self.box_table = {}
         self.box_table["pose"] = PoseStamped()
-        self.box_table["pose"].pose.position.x = 0.0
-        self.box_table["pose"].pose.position.y = -0.447
+        self.box_table["pose"].pose.position.x = -0.0025
+        self.box_table["pose"].pose.position.y = -0.47
         self.box_table["pose"].pose.position.z = -0.465
         self.box_table["pose"].pose.orientation.w = 1.0
-        self.box_table["size"] = [0.795, 1.195, 0.93]
+        self.box_table["size"] = [0.833, 1.233, 0.93]
 
         self.box_heatplate = {}
         self.box_heatplate["pose"] = PoseStamped()
@@ -144,106 +144,111 @@ def sync_scene(expected_collision_objects):
                 break
     
 def plan_cartesian(req):
-    #maybe this?
-    #global move_group
-    global robot
-    global scene
-    global move_group
-    global state_mesh
-    global group_name
-    res = ro_plan_cartesianResponse()  
-    #remove any previous targets
-    move_group.clear_pose_targets()
-    robot_config = settings.ROBOT_CONFIG()
-    
-    
-    way_points = partition_list(req.way_points)
-    
-    current_tcp = move_group.get_current_pose("extruder_tip_link").pose
+    global planning_context
+    planning_context.lock.acquire()
+    try:
+        move_group = planning_context.move_group
+        scene = planning_context.scene
+        arena = planning_context.arena
+        state_mesh = planning_context.state_mesh
+        robot = planning_context.robot
 
-    m_a = MarkerArray()
-
-    m_a.markers.append(tcp_marker(
-        [current_tcp.position.x, 
-        current_tcp.position.y,
-        current_tcp.position.z,
-        current_tcp.orientation.x,
-        current_tcp.orientation.y,
-        current_tcp.orientation.z,
-        current_tcp.orientation.w], 'current_tcp', 0, 1.0,0.0, 0.3))
-
-    
-    first_robot_state = copy.deepcopy(robot.get_current_state())
-    first_robot_state.joint_state.position = req.first_way_point_joint_states
-
-    last_robot_state = copy.deepcopy(robot.get_current_state())
-    last_robot_state.joint_state.position = req.last_way_point_joint_states
-
-    move_group.set_start_state(first_robot_state)
-    
-    mg_way_points = []
-    i = 0
-    for p in way_points:
-        x = p[0] * 0.001
-        y = p[1] * 0.001
-        z = p[2] * 0.001
-        m_a.markers.append(tcp_marker(            
-            [x, y, z, p[3], p[4], p[5], p[6]],
-            'print_path', i, float(i) / len(way_points), 1.0 - (float(i) / len(way_points)), 1.0))
-
-        m_wp = copy.deepcopy(current_tcp)
-        m_wp.position.x = x
-        m_wp.position.y = y
-        m_wp.position.z = z
-        m_wp.orientation.x = p[3]
-        m_wp.orientation.y = p[4]
-        m_wp.orientation.z = p[5]
-        m_wp.orientation.w = p[6]
-        mg_way_points.append(m_wp)
-        i += 1
-    
-    #fk_res = srv_proxy_fk.call(header = Header(), fk_link_names = ["extruder_tip_link"], robot_state = last_robot_state)
-    #mg_way_points.append(fk_res.pose_stamped[0].pose)
-
-    marker_pub_path.publish(m_a)
+        res = ro_plan_cartesianResponse()  
+        #remove any previous targets
+        move_group.clear_pose_targets()
+        robot_config = settings.ROBOT_CONFIG()
 
 
-    
-    
-    #moveit_robot_state.joint_state = way_points[0]
-    (moveit_trajectory, fraction) = move_group.compute_cartesian_path(mg_way_points, robot_config['eef_step'], robot_config['jump_threshold'])
-    print "Cartesian motion planned to " + str(fraction*100.0) + "%"
-    speed = robot_config['print_speed'] if req.speed == None else req.speed
-    moveit_trajectory = move_group.retime_trajectory(robot.get_current_state(), moveit_trajectory, robot_config['print_speed'])
+        way_points = partition_list(req.way_points)
 
-    m_t = Marker()
-    m_t.ns = "motion-trajectory"
-    m_t.id = 0
-    m_t.header.frame_id = '/world'
-    m_t.header.stamp = rospy.Time.now()
-    m_t.type=Marker.POINTS
-    m_t.action = Marker.ADD
-    m_t.scale.x = 0.0005
-    m_t.color.a = 1.0
-    tmp_state = robot.get_current_state()
-    for t in moveit_trajectory.joint_trajectory.points:
-        #draw path points
-        tmp_state.joint_state.position = t.positions
-        fk_res = srv_proxy_fk.call(header=Header(), robot_state = tmp_state, fk_link_names = ["extruder_tip_link"])
-        m_t.points.append(
-            Point(
-                x=fk_res.pose_stamped[0].pose.position.x,
-                y=fk_res.pose_stamped[0].pose.position.y,
-                z=fk_res.pose_stamped[0].pose.position.z))        
+        current_tcp = move_group.get_current_pose("extruder_tip_link").pose
 
-    m_a.markers.append(m_t)
-    marker_pub_path.publish(m_a)      
+        m_a = MarkerArray()
 
-    res.message = 'SUCCESS' if fraction == 1.0 else 'fraction: ' + str(fraction)
-    res.motion_plan = moveit_trajectory.joint_trajectory
-    res.collisions = []
+        m_a.markers.append(tcp_marker(
+            [current_tcp.position.x, 
+            current_tcp.position.y,
+            current_tcp.position.z,
+            current_tcp.orientation.x,
+            current_tcp.orientation.y,
+            current_tcp.orientation.z,
+            current_tcp.orientation.w], 'current_tcp', 0, 1.0,0.0, 0.3))
 
-    return res
+
+        first_robot_state = copy.deepcopy(robot.get_current_state())
+        first_robot_state.joint_state.position = req.first_way_point_joint_states
+
+        last_robot_state = copy.deepcopy(robot.get_current_state())
+        last_robot_state.joint_state.position = req.last_way_point_joint_states
+
+        move_group.set_start_state(first_robot_state)
+
+        mg_way_points = []
+        i = 0
+        for p in way_points:
+            x = p[0] * 0.001
+            y = p[1] * 0.001
+            z = p[2] * 0.001
+            m_a.markers.append(tcp_marker(            
+                [x, y, z, p[3], p[4], p[5], p[6]],
+                'print_path', i, float(i) / len(way_points), 1.0 - (float(i) / len(way_points)), 1.0))
+
+            m_wp = copy.deepcopy(current_tcp)
+            m_wp.position.x = x
+            m_wp.position.y = y
+            m_wp.position.z = z
+            m_wp.orientation.x = p[3]
+            m_wp.orientation.y = p[4]
+            m_wp.orientation.z = p[5]
+            m_wp.orientation.w = p[6]
+            mg_way_points.append(m_wp)
+            i += 1
+
+        #fk_res = srv_proxy_fk.call(header = Header(), fk_link_names = ["extruder_tip_link"], robot_state = last_robot_state)
+        #mg_way_points.append(fk_res.pose_stamped[0].pose)
+
+        marker_pub_path.publish(m_a)
+
+
+
+
+        #moveit_robot_state.joint_state = way_points[0]
+        (moveit_trajectory, fraction) = move_group.compute_cartesian_path(mg_way_points, robot_config['eef_step'], robot_config['jump_threshold'])
+        print "Cartesian motion planned to " + str(fraction*100.0) + "%"
+        speed = robot_config['print_speed'] if req.speed == None else req.speed
+        moveit_trajectory = move_group.retime_trajectory(robot.get_current_state(), moveit_trajectory, robot_config['print_speed'])
+
+        m_t = Marker()
+        m_t.ns = "motion-trajectory"
+        m_t.id = 0
+        m_t.header.frame_id = '/world'
+        m_t.header.stamp = rospy.Time.now()
+        m_t.type=Marker.POINTS
+        m_t.action = Marker.ADD
+        m_t.scale.x = 0.0005
+        m_t.color.a = 1.0
+        tmp_state = robot.get_current_state()
+        for t in moveit_trajectory.joint_trajectory.points:
+            #draw path points
+            tmp_state.joint_state.position = t.positions
+            fk_res = srv_proxy_fk.call(header=Header(), robot_state = tmp_state, fk_link_names = ["extruder_tip_link"])
+            m_t.points.append(
+                Point(
+                    x=fk_res.pose_stamped[0].pose.position.x,
+                    y=fk_res.pose_stamped[0].pose.position.y,
+                    z=fk_res.pose_stamped[0].pose.position.z))        
+
+        m_a.markers.append(m_t)
+        marker_pub_path.publish(m_a)      
+
+        res.message = 'SUCCESS' if fraction == 1.0 else 'fraction: ' + str(fraction)
+        res.motion_plan = moveit_trajectory.joint_trajectory
+        res.collisions = []
+
+        return res
+
+    finally:
+        planning_context.lock.release()
 
 
 def plan_path(req):
@@ -272,7 +277,8 @@ def plan_path(req):
         move_group.set_start_state(moveit_robot_state)
 
         print "Planning path for session [" + req.session + "] from\n" + str(joint_state.position) + " to\n" + str(req.goal_pose)
-        print "Detected restricting collisions mask\n[self_collision, wall_collision, table_collision, state_collision, full_scene]"
+        print "\n\033[1mDetected collisions mask:\033[0m"
+        print "[self_collision, wall_collision, table_collision, state_collision, full_scene]"
 
         #default response
         res = ro_plan_pathResponse()

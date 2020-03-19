@@ -114,7 +114,7 @@ def move_point(req):
     res.message = move_path(mo_req).message
     return res
 
-DISABLE_USER_QUERY_MOVE = False #dangerous!! needs to be explicitly set to true before every call
+DISABLE_USER_QUERY_MOVE = True #dangerous!! needs to be explicitly set to true before every call
 
 def move_path(req):
     global DISABLE_USER_QUERY_MOVE
@@ -148,7 +148,7 @@ def move_path(req):
         res.message = msg
         print colored(msg, 'red')  
 
-    DISABLE_MOVE_USER_QUERY = False      
+    DISABLE_MOVE_USER_QUERY = True      
     return res
 
 def print_path(req):
@@ -268,11 +268,12 @@ def print_path(req):
     srv_proxy_change_motor_speed.call(value = robot_config["print_override"])
     
     _in = raw_input("Check good material flow press Enter")
-
+    srv_proxy_change_motor_speed.call(value = 0.0)
+    _in = raw_input("Press Enter to start print")
     
     for i in range(num_layers):
         try:
-            robot_config = settings.ROBOT_CONFIG()
+            robot_config = settings.ROBOT_CONFIG()           
             srv_proxy_change_temp.call(value = robot_config['print_temp'], wait = True)
             #move to layer start
             print colored("[print_path] Printing layer " + str(i) + " of " + str(num_layers), 'cyan')
