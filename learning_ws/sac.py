@@ -223,13 +223,13 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     #args relevant for env setup
-    parser.add_argument('--session_name',type=str, default = '200316-train-sac')
+    parser.add_argument('--session_name',type=str, default = '200319-train-sac')
     parser.add_argument('--continue_session',type=int, default = 0)
-    parser.add_argument('--reuse_replay_buffers',type=str, default = '')
+    parser.add_argument('--reuse_replay_buffers',type=str, default = '/home/ros/deepbuilder/learning_ws/data/200319-150k-sac/params.pkl')
     parser.add_argument('--rhino_pid',type=int, default = 7)
     parser.add_argument('--reshape_rewards',type=bool, default = True)
     parser.add_argument('--epoch_length', type=int, default=20)
-    parser.add_argument('--trains_per_epoch', type=int, default=250)
+    parser.add_argument('--trains_per_epoch', type=int, default=333)
 
     args=parser.parse_args()
 
@@ -294,5 +294,5 @@ if __name__ == "__main__":
             hidden_sizes=[432, 360, 360],
         ),
     )
-    setup_logger(args.session_name, variant=variant, snapshot_mode="gap_and_last", snapshot_gap=30)
+    setup_logger(args.session_name, variant=variant, snapshot_mode="gap_and_last", snapshot_gap=20)
     experiment(variant, args)
