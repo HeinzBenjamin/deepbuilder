@@ -29,7 +29,7 @@ class BatchRLAlgorithm(BaseRLAlgorithm, metaclass=abc.ABCMeta):
             exploration_data_collector,
             evaluation_data_collector,
             replay_buffer_expl,
-            replay_buffer_eval,
+            replay_buffer_eval
         )
         
         self.num_plays_before_training = num_plays_before_training
@@ -84,4 +84,4 @@ class BatchRLAlgorithm(BaseRLAlgorithm, metaclass=abc.ABCMeta):
             gt.stamp('training', unique=False)
             self.training_mode(False)
 
-            self._end_epoch(epoch)
+            self._end_epoch(epoch, self.environment.env.current_play, self.trainer._n_train_steps_total)

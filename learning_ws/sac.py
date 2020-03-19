@@ -62,11 +62,14 @@ def experiment(variant, args):
     load_buffer = False
     load_networks = False
 
-    if  variant['continue_training'] != '':
+    if variant['continue_training'] != '':
         print("Loading previous training parameters and replay buffer")
-        prev_datas.append(torch.load(variant['continue_training']))
+        loaded_data = torch.load(variant['continue_training'])
+        prev_datas.append(loaded_data)
+        environment.env.current_play = loaded_data['play'] + 1
         load_buffer = True
         load_networks = True
+
 
     elif len(variant['reuse_replay_buffers']) > 0:
         for b in variant['reuse_replay_buffers']:
@@ -177,6 +180,10 @@ def experiment(variant, args):
         qf2=qf2,
         target_qf1=target_qf1,
         target_qf2=target_qf2,
+        policy_optimizer = None if not load_networks else prev_data['trainer/policy_optimizer'],
+        qf1_optimizer = None if not load_networks else prev_data['trainer/qf1_optimizer'],
+        qf2_optimizer = None if not load_networks else prev_data['trainer/qf2_optimizer'],
+        starting_train_steps = 0 if not load_networks else prev_datas[0]['train_step'],
         **variant['sac_trainer_kwargs']
     )
 
@@ -205,7 +212,9 @@ def experiment(variant, args):
     #ptu.set_gpu_mode(True)
     algorithm.to(ptu.device)
     print("Everything set up. Starting to train")
-    algorithm.train()
+
+    start_epoch=0 if not load_networks else (prev_datas[0]['epoch'] + 1)
+    algorithm.train(start_epoch=start_epoch)
 
 
 
@@ -214,20 +223,21 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     #args relevant for env setup
-    parser.add_argument('--session_name',type=str, default = '200221-train-sac')
-    parser.add_argument('--continue_session',type=bool, default = False)
-    parser.add_argument('--reuse_replay_buffers',type=str, default = '/home/ros/deepbuilder/learning_ws/data/200221-collect-sac/200221-collect-sac_2020_02_21_14_01_12_0000--s-0/params.pkl,/home/ros/deepbuilder/learning_ws/data/200221-collect-sac-her/200221-collect-sac-her_2020_02_21_14_01_25_0000--s-0/params.pkl')
-    parser.add_argument('--rhino_pid',type=int, default = 7232)
+    parser.add_argument('--session_name',type=str, default = '200316-train-sac')
+    parser.add_argument('--continue_session',type=int, default = 0)
+    parser.add_argument('--reuse_replay_buffers',type=str, default = '')
+    parser.add_argument('--rhino_pid',type=int, default = 7)
     parser.add_argument('--reshape_rewards',type=bool, default = True)
     parser.add_argument('--epoch_length', type=int, default=20)
-    parser.add_argument('--trains_per_epoch', type=int, default=666)
+    parser.add_argument('--trains_per_epoch', type=int, default=250)
 
     args=parser.parse_args()
 
     continue_training = ''
-    if args.continue_session:
+    if args.continue_session > 0:
         sess_folder = '/home/ros/deepbuilder/learning_ws/data/' + args.session_name
         dirs = os.listdir(sess_folder)
+        dirs.sort()
         for d in reversed(dirs):
             file_path = sess_folder + "/" + d + "/params.pkl"
             if os.path.isfile(file_path):
@@ -255,7 +265,7 @@ if __name__ == "__main__":
             observation_noise_std=0.0002,
             max_steps_per_play=30,
             terminate_at_collision=False,
-            populate_simulation=0.5 #IMPORTANT!!! CHANGE WHEN NOT SIMULATION
+            populate_simulation=0.7 #IMPORTANT!!! CHANGE WHEN NOT SIMULATION
         ),
         algo_kwargs=dict(
             batch_size=128,
@@ -284,5 +294,5 @@ if __name__ == "__main__":
             hidden_sizes=[432, 360, 360],
         ),
     )
-    setup_logger(args.session_name, variant=variant, snapshot_mode="gap_and_last", snapshot_gap=10)
+    setup_logger(args.session_name, variant=variant, snapshot_mode="gap_and_last", snapshot_gap=30)
     experiment(variant, args)

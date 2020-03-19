@@ -25,11 +25,11 @@ class BaseRLAlgorithm(object, metaclass=abc.ABCMeta):
     def __init__(
             self,
             trainer,
-            environment,
+            environment,            
             exploration_data_collector: DataCollector,
             evaluation_data_collector: DataCollector,
             replay_buffer_expl: ReplayBuffer,
-            replay_buffer_eval: ReplayBuffer,
+            replay_buffer_eval: ReplayBuffer
     ):
         self.trainer = trainer
         self.environment = environment
@@ -37,7 +37,6 @@ class BaseRLAlgorithm(object, metaclass=abc.ABCMeta):
         self.eval_data_collector = evaluation_data_collector
         self.replay_buffer_expl = replay_buffer_expl
         self.replay_buffer_eval = replay_buffer_eval
-        self._start_epoch = 0
 
         self.post_epoch_funcs = []
 
@@ -51,8 +50,12 @@ class BaseRLAlgorithm(object, metaclass=abc.ABCMeta):
         """
         raise NotImplementedError('_train must implemented by inherited class')
 
-    def _end_epoch(self, epoch):
+    def _end_epoch(self, epoch, play=0, train_step=0):
         snapshot = self._get_snapshot()
+        snapshot['epoch'] = epoch
+        snapshot['play'] = play
+        snapshot['train_step'] = train_step
+
         logger.save_itr_params(epoch, snapshot)
         gt.stamp('saving')
         self._log_stats(epoch)

@@ -69,6 +69,7 @@ class DeepBuilderEnv():
         self.rhino_pid = rhino_pid
         self.is_synced = True #is only false during step and reset operations in which state, action, operation, reward tuples are not in sync
         self.phase = 'init'
+        self.preview_pose = True
 
         self.terminate_at_collision = terminate_at_collision
         self.max_steps_per_play = max_steps_per_play
@@ -144,8 +145,6 @@ class DeepBuilderEnv():
 
         if self.is_simulation:            
             self.print_result = self.FH_Reset()            
-            self.observation_dict['observation'] = self.print_result["state_compressed"]
-            self.fill_goal_dict_from_gh_simulation(self.achieved_goal_dict, self.print_result)
             
 
         else:
@@ -156,11 +155,11 @@ class DeepBuilderEnv():
             self.state_tags = self.ros_scan_state(sensing_poses)
 
             print("Sending new state tags to Rhino")
-            sim_res = self.update_state_tags(self.state_tags)
-            self.observation_dict['observation'] = sim_res["state_compressed"]
-            self.achieved_goal_dict = {} #TO DO
-            self.print_result = {} #TO DO
-            
+            self.print_result = self.update_state_tags(self.state_tags)
+
+        self.observation_dict['observation'] = self.print_result["state_compressed"]
+
+        self.fill_goal_dict_from_gh_simulation(self.achieved_goal_dict, self.print_result)   
 
         self.state_mesh['indices'] = self.print_result['state_mesh_indices']
         self.state_mesh['vertices'] = self.print_result['state_mesh_vertices']
@@ -175,10 +174,10 @@ class DeepBuilderEnv():
         self.observation_dict['observation'] += np.random.normal(loc=self.observation_noise_mean, scale=self.observation_noise_std, size=[self.observation_dim])        
         self.observation_dict['desired_goal'] = self.goal_dict_to_tensor(self.random_desired_goal())
         self.observation_dict['achieved_goal'] = self.goal_dict_to_tensor(self.achieved_goal_dict)
-        self.observation_dict['additional_info'] = self.assemble_additional_info(col_res, self.print_result)
+        if self.is_simulation:
+            self.observation_dict['additional_info'] = self.assemble_additional_info(col_res, self.print_result)
 
         
-        self.current_step = 0
         self.done = False
         self.current_step = 0
         self.is_synced=True
@@ -201,6 +200,9 @@ class DeepBuilderEnv():
         self.note += "Path " + path_planning_result['message']
         #self.fill_goal_dict_from_moveit_collisions(achieved_goal_dict, path_planning_result['collisions'])
 
+        if self.preview_pose:
+            self.send_pose_preview(action, path_planning_result['message'])
+            time.sleep(0.1)
 
         if path_planning_result['message'] == "SUCCESS":            
             if self.is_simulation:
@@ -231,8 +233,14 @@ class DeepBuilderEnv():
 
         self.state_mesh['indices'] = self.print_result['state_mesh_indices']
         self.state_mesh['vertices'] = self.print_result['state_mesh_vertices']
+        
         self.observation_dict['achieved_goal'] = self.goal_dict_to_tensor(self.achieved_goal_dict)
-        self.observation_dict['additional_info'] = self.assemble_additional_info(path_planning_result, self.print_result)
+
+        if self.is_simulation:
+            self.observation_dict['additional_info'] = self.assemble_additional_info(path_planning_result, self.print_result)
+        else:
+            self.observation_dict['additional_info'] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
         self.observation_dict['observation'] += np.random.normal(loc=self.observation_noise_mean, scale=self.observation_noise_std, size=[self.observation_dim])
 
 
@@ -347,7 +355,7 @@ class DeepBuilderEnv():
             goal_dict['collision'] = 0.66666666
             return
 
-        #combined collision
+        #combination collision
         if collisions[4]:
             goal_dict['collision'] = 0.9
             return
@@ -363,7 +371,7 @@ class DeepBuilderEnv():
         goal_dict['current_deformation'] = (sim_result['current_tcp_displacement'] / settings.MAX_DEFORMATION) * -2.0 + 1.0
 
         #deformation is mean cartesian tcp displacement scaled by observation_cube_length
-        #by default deformation is 1.0 (meaning NO deformation), bc. that results in smooth transition from 'no tcps present' to 
+        #by default deformation is 1.0 (meaning NO deformation), bc. that results in smooth transition from 'no tcps present' to
         #'slightly deformed tcps present' as it's the case when new tcps with high anchor amount are introduced
         #this encourages the agent to maintain deformation=1.0 rather than figuring out that there's a step between 0 present tcps and some tcps
 
@@ -417,10 +425,13 @@ class DeepBuilderEnv():
             return self.reward
 
         #distance to state mesh
-        dist_ratio = (1.0 - min(1.0, (max(0.0, (print_result['dist_to_state_mesh'] - 100.0)) / (settings.DISTANCE_TCP_STATE_MAX - 200.0)))) * 0.3
-        tilt_ratio = max(0.7854, min(1.5708, print_result['tilt_angle'])) - 0.7854
-        tilt_ratio_0to1 = 1.0 - (tilt_ratio / (1.5708 - 0.7854))
-        self.reward += dist_ratio * tilt_ratio_0to1
+        dist_ratio = (1.0 - min(1.0, (max(0.0, (print_result['dist_to_state_mesh'] - 0.0)) / (settings.DISTANCE_TCP_STATE_MAX - 400.0)))) * 0.3
+        tilt_lower_threshold = 0.5
+        tilt_upper_threshold = 1.0
+        capped_tilt_angle = max(tilt_lower_threshold, min(tilt_upper_threshold, print_result['tilt_angle'])) - tilt_lower_threshold
+        tilt_ratio_0to1 = 1.0 - (capped_tilt_angle / (tilt_upper_threshold - tilt_lower_threshold))
+        tilt_dist_bonus = dist_ratio * tilt_ratio_0to1
+        self.reward += tilt_dist_bonus
 
 
         #printability
@@ -476,6 +487,14 @@ class DeepBuilderEnv():
         p["run"]=run
         return self.SafeRequest('fh_run', p, settings.TIMEOUT_FH)
         
+    def send_pose_preview(self, action, collisions):
+        p = {}
+        p["collisions"] = collisions
+        p["action"] = []
+        for a in range(len(action)):
+            p["action"].append("A"+str(a)+"="+str(action[a]))        
+
+        return self.SafeRequest('pose_preview', p, settings.TIMEOUT_ACTION)
 
     #for real
     def get_print_path(self, action):
@@ -562,8 +581,19 @@ class DeepBuilderEnv():
 
     #print_plan should be a dict containing three members: way_points_cartesian as a flat array of 7d way points, 'first_way_point_joint_states' and 'last_way_point_joint_states' (required for planning)
     def ros_print_path_with_robot(self, action, print_plan):
-        print_plan["action"] = action[0:6]
-        return self.ros_comm().print_path(print_plan)
+        pp = copy.deepcopy(print_plan)
+        allowed_keys = ['action','first_way_point_joint_states','last_way_point_joint_states','way_points_cartesian','num_way_points']
+        remove_keys = []
+        pp["action"] = action[0:6].tolist()
+
+        for key in pp:
+            if not key in allowed_keys:
+                remove_keys.append(key) 
+
+        for k in remove_keys:
+            del pp[k]
+
+        return self.ros_comm().print_path(pp)
 
     def ros_scan_state(self, sensor_poses):
         return self.ros_comm().scan_state(sensor_poses)
@@ -648,7 +678,8 @@ class DeepBuilderShapedEnv(DeepBuilderEnv, gym.Env):
 
 if __name__ == "__main__":
     env = NormalizedActions(DeepBuilderGoalEnv(session_name = "debug_sess", is_simulation = True))
-    env.env.rhino_pid = 16580
+    env.env.rhino_pid = 10828
+    env.env.is_simulation = False
     num_steps = 20
     while True:
         env.env.reset()

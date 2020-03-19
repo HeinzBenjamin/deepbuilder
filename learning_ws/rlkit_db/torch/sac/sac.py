@@ -35,6 +35,10 @@ class SACTrainer(TorchTrainer):
             use_automatic_entropy_tuning=True,
             target_entropy=None,
             starting_train_steps = 0,
+
+            policy_optimizer=None,
+            qf1_optimizer=None,
+            qf2_optimizer=None
     ):
         super().__init__()
         self.env = env
@@ -69,14 +73,22 @@ class SACTrainer(TorchTrainer):
             self.policy.parameters(),
             lr=policy_lr,
         )
+        if policy_optimizer:
+            self.policy_optimizer.load_state_dict(policy_optimizer.state_dict())
+
         self.qf1_optimizer = optimizer_class(
             self.qf1.parameters(),
             lr=qf_lr,
         )
+        if qf1_optimizer:
+            self.qf1_optimizer.load_state_dict(qf1_optimizer.state_dict())
+        
         self.qf2_optimizer = optimizer_class(
             self.qf2.parameters(),
             lr=qf_lr,
         )
+        if qf2_optimizer:
+            self.qf2_optimizer.load_state_dict(qf2_optimizer.state_dict())
 
         self.discount = discount
         self.reward_scale = reward_scale
@@ -225,5 +237,8 @@ class SACTrainer(TorchTrainer):
             qf2=self.qf2,
             target_qf1=self.qf1,
             target_qf2=self.qf2,
+            policy_optimizer=self.policy_optimizer,
+            qf1_optimizer=self.qf1_optimizer,
+            qf2_optimizer=self.qf2_optimizer
         )
 

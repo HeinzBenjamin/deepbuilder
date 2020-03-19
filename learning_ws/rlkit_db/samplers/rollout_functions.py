@@ -23,8 +23,12 @@ def multitask_rollout(
     env_infos = []
     next_observations = []
     path_length = 0
-    agent.reset()
-    obs = env.reset()
+    try:
+        agent.reset()
+        obs = env.reset()
+    except:
+        raise ValueError('GH_OUT','GH_OUT')
+    
     done = env.done
 
     goal = obs[desired_goal_key]

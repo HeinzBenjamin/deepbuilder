@@ -27,7 +27,7 @@ class Connection():
         print('Service response: {}'.format(result['loggers']))
 
     def scan_state(self, sensor_poses, trust_blindly = False):
-        sensor_poses['trust_blindly'] = trust_blindly
+        #sensor_poses['trust_blindly'] = trust_blindly
         return self.safe_request('srv_collect_state', sensor_poses, _timeout=999999).data
 
     def get_tags(self):
