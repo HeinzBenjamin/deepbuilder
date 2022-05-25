@@ -1,1 +1,9 @@
-DEEPBUILDER
+Repo to the publication:
+
+https://link.springer.com/article/10.1007/s41693-022-00069-0
+
+
+## Autonomous robotic additive manufacturing through distributed model‐free deep reinforcement learning in computational design environments
+
+
+The objective of autonomous robotic additive manufacturing for construction in the architectural scale is currently being investigated in parts both within the research communities of computational design and robotic fabrication (CDRF) and deep reinforcement learning (DRL) in robotics. The presented study summarizes the relevant state of the art in both research areas and lays out how their respective accomplishments can be combined to achieve higher degrees of autonomy in robotic construction within the Architecture, Engineering and Construction (AEC) industry. A distributed control and communication infrastructure for agent training and task execution is presented, that leverages the potentials of combining tools, standards and algorithms of both fields. It is geared towards industrial CDRF applications. Using this framework, a robotic agent is trained to autonomously plan and build structures using two model-free DRL algorithms (TD3, SAC) in two case studies: robotic block stacking and sensor-adaptive 3D printing. The first case study serves to demonstrate the general applicability of computational design environments for DRL training and the comparative learning success of the utilized algorithms. Case study two highlights the benefit of our setup in terms of tool path planning, geometric state reconstruction, the incorporation of fabrication constraints and action evaluation as part of the training and execution process through parametric modeling routines. The study benefits from highly efficient geometry compression based on convolutional autoencoders (CAE) and signed distance fields (SDF), real-time physics simulation in CAD, industry-grade hardware control and distinct action complementation through geometric scripting. Most of the developed code is provided open source.
